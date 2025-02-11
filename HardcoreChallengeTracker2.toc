@@ -1,0 +1,14 @@
+## Interface: 11506
+## Title: Hardcore Challenge Tracker 2
+## Author: Your Name
+## Version: 0.0.1
+## SavedVariables: HardcoreChallengeTracker2DB
+
+embeds.xml
+HardcoreChallengeTracker2_Data.lua
+HardcoreChallengeTracker2_Teams.lua
+DataModule.lua
+UIModule.lua
+EventModule.lua
+ChatModule.lua
+Core.lua
