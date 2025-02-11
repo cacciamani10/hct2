@@ -5,12 +5,12 @@ Hardcore Challenge Tracker 2 is a World of Warcraft addon designed for a contest
 - Leveling up
 - Competing in team tug-of-war events
 - Completing achievements
-- Completing feats (renamed from "bounties" to avoid confusion)
-- Completing additional tasks (such as special achievements)
+- Completing feats 
+- Completing bounties
 
 **Contest Rules:**
 - All players must be on the same official hardcore server (as of 2024, these servers enforce a no-resurrection rule).
-- If a player dies, points earned from leveling, achievements, and feats are halved (truncated).
+- If a player dies, points earned from leveling, achievements, and bounties are halved (truncated).
 - Tug-of-war points and feats remain unchanged upon death.
 - All players are on the same faction and guild but are split into two teams.
 
@@ -49,7 +49,7 @@ The addon is organized into several Lua modules to separate concerns:
   - Displays team information, character stats, achievements, and a chat panel.
   - Aggregates data from AceDB to create real-time visual updates for players.
 
-- **ChatModule.lua (if applicable):**  
+- **ChatModule.lua:**  
   - Handles team chat messages.
   - Sends and receives team chat messages through AceComm-3.0.
   - Integrates with the UI so players can communicate within the addon.
