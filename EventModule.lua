@@ -36,9 +36,7 @@ function HCT_EventModule:RegisterEvents()
             GetHCT():RegisterEvent(eventType, handlerName)
         end
     end
-
-    GetHCT():RegisterEvent("PLAYER_LEVEL_UP", "OnPlayerLevelUp")
-    GetHCT():RegisterEvent("PLAYER_DEAD", "OnPlayerDead")
+    
     GetHCT():RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
     --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
     GetHCT():RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
@@ -54,7 +52,7 @@ function HCT_EventModule:UnregisterEvents()
             GetHCT():UnregisterEvent(eventType)
         end
     end
-    
+
     GetHCT():UnregisterEvent("PLAYER_DEAD")
     GetHCT():UnregisterEvent("COMBAT_LOG_EVENT")
     GetHCT():UnregisterEvent("CHAT_MSG_ADDON")
@@ -67,39 +65,6 @@ function HCT_EventModule:RequestMissingEvents()
     local serializedRequest = AceSerializer:Serialize("REQUEST", data)
     GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedRequest, "GUILD")
     GetHCT():Print("Requested events since " .. (GetDB().lastEventTimestamp or 0))
-end
-
--- Event handler for level up.
-function HCT_EventModule:OnPlayerLevelUp(event, newLevel)
-    newLevel = tonumber(newLevel)
-    local charKey = UnitName("player")
-    local charData = GetDB().characters[charKey]
-    if charData then
-        local oldLevel = tonumber(charData.level) or (newLevel - 1)
-        local pointsAwarded = HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
-        charData.levelUpPoints = (charData.levelUpPoints or 0) + pointsAwarded
-        charData.level = newLevel
-        if GetHCT() then
-            GetHCT():Print("Level up! New level: " .. newLevel .. ". Awarded " .. pointsAwarded .. " level points.")
-        end
-
-        local battleTag = HCT_DataModule:GetBattleTag()
-        local team = HCT_DataModule:GetPlayerTeam(battleTag)
-        if team then
-            -- Note: In this dynamic approach, team points may be computed on the fly,
-            -- but if you want to update a stored field, do so here.
-            GetDB().teams[team].points = (GetDB().teams[team].points or 0) + pointsAwarded
-        end
-
-        local ev = {
-            type = "LEVELUP",
-            charKey = charKey,
-            newLevel = newLevel,
-            pointsAwarded = pointsAwarded,
-            timestamp = time()
-        }
-        HCT_EventModule:BroadcastEvent(ev)
-    end
 end
 
 function HCT_EventModule:OnCombatLogEvent(event, ...)
@@ -120,33 +85,6 @@ function HCT_EventModule:OnCombatLogEvent(event, ...)
         end
 
     -- Add more subEvent checks as needed.
-    end
-end
-
-
-function HCT_EventModule:OnPlayerDead(event)
-    local charKey = UnitName("player")
-    local charData = GetDB().characters[charKey]
-    if charData then
-        charData.isDead = true
-        charData.levelUpPoints = math.floor((charData.levelUpPoints or 0) / 2)
-        charData.achievementPoints = math.floor((charData.achievementPoints or 0) / 2)
-        charData.featPoints = math.floor((charData.featPoints or 0) / 2)
-        if GetHCT() then
-            GetHCT():Print("You have died... but we go agane!")
-        end
-        local ev = {
-            type = "DEATH",
-            charKey = charKey,
-            timestamp = time()
-        }
-        HCT_EventModule:BroadcastEvent(ev)
-    end
-end
-
-function HCT_EventModule:OnGuildRosterUpdate(event)
-    if GetHCT() then
-        GetHCT():Print("Guild roster updated.")
     end
 end
 
