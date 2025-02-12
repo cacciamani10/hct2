@@ -1,5 +1,4 @@
 -- UIModule.lua
-local AceSerializer     = LibStub("AceSerializer-3.0")
 HCT_UIModule            = {}
 local AceGUI            = LibStub("AceGUI-3.0")
 
@@ -201,109 +200,132 @@ local function DrawCharacters(container)
     end
 end
 
-local function DrawAchievements(container)
-    container:ReleaseChildren()
+local function UpdateAchievementsContent(contentContainer, mode)
+    contentContainer:ReleaseChildren()  -- attempt to index local 'contentContainer' (a nil value)
 
-    local scrollFrame = AceGUI:Create("ScrollFrame")
-    scrollFrame:SetLayout("Flow")
-    scrollFrame:SetFullWidth(true)
-    scrollFrame:SetFullHeight(true)
-    container:AddChild(scrollFrame)
-
-    -- ******************
-    -- Available Achievements (by category)
-    -- ******************
-    local availableHeader = AceGUI:Create("Heading")
-    availableHeader:SetText("Available Achievements")
-    availableHeader:SetFullWidth(true)
-    scrollFrame:AddChild(availableHeader)
-
-    -- Iterate over each category in the achievements definition.
-    for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
-        local catHeader = AceGUI:Create("Heading")
-        catHeader:SetText(category)
-        catHeader:SetFullWidth(true)
-        scrollFrame:AddChild(catHeader)
-
-        -- Optionally sort the achievements in this category by name.
-        table.sort(achList, function(a, b)
-            return a.name < b.name
-        end)
-
-        for _, ach in ipairs(achList) do
-            local label = AceGUI:Create("Label")
-            label:SetFullWidth(true)
-            local description = ach.description or "No description available"
-            label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", ACHIEVEMENT_COLOR, ach.name, ach.points or 0,
-                description))
-            scrollFrame:AddChild(label)
+    if mode == "all" then
+        -- Draw all available achievements
+        for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
+            local catHeader = AceGUI:Create("Heading")
+            catHeader:SetText(category)
+            catHeader:SetFullWidth(true)
+            contentContainer:AddChild(catHeader)
+            table.sort(achList, function(a, b) return a.name < b.name end)
+            for _, ach in ipairs(achList) do
+                local label = AceGUI:Create("Label")
+                label:SetFullWidth(true)
+                local description = ach.description or "No description available"
+                label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", 
+                    ACHIEVEMENT_COLOR, ach.name, ach.points or 0, description))
+                contentContainer:AddChild(label)
+            end
         end
-    end
-
-    -- ******************
-    -- Completed Achievements (Aggregated)
-    -- ******************
-    local completedHeader = AceGUI:Create("Heading")
-    completedHeader:SetText("Completed Achievements")
-    completedHeader:SetFullWidth(true)
-    scrollFrame:AddChild(completedHeader)
-
-    local completedAch = {}
-    local db = GetDB()
-    -- Iterate over all users and their characters.
-    for user, userData in pairs(db.users) do
-        if userData.characters then
-            for _, charName in ipairs(userData.characters) do
-                local charData = db.characters[charName]
-                if charData and charData.achievements then
-                    for achName, ts in pairs(charData.achievements) do
-                        -- Find the achievement definition in the data file.
-                        local found, points, cat = nil, 0, nil
-                        for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
-                            for _, ach in ipairs(achList) do
-                                if ach.name == achName then
-                                    found = true
-                                    points = ach.points or 0
-                                    cat = category
-                                    break
+    elseif mode == "complete" then
+        -- Draw completed achievements (aggregated from user data)
+        local completedAch = {}
+        local db = HCT.db.profile
+        for user, userData in pairs(db.users) do
+            if userData.characters then
+                for _, charName in ipairs(userData.characters) do
+                    local charData = db.characters[charName]
+                    if charData and charData.achievements then
+                        for achName, ts in pairs(charData.achievements) do
+                            local found, points, cat = nil, 0, nil
+                            for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
+                                for _, ach in ipairs(achList) do
+                                    if ach.name == achName then
+                                        found = true
+                                        points = ach.points or 0
+                                        cat = category
+                                        break
+                                    end
                                 end
+                                if found then break end
                             end
-                            if found then break end
-                        end
-                        if found then
-                            table.insert(completedAch, {
-                                player = charName,
-                                achievement = achName,
-                                category = cat,
-                                points = points,
-                                date = date("%Y-%m-%d %H:%M:%S", ts)
-                            })
+                            if found then
+                                table.insert(completedAch, {
+                                    player = charName,
+                                    achievement = achName,
+                                    category = cat,
+                                    points = points,
+                                    date = date("%Y-%m-%d %H:%M:%S", ts)
+                                })
+                            end
                         end
                     end
                 end
             end
         end
-    end
+        table.sort(completedAch, function(a, b)
+            if a.player == b.player then
+                return a.achievement < b.achievement
+            else
+                return a.player < b.player
+            end
+        end)
+        -- Create Header for completed achievements.
+        local completedHeader = AceGUI:Create("Heading")
+        completedHeader:SetText("Completed Achievements")
+        completedHeader:SetFullWidth(true)
+        contentContainer:AddChild(completedHeader)
 
-    -- Sort completed achievements (for example, by player then achievement name).
-    table.sort(completedAch, function(a, b)
-        if a.player == b.player then
-            return a.achievement < b.achievement
-        else
-            return a.player < b.player
+        for _, entry in ipairs(completedAch) do
+            local label = AceGUI:Create("Label")
+            label:SetFullWidth(true)
+            label:SetText(string.format("|cff%s[%s]|r |cffffffff%s|r - Points: %d - Completed: %s",
+                COMPLETED_COLOR, entry.category, entry.achievement, entry.points, entry.date))
+            contentContainer:AddChild(label)
         end
-    end)
-
-    for _, entry in ipairs(completedAch) do
-        local label = AceGUI:Create("Label")
-        label:SetFullWidth(true)
-        label:SetText(string.format("|cff%s[%s]|r |cffffffff%s|r - Points: %d - Completed: %s",
-            COMPLETED_COLOR, entry.category, entry.achievement, entry.points, entry.date))
-        scrollFrame:AddChild(label)
     end
 end
 
-local function DrawFeats(container)
+function HCT_UIModule:DrawAchievementsPage(container)
+    container:ReleaseChildren()
+
+    -- Store the current view mode; default is "all"
+    local viewMode = "all"
+    local contentContainer
+
+    local buttonGroup = AceGUI:Create("SimpleGroup")
+    buttonGroup:SetLayout("Flow")
+    buttonGroup:SetFullWidth(true)
+    container:AddChild(buttonGroup)
+
+    local btnAll = AceGUI:Create("Button")
+    btnAll:SetText("All")
+    btnAll:SetCallback("OnClick", function()
+        viewMode = "all"
+        UpdateAchievementsContent(contentContainer, viewMode)
+    end)
+    buttonGroup:AddChild(btnAll)
+
+    local btnComplete = AceGUI:Create("Button")
+    btnComplete:SetText("Complete")
+    btnComplete:SetCallback("OnClick", function()
+        viewMode = "complete"
+        UpdateAchievementsContent(contentContainer, viewMode)
+    end)
+    buttonGroup:AddChild(btnComplete)
+
+    -- Create and assign the content container as a ScrollFrame
+    contentContainer = AceGUI:Create("ScrollFrame")
+    contentContainer:SetLayout("Flow")
+    contentContainer:SetFullWidth(true)
+    contentContainer:SetFullHeight(true)
+    container:AddChild(contentContainer)
+
+    local heading = AceGUI:Create("Heading")
+    heading:SetText(viewMode .. " achievements")
+    heading:SetFullWidth(true)
+    contentContainer:AddChild(heading)
+
+    -- Initial draw with default mode "all"
+    UpdateAchievementsContent(contentContainer, viewMode)
+end
+
+
+
+local function DrawBounties(container)
     container:ReleaseChildren()
 
     local scrollFrame = AceGUI:Create("ScrollFrame")
@@ -504,13 +526,13 @@ function HCT_UIModule:ShowMainGUI()
             DrawCharacters(container)
             guiFrame:SetStatusText("Character Information")
         elseif group == "achievements" then
-            DrawAchievements(container)
+            HCT_UIModule:DrawAchievementsPage(container)
             guiFrame:SetStatusText("Achievements are earnable once per character.")
         elseif group == "feats" then
             DrawFeats(container)
             guiFrame:SetStatusText("Feats can only be earned once per contest.")
         elseif group == "bounties" then
-            DrawFeats(container)
+            DrawBounties(container)
             guiFrame:SetStatusText(
                 "Bounties can be earned infinitely - the level will reflect how many times you've completed it.")
         elseif group == "tugOfWar" then

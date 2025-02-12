@@ -8,6 +8,7 @@ embeds.xml
 AddonEnv.lua
 HardcoreChallengeTracker2_Data.lua
 HardcoreChallengeTracker2_Teams.lua
+Set.lua
 DataModule.lua
 UIModule.lua
 EventModule.lua
