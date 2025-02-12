@@ -111,12 +111,12 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
         return
     end
     
-    print("Raw addon message from " .. sender .. ": " .. message)
+    --print("Raw addon message from " .. sender .. ": " .. message)
 
     if not GetHCT() then return end -- Ensure the module is properly initialized.
     local success, msgType, payload = AceSerializer:Deserialize(message)
     if success then
-        PrintTable(payload)
+        --PrintTable(payload)
         if msgType == "EVENT" then
             GetHCT():ProcessEvent(payload)
         elseif msgType == "REQUEST" then
@@ -200,7 +200,7 @@ function HCT_EventModule:BroadcastEvent(ev)
     
     -- Debug: print the event table being broadcast.
     HCT:Print("Broadcasting event: " .. ev.type)
-    PrintTable(ev)  -- Assumes you have a helper to print tables.
+    --PrintTable(ev)  -- Assumes you have a helper to print tables.
     
     local serialized = AceSerializer:Serialize("EVENT", ev)
     if not serialized or serialized == "" then
