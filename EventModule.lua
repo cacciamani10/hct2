@@ -34,7 +34,7 @@ function HCT_EventModule:RegisterEvents()
         end
     end
 
-    GetHCT():RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
+    --GetHCT():RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
     --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
     GetHCT():RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
     GetHCT():RegisterComm(GetHCT().addonPrefix, "OnCommReceived") -- Register for addon messages.

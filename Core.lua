@@ -111,11 +111,11 @@ function HCT:OnEnable()
     HCT_ChatModule:RegisterChatCommands()
     self:ScheduleTimer(function()
         HCT_EventModule:RequestContestData()
-    end, 3)
+    end, 600)
     -- Schedule bulk event broadcast every 5 minutes as a backup.
     self:ScheduleRepeatingTimer(function()
         HCT_EventModule:BroadcastBulkEvents()
-    end, 300)
+    end, 900)
     local charKey = UnitName("player")
     HCT_DataModule:CheckAllAchievements(charKey)
 end
