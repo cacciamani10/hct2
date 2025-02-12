@@ -72,13 +72,18 @@ function HCT_ChatModule:ProcessTeamChatMessage(payload)
         local senderName = payload.character or payload.sender
         local senderClass = payload.class
         local classColorStr = "ffffff"
+        local teamColorStr = "ffffff"
         if senderClass and RAID_CLASS_COLORS[senderClass] then
             classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
         end
+        if HCT.db.profile.teams[payload.team] then
+            local teamColor = HCT_DataModule.NormalizeColor(HCT.db.profile.teams[payload.team].color)
+            teamColorStr = string.format("%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
+        end
         classColorStr = string.gsub(classColorStr, "%s+", "")
         classColorStr = string.sub(classColorStr, 1, 6)
-        local formattedMsg = string.format("|cffaaaaaa[Team Chat]|r |cff%s%s|r: %s", classColorStr, senderName, payload.text)
+        local formattedMsg = string.format("|cff%s[Team Chat]|r |cff%s%s|r: %s", teamColorStr, classColorStr, senderName, payload.text)
         DEFAULT_CHAT_FRAME:AddMessage(formattedMsg)
-        HCT:AddTeamChatMessage(formattedMsg)
+        HCT_ChatModule:AddTeamChatMessage(formattedMsg)
     end
 end

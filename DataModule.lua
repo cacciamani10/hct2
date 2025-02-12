@@ -160,6 +160,7 @@ function HCT_DataModule:BroadcastCharacterInfo()
         race = race,    
         timestamp = time(),
     }
+    HCT:Print("Broadcasting character info for " .. charKey)
     HCT_EventModule:BroadcastEvent(ev)
 end
 
