@@ -48,10 +48,15 @@ function HCT_EventModule:RegisterEvents()
 end
 
 function HCT_EventModule:UnregisterEvents()
-    GetHCT():UnregisterEvent("PLAYER_LEVEL_UP")
+    for _, handler in pairs(_G.HCT_Handlers) do
+        local eventType = handler:GetEventType()
+        if eventType then
+            GetHCT():UnregisterEvent(eventType)
+        end
+    end
+    
     GetHCT():UnregisterEvent("PLAYER_DEAD")
     GetHCT():UnregisterEvent("COMBAT_LOG_EVENT")
-    GetHCT():UnregisterEvent("GUILD_ROSTER_UPDATE")
     GetHCT():UnregisterEvent("CHAT_MSG_ADDON")
     GetHCT():UnregisterComm(GetHCT().addonPrefix) -- Unregister for addon messages.
 end
