@@ -1,7 +1,9 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
 local AceGUI = LibStub("AceGUI-3.0")
--- ChatModule.lua
 HCT_ChatModule = {}
+local function GetHCT()
+    return _G.HCT_Env.GetAddon()
+end
 
 function HCT_ChatModule:SendTeamChatMessage(text)
     local characterName = UnitName("player")
@@ -52,15 +54,15 @@ function HCT_ChatModule:AddTeamChatMessage(message)
 end
 
 
-function HCT_ChatModule:RegisterChatCommands(HCT)
-    HCT:RegisterChatCommand("t", function(input)
+function HCT_ChatModule:RegisterChatCommands()
+    GetHCT():RegisterChatCommand("t", function(input)
         if input and input ~= "" then
             HCT_ChatModule:SendTeamChatMessage(input)
         end
     end)
 end
 
-function HCT_ChatModule:UnregisterChatCommands(HCT)
+function HCT_ChatModule:UnregisterChatCommands()
     -- No built-in unregister exists; this is a placeholder if needed.
 end
 

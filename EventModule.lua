@@ -4,8 +4,16 @@ HCT_EventModule = {}
 -- Table to keep track of processed event IDs.
 HCT_EventModule.processedEventIDs = {}
 
+local function GetHCT()
+    return _G.HCT_Env.GetAddon()
+end
+
+local function GetHandlers() 
+    return _G.HCT_Env.GetAddon().HCT_Handlers
+end
+
 local function GetDB()
-    return HCT.db.profile
+    return _G.HCT_Env.GetAddon().db.profile
 end
 
 -- Helper function: compute a unique ID for an event.
@@ -15,39 +23,45 @@ local function ComputeEventID(ev)
     return ev.type .. ":" .. key .. ":" .. ev.timestamp
 end
 
-function HCT_EventModule:RegisterEvents(hctObj)
-    if not hctObj then
-        print("HCT_EventModule:RegisterEvents - hctObj is nil")
-        return
-    end     -- Ensure the module is properly initialized.
-    hctObj:RegisterEvent("PLAYER_LEVEL_UP", "OnPlayerLevelUp")
-    hctObj:RegisterEvent("PLAYER_DEAD", "OnPlayerDead")
-    hctObj:RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
-    --hctObj:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
-    hctObj:RegisterEvent("GUILD_ROSTER_UPDATE", "OnGuildRosterUpdate")
-    hctObj:RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
-    hctObj:RegisterComm(hctObj.addonPrefix, "OnCommReceived") -- Register for addon messages.
-    self.owner = hctObj -- Store the owner object.
-    self:RequestMissingEvents(hctObj) -- Request missing events from the guild.
-    self:BroadcastBulkEvents(hctObj) -- Broadcast bulk events to the guild.
+function HCT_EventModule:RegisterEvents()
+    for _, handler in pairs(_G.HCT_Handlers) do
+        local eventType = handler:GetEventType()
+        local handlerName = handler:GetHandlerName()
+    
+        if eventType and handlerName then
+            GetHCT()[handlerName] = function(_, ...)
+                handler:HandleEvent(GetHCT(), ...)
+            end
+    
+            GetHCT():RegisterEvent(eventType, handlerName)
+        end
+    end
+
+    GetHCT():RegisterEvent("PLAYER_LEVEL_UP", "OnPlayerLevelUp")
+    GetHCT():RegisterEvent("PLAYER_DEAD", "OnPlayerDead")
+    GetHCT():RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
+    --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
+    GetHCT():RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
+    GetHCT():RegisterComm(GetHCT().addonPrefix, "OnCommReceived") -- Register for addon messages.
+    self:RequestMissingEvents(GetHCT()) -- Request missing events from the guild.
+    self:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
 end
 
-function HCT_EventModule:UnregisterEvents(hctObj)
-    hctObj:UnregisterEvent("PLAYER_LEVEL_UP")
-    hctObj:UnregisterEvent("PLAYER_DEAD")
-    hctObj:UnregisterEvent("COMBAT_LOG_EVENT")
-    hctObj:UnregisterEvent("GUILD_ROSTER_UPDATE")
-    hctObj:UnregisterEvent("CHAT_MSG_ADDON")
-    hctObj:UnregisterComm(hctObj.addonPrefix) -- Unregister for addon messages.
-    self.owner = nil -- Clear the owner object.
+function HCT_EventModule:UnregisterEvents()
+    GetHCT():UnregisterEvent("PLAYER_LEVEL_UP")
+    GetHCT():UnregisterEvent("PLAYER_DEAD")
+    GetHCT():UnregisterEvent("COMBAT_LOG_EVENT")
+    GetHCT():UnregisterEvent("GUILD_ROSTER_UPDATE")
+    GetHCT():UnregisterEvent("CHAT_MSG_ADDON")
+    GetHCT():UnregisterComm(GetHCT().addonPrefix) -- Unregister for addon messages.
 end
 
-function HCT_EventModule:RequestMissingEvents(hctObj)
+function HCT_EventModule:RequestMissingEvents()
     local request = { since = GetDB().lastEventTimestamp or 0 }
     local data = { "Request", request }
     local serializedRequest = AceSerializer:Serialize("REQUEST", data)
-    hctObj:SendCommMessage(hctObj.addonPrefix, serializedRequest, "GUILD")
-    hctObj:Print("Requested events since " .. (GetDB().lastEventTimestamp or 0))
+    GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedRequest, "GUILD")
+    GetHCT():Print("Requested events since " .. (GetDB().lastEventTimestamp or 0))
 end
 
 -- Event handler for level up.
@@ -60,8 +74,8 @@ function HCT_EventModule:OnPlayerLevelUp(event, newLevel)
         local pointsAwarded = HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
         charData.levelUpPoints = (charData.levelUpPoints or 0) + pointsAwarded
         charData.level = newLevel
-        if self.owner then
-            self.owner:Print("Level up! New level: " .. newLevel .. ". Awarded " .. pointsAwarded .. " level points.")
+        if GetHCT() then
+            GetHCT():Print("Level up! New level: " .. newLevel .. ". Awarded " .. pointsAwarded .. " level points.")
         end
 
         local battleTag = HCT_DataModule:GetBattleTag()
@@ -84,20 +98,20 @@ function HCT_EventModule:OnPlayerLevelUp(event, newLevel)
 end
 
 function HCT_EventModule:OnCombatLogEvent(event, ...)
-    if not self.owner then return end -- Ensure the module is initialized.
+    if not GetHCT() then return end -- Ensure the module is initialized.
     local timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags,
           destGUID, destName, destFlags, amount, overkill, school, resisted, block, absorbed, critical, glancing, crushing, isOffHand = ...
     
     -- Example: Track damage dealt by the player.
     if subEvent == "SPELL_DAMAGE" or subEvent == "SWING_DAMAGE" then
         if sourceName == UnitName("player") then
-            self.owner.db.char.totalDamageDealt = (self.owner.db.char.totalDamageDealt or 0) + (amount or 0)
+            GetHCT().db.char.totalDamageDealt = (GetHCT().db.char.totalDamageDealt or 0) + (amount or 0)
         end
 
     -- Similarly for healing or other events.
     elseif subEvent == "SPELL_HEAL" then
         if sourceName == UnitName("player") then
-            self.owner.db.char.totalHealingDone = (self.owner.db.char.totalHealingDone or 0) + (amount or 0)
+            GetHCT().db.char.totalHealingDone = (GetHCT().db.char.totalHealingDone or 0) + (amount or 0)
         end
 
     -- Add more subEvent checks as needed.
@@ -113,8 +127,8 @@ function HCT_EventModule:OnPlayerDead(event)
         charData.levelUpPoints = math.floor((charData.levelUpPoints or 0) / 2)
         charData.achievementPoints = math.floor((charData.achievementPoints or 0) / 2)
         charData.featPoints = math.floor((charData.featPoints or 0) / 2)
-        if self.owner then
-            self.owner:Print("You have died... but we go agane!")
+        if GetHCT() then
+            GetHCT():Print("You have died... but we go agane!")
         end
         local ev = {
             type = "DEATH",
@@ -126,8 +140,8 @@ function HCT_EventModule:OnPlayerDead(event)
 end
 
 function HCT_EventModule:OnGuildRosterUpdate(event)
-    if self.owner then
-        self.owner:Print("Guild roster updated.")
+    if GetHCT() then
+        GetHCT():Print("Guild roster updated.")
     end
 end
 
@@ -145,7 +159,7 @@ local function PrintTable(t, indent)
 end
 
 function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
-    if prefix ~= HCT.addonPrefix then
+    if prefix ~= GetHCT().addonPrefix then
         return
     end
 
@@ -155,16 +169,14 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
         return
     end
     
-    -- Debug: print the raw message received.
     print("Raw addon message from " .. sender .. ": " .. message)
 
-    if not self.owner then return end -- Ensure the module is properly initialized.
+    if not GetHCT() then return end -- Ensure the module is properly initialized.
     local success, msgType, payload = AceSerializer:Deserialize(message)
     if success then
-        print("Deserialized payload from " .. sender .. ":")
         PrintTable(payload)
         if msgType == "EVENT" then
-            self.owner:ProcessEvent(payload)
+            GetHCT():ProcessEvent(payload)
         elseif msgType == "REQUEST" then
             local since = payload.since or 0
             local eventsToSend = {}
@@ -174,24 +186,24 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
                 end
             end
             local serializedEvents = AceSerializer:Serialize("EVENTDATA", { events = eventsToSend })
-            HCT:SendCommMessage(HCT.addonPrefix, serializedEvents, "GUILD")
+            GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedEvents, "GUILD")
         elseif msgType == "EVENTDATA" then
             for _, ev in ipairs(payload.events or {}) do
-                self.owner:ProcessEvent(ev)
+                GetHCT():ProcessEvent(ev)
             end
         elseif msgType == "TEAMCHAT" then
             HCT_ChatModule:ProcessTeamChatMessage(payload)
         else
-            self.owner:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
+            GetHCT():Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
         end
     else
-        self.owner:Print("Failed to deserialize message from " .. sender)
+        GetHCT():Print("Failed to deserialize message from " .. sender)
         print("Raw message causing deserialization failure: " .. message)
     end
 end
 
 function HCT_EventModule:ProcessEvent(ev)
-    if not self.owner then return end -- Ensure the module is properly initialized.
+    if not GetHCT() then return end -- Ensure the module is properly initialized.
     local db = GetDB()
     local uniqueID = ComputeEventID(ev)
     self.processedEventIDs = self.processedEventIDs or {}
@@ -209,19 +221,19 @@ function HCT_EventModule:ProcessEvent(ev)
             if ev.class then
                 db.characters[charKey].class = ev.class
             end
-            self.owner:Print(charKey .. " has leveled up to " .. ev.newLevel .. ": Awarded " .. ev.pointsAwarded .. " level points.")
+            GetHCT():Print(charKey .. " has leveled up to " .. ev.newLevel .. ": Awarded " .. ev.pointsAwarded .. " level points.")
         end
     elseif ev.type == "DEATH" then
         local charKey = ev.charKey
         if db.characters[charKey] then
             db.characters[charKey].isDead = true
-            self.owner:Print(charKey .. " has died.")
+            GetHCT():Print(charKey .. " has died.")
         end
     elseif ev.type == "ACHIEVEMENT" then
         local charKey = ev.charKey
         if db.characters[charKey] then
             db.characters[charKey].achievementPoints = (db.characters[charKey].achievementPoints or 0) + ev.pointsAwarded
-            self.owner:Print(charKey .. " completed achievement '" .. ev.achievement .. "': Awarded " .. ev.pointsAwarded .. " points.")
+            GetHCT():Print(charKey .. " completed achievement '" .. ev.achievement .. "': Awarded " .. ev.pointsAwarded .. " points.")
         end
     elseif ev.type == "CHARACTER_INFO" then
         -- (Optional) Process a dedicated character info event.
@@ -230,10 +242,10 @@ function HCT_EventModule:ProcessEvent(ev)
             db.characters[charKey].class = ev.class
             db.characters[charKey].race = ev.race
             -- Add any additional fields you wish to propagate.
-            self.owner:Print("Updated info for " .. charKey)
+            GetHCT():Print("Updated info for " .. charKey)
         end
     else
-        self.owner:Print("Unknown event type: " .. tostring(ev.type))
+        GetHCT():Print("Unknown event type: " .. tostring(ev.type))
     end
     if ev.timestamp and ev.timestamp > db.lastEventTimestamp then
         db.lastEventTimestamp = ev.timestamp
@@ -241,7 +253,7 @@ function HCT_EventModule:ProcessEvent(ev)
 end
 
 function HCT_EventModule:BroadcastEvent(ev)
-    if not self.owner then return end -- Ensure the module is initialized.
+    if not GetHCT() then return end -- Ensure the module is initialized.
     table.insert(GetDB().eventLog, ev)
     
     -- Debug: print the event table being broadcast.
@@ -254,12 +266,11 @@ function HCT_EventModule:BroadcastEvent(ev)
     else
         print("Serialized event: " .. serialized)
     end
-    self.owner:SendCommMessage(self.owner.addonPrefix, serialized, "GUILD")
+    GetHCT():SendCommMessage(GetHCT().addonPrefix, serialized, "GUILD")
 end
 
--- Backup: Broadcast Bulk Events
-function HCT_EventModule:BroadcastBulkEvents(hctObj)
-    if not hctObj then return end -- Ensure the module is properly initialized.
+function HCT_EventModule:BroadcastBulkEvents()
+    if not GetHCT() then return end
 
     local currentTime = time()
     local bulkEvents = {}
@@ -269,9 +280,8 @@ function HCT_EventModule:BroadcastBulkEvents(hctObj)
         end
     end
     if #bulkEvents > 0 then
-        if not self.owner then return end -- Ensure the module is properly initialized.
         local serializedBulk = AceSerializer:Serialize("EVENTDATA", { events = bulkEvents })
-        self.owner:SendCommMessage(self.owner.addonPrefix, serializedBulk, "GUILD")
-        hctObj:Print("Broadcasted bulk event update (" .. #bulkEvents .. " events).")
+        GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedBulk, "GUILD")
+        GetHCT():Print("Broadcasted bulk event update (" .. #bulkEvents .. " events).")
     end
 end
