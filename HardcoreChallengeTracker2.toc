@@ -5,6 +5,7 @@
 ## SavedVariables: HardcoreChallengeTracker2DB
 
 embeds.xml
+AddonEnv.lua
 HardcoreChallengeTracker2_Data.lua
 HardcoreChallengeTracker2_Teams.lua
 DataModule.lua
