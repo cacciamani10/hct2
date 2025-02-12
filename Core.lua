@@ -67,16 +67,14 @@ local options = {
     },
 }
 
--- Attach event handlers so that AceAddon can find them.
-HCT.OnPlayerLevelUp = HCT_EventModule.OnPlayerLevelUp
+
 HCT.OnPlayerDead = HCT_EventModule.OnPlayerDead
 HCT.OnCombatLogEvent = HCT_EventModule.OnCombatLogEvent
-HCT.OnGuildRosterUpdate = HCT_EventModule.OnGuildRosterUpdate
 HCT.OnChatMsgAddon = HCT_EventModule.OnChatMsgAddon
 
 function HCT:OnCommReceived(prefix, message, distribution, sender)
     if prefix == self.addonPrefix then
-        self:Print("Received message from " .. sender)
+        --self:Print("Received message from " .. sender)
         HCT_EventModule:OnChatMsgAddon("CHAT_MSG_ADDON", prefix, message, distribution, sender)
     end
 end
@@ -104,21 +102,21 @@ function HCT:OnInitialize()
 end
 
 function HCT:OnEnable()
-    HCT_EventModule:RegisterEvents(self)
-    HCT_ChatModule:RegisterChatCommands(self)
+    HCT_EventModule:RegisterEvents()
+    HCT_ChatModule:RegisterChatCommands()
     self:ScheduleTimer(function()
-        HCT_EventModule:RequestMissingEvents(self)
+        HCT_EventModule:RequestMissingEvents()
     end, 3)
     -- Schedule bulk event broadcast every 5 minutes as a backup.
     self:ScheduleRepeatingTimer(function()
-        HCT_EventModule:BroadcastBulkEvents(self)
+        HCT_EventModule:BroadcastBulkEvents()
     end, 300)
     local charKey = UnitName("player")
     HCT_DataModule:CheckAllAchievements(charKey)
 end
 
 function HCT:OnDisable()
-    HCT_EventModule:UnregisterEvents(self)
-    HCT_ChatModule:UnregisterChatCommands(self)
+    HCT_EventModule:UnregisterEvents()
+    HCT_ChatModule:UnregisterChatCommands()
     self:CancelAllTimers()
 end
