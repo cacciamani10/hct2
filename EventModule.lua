@@ -90,9 +90,9 @@ function HCT_EventModule:ProcessEvent(ev)
         -- (Optional) Process a dedicated character info event.
         local charKey = ev.charKey
         if db.characters[charKey] then
-            db.characters[charKey].class = ev.class
-            db.characters[charKey].race = ev.race
-            -- Add any additional fields you wish to propagate.
+            for k, v in pairs(ev) do -- Merge the character info.
+                db.characters[charKey][k] = v -- Update the character info.
+            end
             GetHCT():Print("Updated info for " .. charKey)
         end
     else
@@ -152,17 +152,6 @@ function HCT_EventModule:RespondToRequest(payload)
     HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
 end
 
-function HCT_EventModule:ProcessCharacterInfo(payload)
-    if not GetHCT() then return end -- Ensure the module is properly initialized.
-    local db = GetDB() -- Access the database.
-    local charKey = payload.charKey -- Extract the character key.
-    if not db.characters[charKey] then return end -- Ensure the character exists.
-    for k, v in pairs(payload) do -- Merge the character info.
-        db.characters[charKey][k] = v -- Update the character info.
-    end
-    GetHCT():Print("Updated info for " .. charKey) -- Debug print.
-end
-
 function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
     -- Only process messages with the correct prefix.
     local addonPrefix = GetHCT().addonPrefix
@@ -195,9 +184,6 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
         HCT_EventModule:RespondToRequest(payload)
     elseif msgType == "TEAMCHAT" then
         HCT_ChatModule:ProcessTeamChatMessage(payload)
-    elseif msgType == "CHARACTER_INFO" then
-        -- Process detailed character info.
-        HCT_DataModule:ProcessCharacterInfo(payload)
     else
         GetHCT():Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
     end
