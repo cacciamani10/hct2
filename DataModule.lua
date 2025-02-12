@@ -5,9 +5,6 @@ local function GetDB()
     return HCT.db.profile
 end
 
-local realm = HardcoreChallengeTracker_Data.realm
-local faction = HardcoreChallengeTracker_Data.faction
-
 -- (No longer need InitializeSavedVariables as AceDB handles that)
 
 function HCT_DataModule:GetBattleTag()
@@ -30,7 +27,6 @@ function HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
     end
     return points
 end
-
 
 function HCT_DataModule:GetPlayerTeam(player)
     local teams = GetDB().teams
@@ -208,8 +204,6 @@ function HCT_DataModule:InitializeCharacterData()
     local playerRealm = GetRealmName()
     local charKey = UnitName("player")
     local db = GetDB()
-    print("Realm: " .. playerRealm .. ", Faction: " .. playerFaction)
-    print("Realm: " .. db.realm .. ", Faction: " .. db.faction)
     if playerRealm ~= db.realm then
         print("This character is not eligible. Invalid realm: " .. playerRealm)
         return

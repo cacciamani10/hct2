@@ -6,7 +6,7 @@ HCT_EventModule.owner = HCT
 HCT.ProcessEvent = HCT_EventModule.ProcessEvent -- Alias for convenience.
 _G.HCT = HCT
 HCT.teamChatLog = HCT.teamChatLog or {}
-ADDON_PREFIX = "HCT2Addon"
+HCT.addonPrefix = "HCT2Addon"
 
 -- Set the owner reference in EventModule.
 
@@ -74,7 +74,7 @@ HCT.OnGuildRosterUpdate = HCT_EventModule.OnGuildRosterUpdate
 HCT.OnChatMsgAddon = HCT_EventModule.OnChatMsgAddon
 
 function HCT:OnCommReceived(prefix, message, distribution, sender)
-    if prefix == ADDON_PREFIX then
+    if prefix == self.addonPrefix then
         self:Print("Received message from " .. sender)
         HCT_EventModule:OnChatMsgAddon("CHAT_MSG_ADDON", prefix, message, distribution, sender)
     end

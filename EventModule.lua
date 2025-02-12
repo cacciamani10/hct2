@@ -26,7 +26,7 @@ function HCT_EventModule:RegisterEvents(hctObj)
     --hctObj:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
     hctObj:RegisterEvent("GUILD_ROSTER_UPDATE", "OnGuildRosterUpdate")
     hctObj:RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
-    hctObj:RegisterComm(ADDON_PREFIX, "OnCommReceived") -- Register for addon messages.
+    hctObj:RegisterComm(hctObj.addonPrefix, "OnCommReceived") -- Register for addon messages.
     self.owner = hctObj -- Store the owner object.
     self:RequestMissingEvents(hctObj) -- Request missing events from the guild.
     self:BroadcastBulkEvents(hctObj) -- Broadcast bulk events to the guild.
@@ -38,7 +38,7 @@ function HCT_EventModule:UnregisterEvents(hctObj)
     hctObj:UnregisterEvent("COMBAT_LOG_EVENT")
     hctObj:UnregisterEvent("GUILD_ROSTER_UPDATE")
     hctObj:UnregisterEvent("CHAT_MSG_ADDON")
-    hctObj:UnregisterComm(ADDON_PREFIX)
+    hctObj:UnregisterComm(hctObj.addonPrefix) -- Unregister for addon messages.
     self.owner = nil -- Clear the owner object.
 end
 
@@ -46,7 +46,7 @@ function HCT_EventModule:RequestMissingEvents(hctObj)
     local request = { since = GetDB().lastEventTimestamp or 0 }
     local data = { "Request", request }
     local serializedRequest = AceSerializer:Serialize("REQUEST", data)
-    hctObj:SendCommMessage(ADDON_PREFIX, serializedRequest, "GUILD")
+    hctObj:SendCommMessage(hctObj.addonPrefix, serializedRequest, "GUILD")
     hctObj:Print("Requested events since " .. (GetDB().lastEventTimestamp or 0))
 end
 
@@ -145,21 +145,23 @@ local function PrintTable(t, indent)
 end
 
 function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
-    if prefix ~= ADDON_PREFIX then
+    if prefix ~= HCT.addonPrefix then
         return
     end
 
     -- Filter out messages from ourselves.
     local myName = UnitName("player")
-    -- (If sender includes realm information, you might want to strip that out using Ambiguate)
     if sender == myName or Ambiguate(sender, "none") == myName then
         return
     end
     
+    -- Debug: print the raw message received.
+    print("Raw addon message from " .. sender .. ": " .. message)
+
     if not self.owner then return end -- Ensure the module is properly initialized.
     local success, msgType, payload = AceSerializer:Deserialize(message)
     if success then
-        print("Deserialized payload:")
+        print("Deserialized payload from " .. sender .. ":")
         PrintTable(payload)
         if msgType == "EVENT" then
             self.owner:ProcessEvent(payload)
@@ -172,7 +174,7 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
                 end
             end
             local serializedEvents = AceSerializer:Serialize("EVENTDATA", { events = eventsToSend })
-            HCT:SendCommMessage(ADDON_PREFIX, serializedEvents, "GUILD")
+            HCT:SendCommMessage(HCT.addonPrefix, serializedEvents, "GUILD")
         elseif msgType == "EVENTDATA" then
             for _, ev in ipairs(payload.events or {}) do
                 self.owner:ProcessEvent(ev)
@@ -183,7 +185,8 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
             self.owner:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
         end
     else
-        self.owner:Print("Failed to deserialize " .. tostring(msgType) .. " message from " .. sender)
+        self.owner:Print("Failed to deserialize message from " .. sender)
+        print("Raw message causing deserialization failure: " .. message)
     end
 end
 
@@ -238,13 +241,20 @@ function HCT_EventModule:ProcessEvent(ev)
 end
 
 function HCT_EventModule:BroadcastEvent(ev)
+    if not self.owner then return end -- Ensure the module is initialized.
     table.insert(GetDB().eventLog, ev)
-    -- Print the event for debugging purposes.
-    print("Broadcasting event:")
-    PrintTable(ev)
+    
+    -- Debug: print the event table being broadcast.
+    HCT:Print("Broadcasting event: " .. ev.type)
+    PrintTable(ev)  -- Assumes you have a helper to print tables.
+    
     local serialized = AceSerializer:Serialize("EVENT", ev)
-    print("Serialized event: " .. serialized)
-    HCT:SendCommMessage(ADDON_PREFIX, serialized, "GUILD")
+    if not serialized or serialized == "" then
+        HCT:Print("Error: Serialized event is empty!")
+    else
+        print("Serialized event: " .. serialized)
+    end
+    self.owner:SendCommMessage(self.owner.addonPrefix, serialized, "GUILD")
 end
 
 -- Backup: Broadcast Bulk Events
@@ -261,7 +271,7 @@ function HCT_EventModule:BroadcastBulkEvents(hctObj)
     if #bulkEvents > 0 then
         if not self.owner then return end -- Ensure the module is properly initialized.
         local serializedBulk = AceSerializer:Serialize("EVENTDATA", { events = bulkEvents })
-        self.owner:SendCommMessage(ADDON_PREFIX, serializedBulk, "GUILD")
+        self.owner:SendCommMessage(self.owner.addonPrefix, serializedBulk, "GUILD")
         hctObj:Print("Broadcasted bulk event update (" .. #bulkEvents .. " events).")
     end
 end

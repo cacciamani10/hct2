@@ -35,7 +35,7 @@ function HCT_ChatModule:SendTeamChatMessage(text)
         timestamp = time(),
     }
     local serialized = AceSerializer:Serialize("TEAMCHAT", payload)
-    HCT:SendCommMessage(ADDON_PREFIX, serialized, "GUILD")
+    HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
     DEFAULT_CHAT_FRAME:AddMessage(fullMessage)
     HCT_ChatModule:AddTeamChatMessage(fullMessage)
 end
