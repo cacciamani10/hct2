@@ -1,5 +1,9 @@
 -- DataModule.lua
 HCT_DataModule = {}
+-- local AchievementSet = require("Set")
+local myAchievements = AchievementSet:New()
+local achievementLedger = AchievementSet:New()
+
 
 local function GetDB()
     return HCT.db.profile

@@ -9,8 +9,6 @@ HCT.teamChatLog = HCT.teamChatLog or {}
 HCT.addonPrefix = "HCT2Addon"
 
 -- Set the owner reference in EventModule.
-
-
 local defaults = {
     profile = {
         realm = HardcoreChallengeTracker_Data.realm,
@@ -33,7 +31,8 @@ local defaults = {
         },
         users = {},
         characters = {},
-        achievements = {},
+        myAchievements = {},      -- Local store: a set of achievements earned by the local character.
+        achievementLedger = {},   -- Global ledger: a set aggregating achievements from all players.
         tugOfWarEvents = {},
         bounties = {},
         feats = {},
