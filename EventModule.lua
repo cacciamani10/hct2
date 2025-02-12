@@ -44,7 +44,8 @@ end
 
 function HCT_EventModule:RequestMissingEvents(hctObj)
     local request = { since = GetDB().lastEventTimestamp or 0 }
-    local serializedRequest = AceSerializer:Serialize("REQUEST", request)
+    local data = { "Request", request }
+    local serializedRequest = AceSerializer:Serialize("REQUEST", data)
     hctObj:SendCommMessage(ADDON_PREFIX, serializedRequest, "GUILD")
     hctObj:Print("Requested events since " .. (GetDB().lastEventTimestamp or 0))
 end
@@ -236,10 +237,13 @@ function HCT_EventModule:ProcessEvent(ev)
     end
 end
 
-
 function HCT_EventModule:BroadcastEvent(ev)
     table.insert(GetDB().eventLog, ev)
+    -- Print the event for debugging purposes.
+    print("Broadcasting event:")
+    PrintTable(ev)
     local serialized = AceSerializer:Serialize("EVENT", ev)
+    print("Serialized event: " .. serialized)
     HCT:SendCommMessage(ADDON_PREFIX, serialized, "GUILD")
 end
 
