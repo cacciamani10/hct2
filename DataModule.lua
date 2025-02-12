@@ -180,15 +180,32 @@ function HCT_DataModule:InitializeCharacterData()
     db.characters = db.characters or {}
     -- find the character in the db.characters table by name and realm, if not found, create a new entry
     if not db.characters[charKey] then
+        local level = UnitLevel("player") or 1
+        local class = select(2, UnitClass("player")) or "Unknown"
+        local race = select(2, UnitRace("player")) or "Unknown"
         db.characters[charKey] = {
             battleTag = battleTag,
-            level = UnitLevel("player"),
+            level = level,
             name = characterName,
-            class = select(2, UnitClass("player")),
+            class = class,
+            race = race,
             faction = playerFaction,
             realm = playerRealm,
             isDead = false,
         }
+
+        local ev = {
+            type = "CHARACTER",
+            battleTag = battleTag,
+            level = level,
+            name = characterName,
+            class = class,
+            race = race,
+            faction = playerFaction,
+            realm = playerRealm,
+            isDead = false,
+        }
+        HCT_Broadcaster:BroadcastEvent(ev)
     end
     -- add the character to the user's character list if it is not already there
     db.users = db.users or {}

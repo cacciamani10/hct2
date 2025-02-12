@@ -21,18 +21,16 @@ _G.HCT_Broadcaster = {
         local HCT = _G.HCT_Env.GetAddon()
         if not HCT then return end
 
-        local currentTime = time()
-        local bulkEvents = {}
-        for _, ev in ipairs(HCT.db.profile.eventLog or {}) do
-            if currentTime - ev.timestamp <= 3600 then
-                table.insert(bulkEvents, ev)
-            end
-        end
+        local broadCastTable = {}                               -- Custom table for broadcasting.
 
-        if #bulkEvents > 0 then
-            local serializedBulk = AceSerializer:Serialize("EVENTDATA", { events = bulkEvents })
+        broadCastTable.users = HCT.db.profile.users or {}         -- Copy users table.
+        broadCastTable.characters = HCT.db.characters or {}         -- Copy characters table.
+        broadCastTable.completionLedger = HCT.db.completionLedger or {} -- Copy completionLedger table.
+
+        if #broadCastTable > 0 then
+            local serializedBulk = AceSerializer:Serialize("BULK_UPDATE", broadCastTable)
             HCT:SendCommMessage(HCT.addonPrefix, serializedBulk, "GUILD")
-            HCT:Print("Broadcasted bulk event update (" .. #bulkEvents .. " events).")
+            HCT:Print("Broadcasted bulk update of " .. #broadCastTable .. " items.")
         end
     end
 }

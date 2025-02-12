@@ -1,9 +1,6 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
 HCT_EventModule = {}
 
--- Table to keep track of processed event IDs.
-HCT_EventModule.processedEventIDs = {}
-
 local function GetHCT()
     return _G.HCT_Env.GetAddon()
 end
@@ -41,8 +38,8 @@ function HCT_EventModule:RegisterEvents()
     --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
     GetHCT():RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
     GetHCT():RegisterComm(GetHCT().addonPrefix, "OnCommReceived") -- Register for addon messages.
-    self:RequestMissingEvents(GetHCT()) -- Request missing events from the guild.
-    self:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
+    self:RequestContestData() -- Request missing events from the guild.
+    HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
 end
 
 function HCT_EventModule:UnregisterEvents()
@@ -58,33 +55,13 @@ function HCT_EventModule:UnregisterEvents()
     GetHCT():UnregisterComm(GetHCT().addonPrefix) -- Unregister for addon messages.
 end
 
-function HCT_EventModule:RequestMissingEvents()
-    local request = { since = GetDB().lastEventTimestamp or 0 }
-    local data = { "Request", request }
-    local serializedRequest = AceSerializer:Serialize("REQUEST", data)
-    GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedRequest, "GUILD")
-    GetHCT():Print("Requested events since " .. (GetDB().lastEventTimestamp or 0))
-end
-
-function HCT_EventModule:OnCombatLogEvent(event, ...)
-    if not GetHCT() then return end -- Ensure the module is initialized.
-    local timestamp, subEvent, hideCaster, sourceGUID, sourceName, sourceFlags,
-          destGUID, destName, destFlags, amount, overkill, school, resisted, block, absorbed, critical, glancing, crushing, isOffHand = ...
-    
-    -- Example: Track damage dealt by the player.
-    if subEvent == "SPELL_DAMAGE" or subEvent == "SWING_DAMAGE" then
-        if sourceName == UnitName("player") then
-            GetHCT().db.char.totalDamageDealt = (GetHCT().db.char.totalDamageDealt or 0) + (amount or 0)
-        end
-
-    -- Similarly for healing or other events.
-    elseif subEvent == "SPELL_HEAL" then
-        if sourceName == UnitName("player") then
-            GetHCT().db.char.totalHealingDone = (GetHCT().db.char.totalHealingDone or 0) + (amount or 0)
-        end
-
-    -- Add more subEvent checks as needed.
-    end
+function HCT_EventModule:RequestContestData()
+    local ev = {
+        type = "REQUEST",
+        payload = "request"
+    }
+    HCT_Broadcaster:BroadcastEvent(ev)
+    GetHCT():Print("Requesting data update...")
 end
 
 local function PrintTable(t, indent)
@@ -100,82 +77,14 @@ local function PrintTable(t, indent)
     end
 end
 
-function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
-    if prefix ~= GetHCT().addonPrefix then
-        return
-    end
-
-    -- Filter out messages from ourselves.
-    local myName = UnitName("player")
-    if sender == myName or Ambiguate(sender, "none") == myName then
-        return
-    end
-    
-    print("Raw addon message from " .. sender .. ": " .. message)
-
-    if not GetHCT() then return end -- Ensure the module is properly initialized.
-    local success, msgType, payload = AceSerializer:Deserialize(message)
-    if success then
-        PrintTable(payload)
-        if msgType == "EVENT" then
-            GetHCT():ProcessEvent(payload)
-        elseif msgType == "REQUEST" then
-            local since = payload.since or 0
-            local eventsToSend = {}
-            for _, ev in ipairs(GetDB().eventLog or {}) do
-                if ev.timestamp > since then
-                    table.insert(eventsToSend, ev)
-                end
-            end
-            local serializedEvents = AceSerializer:Serialize("EVENTDATA", { events = eventsToSend })
-            GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedEvents, "GUILD")
-        elseif msgType == "EVENTDATA" then
-            for _, ev in ipairs(payload.events or {}) do
-                GetHCT():ProcessEvent(ev)
-            end
-        elseif msgType == "TEAMCHAT" then
-            HCT_ChatModule:ProcessTeamChatMessage(payload)
-        else
-            GetHCT():Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
-        end
-    else
-        GetHCT():Print("Failed to deserialize message from " .. sender)
-        print("Raw message causing deserialization failure: " .. message)
-    end
-end
-
 function HCT_EventModule:ProcessEvent(ev)
     if not GetHCT() then return end -- Ensure the module is properly initialized.
     local db = GetDB()
-    local uniqueID = ComputeEventID(ev)
-    self.processedEventIDs = self.processedEventIDs or {}
-    if self.processedEventIDs[uniqueID] then
-        return -- Already processed.
-    end
-    self.processedEventIDs[uniqueID] = true
-
-    if ev.type == "LEVELUP" then
-        local charKey = ev.charKey
-        if db.characters[charKey] then
-            db.characters[charKey].level = ev.newLevel
-            db.characters[charKey].levelUpPoints = (db.characters[charKey].levelUpPoints or 0) + ev.pointsAwarded
-            -- Update class info if present.
-            if ev.class then
-                db.characters[charKey].class = ev.class
-            end
-            GetHCT():Print(charKey .. " has leveled up to " .. ev.newLevel .. ": Awarded " .. ev.pointsAwarded .. " level points.")
-        end
-    elseif ev.type == "DEATH" then
+    if ev.type == "DEATH" then
         local charKey = ev.charKey
         if db.characters[charKey] then
             db.characters[charKey].isDead = true
             GetHCT():Print(charKey .. " has died.")
-        end
-    elseif ev.type == "ACHIEVEMENT" then
-        local charKey = ev.charKey
-        if db.characters[charKey] then
-            db.characters[charKey].achievementPoints = (db.characters[charKey].achievementPoints or 0) + ev.pointsAwarded
-            GetHCT():Print(charKey .. " completed achievement '" .. ev.achievement .. "': Awarded " .. ev.pointsAwarded .. " points.")
         end
     elseif ev.type == "CHARACTER_INFO" then
         -- (Optional) Process a dedicated character info event.
@@ -189,41 +98,115 @@ function HCT_EventModule:ProcessEvent(ev)
     else
         GetHCT():Print("Unknown event type: " .. tostring(ev.type))
     end
-    if ev.timestamp and ev.timestamp > db.lastEventTimestamp then
-        db.lastEventTimestamp = ev.timestamp
-    end
 end
 
-function HCT_EventModule:BroadcastEvent(ev)
-    if not GetHCT() then return end -- Ensure the module is initialized.
-    table.insert(GetDB().eventLog, ev)
-    
-    -- Debug: print the event table being broadcast.
-    HCT:Print("Broadcasting event: " .. ev.type)
-    PrintTable(ev)  -- Assumes you have a helper to print tables.
-    
-    local serialized = AceSerializer:Serialize("EVENT", ev)
-    if not serialized or serialized == "" then
-        HCT:Print("Error: Serialized event is empty!")
-    else
-        print("Serialized event: " .. serialized)
-    end
-    GetHCT():SendCommMessage(GetHCT().addonPrefix, serialized, "GUILD")
-end
-
-function HCT_EventModule:BroadcastBulkEvents()
-    if not GetHCT() then return end
-
-    local currentTime = time()
-    local bulkEvents = {}
-    for _, ev in ipairs(GetDB().eventLog or {}) do
-        if currentTime - ev.timestamp <= 3600 then
-            table.insert(bulkEvents, ev)
+function HCT_EventModule:ProcessBulkUpdate(payload)
+    if not GetHCT() then return end -- Ensure the module is properly initialized.
+    local db = GetDB() -- Access the database.
+    -- Payload should contain users, characters, and completionLedger.
+    -- Merge users
+    for userKey, userInfo in pairs(payload.users) do
+        if not db.users[userKey] then
+            db.users[userKey] = userInfo
+        else -- Merge existing user info.
+            for k, v in pairs(userInfo) do
+                db.users[userKey][k] = v
+            end
         end
     end
-    if #bulkEvents > 0 then
-        local serializedBulk = AceSerializer:Serialize("EVENTDATA", { events = bulkEvents })
-        GetHCT():SendCommMessage(GetHCT().addonPrefix, serializedBulk, "GUILD")
-        GetHCT():Print("Broadcasted bulk event update (" .. #bulkEvents .. " events).")
+    -- Merge characters
+    for charKey, charInfo in pairs(payload.characters) do
+        if not db.characters[charKey] then
+            db.characters[charKey] = charInfo
+        else -- Merge existing character info.
+            for k, v in pairs(charInfo) do
+                db.characters[charKey][k] = v
+            end
+        end
+    end
+    -- Merge completionLedger (assuming it's a set of completionIDs)
+    for completionID, completionInfo in pairs(payload.completionLedger) do
+        -- (characterKey = characterName:battleTag)
+        -- (completionID = characterKey:achievementID)
+        -- (achievementID = characterName:battleTag:achievementID)
+        local achievementID = tonumber(completionID:match(":(.+)$")) or 0 -- Extract the achievementID.
+        if achievementID == 0 then 
+            GetHCT():Print("Invalid achievementID in completionID: " .. tostring(completionID)) -- Debug print.
+            return 
+        end 
+        
+        if not db.completionLedger[completionID] then
+            db.completionLedger[completionID] = completionInfo
+        -- Feat IDs are between 500 and 799. If the achievementID is for a feat, check if an earlier timestamp exists
+        elseif achievementID <= 799 and achievementID >= 500 then
+            if completionInfo.timestamp < db.completionLedger[completionID].timestamp then
+                db.completionLedger[completionID] = completionInfo
+            end
+        end
+    end
+    GetHCT():Print("Processed bulk update.") -- Debug print.
+end
+
+function HCT_EventModule:RespondToRequest(payload)
+    if not GetHCT() then return end -- Ensure the module is properly initialized.
+    HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
+end
+
+function HCT_EventModule:ProcessCharacterInfo(payload)
+    if not GetHCT() then return end -- Ensure the module is properly initialized.
+    local db = GetDB() -- Access the database.
+    local charKey = payload.charKey -- Extract the character key.
+    if not db.characters[charKey] then return end -- Ensure the character exists.
+    for k, v in pairs(payload) do -- Merge the character info.
+        db.characters[charKey][k] = v -- Update the character info.
+    end
+    GetHCT():Print("Updated info for " .. charKey) -- Debug print.
+end
+
+function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
+    -- Only process messages with the correct prefix.
+    local addonPrefix = GetHCT().addonPrefix
+    if prefix ~= addonPrefix then
+        return
+    end
+
+    -- Filter out messages from ourselves.
+    local myName = UnitName("player")
+    if sender == myName or Ambiguate(sender, "none") == myName then
+        return
+    end
+
+    -- Debug: Print the raw message for inspection.
+    print("Received raw message from " .. sender .. ": " .. message)
+
+    if not GetHCT() then return end -- Ensure our addon object is available.
+    local success, msgType, payload = AceSerializer:Deserialize(message)
+    if not success then
+        GetHCT():Print("Failed to deserialize message from " .. sender)
+        print("Raw message causing error: " .. message)
+        return
+    end
+
+    print("Deserialized message type: " .. tostring(msgType) .. " from " .. sender)
+    -- Optionally, pretty-print the payload if you have a PrintTable helper.
+    PrintTable(payload)
+
+    -- Handle the different message types.
+    if msgType == "EVENT" then
+        -- Process a single event.
+        HCT_EventModule:ProcessEvent(payload)
+    elseif msgType == "BULK_UPDATE" then
+        -- Process a bulk update. This could involve merging multiple events.
+        HCT_EventModule:ProcessBulkUpdate(payload)
+    elseif msgType == "REQUEST" then
+        -- If the payload indicates a full ledger request, respond with your bulk update.
+        HCT_EventModule:RespondToRequest(payload)
+    elseif msgType == "TEAMCHAT" then
+        HCT_ChatModule:ProcessTeamChatMessage(payload)
+    elseif msgType == "CHARACTER_INFO" then
+        -- Process detailed character info.
+        HCT_DataModule:ProcessCharacterInfo(payload)
+    else
+        GetHCT():Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
     end
 end

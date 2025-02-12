@@ -35,7 +35,7 @@ local defaults = {
             -- ["PeterPiper#1450"] = { team = 1, totalDeaths = 0, characterKeys = { "Morloe:PeterPiper#1450" }},
         },
         characters = {
-            -- [Morloe:PeterPiper#1450] = { battleTag = "PeterPiper#1450", level = 1, name = "Morloe", class = "Warrior", faction = "Alliance", realm = "Doomhowl" isDead = false },
+            -- [Morloe:PeterPiper#1450] = { battleTag = "PeterPiper#1450", level = 1, name = "Morloe", class = "Warrior", race = "Human", faction = "Alliance", realm = "Doomhowl" isDead = false },
         },
         myCompletions = { -- Local store: a set of achievements earned by the local character.
             -- (completionID = characterKey:achievementID)

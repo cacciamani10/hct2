@@ -8,29 +8,28 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
     
     HandleEvent = function(self, HCT, event, newLevel)
         newLevel = tonumber(newLevel)
-        local charKey = UnitName("player")
+        local characterName = UnitName("player")
+        local battleTag = HCT_DataModule:GetBattleTag()
+        local charKey =  characterName.. ":" .. battleTag
         local charData = HCT.db.profile.characters[charKey]
 
         if charData then
             local oldLevel = tonumber(charData.level) or (newLevel - 1)
             local pointsAwarded = HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
-            charData.levelUpPoints = (charData.levelUpPoints or 0) + pointsAwarded
             charData.level = newLevel
 
-            HCT:Print("Level up! New level: " .. newLevel .. ". Awarded " .. pointsAwarded .. " level points.")
-
-            local battleTag = HCT_DataModule:GetBattleTag()
-            local team = HCT_DataModule:GetPlayerTeam(battleTag)
-            if team then
-                HCT.db.profile.teams[team].points = (HCT.db.profile.teams[team].points or 0) + pointsAwarded
-            end
+            HCT:Print("Level up! New level: " .. newLevel .. "!")
 
             local ev = {
-                type = "LEVELUP",
-                charKey = charKey,
-                newLevel = newLevel,
-                pointsAwarded = pointsAwarded,
-                timestamp = time()
+                type = "CHARACTER",
+                battleTag = battleTag,
+                level = newLevel,
+                name = characterName,
+                class = select(2, UnitClass("player")),
+                race = select(2, UnitRace("player")),
+                faction = UnitFactionGroup("player"),
+                realm = GetRealmName(),
+                isDead = false,
             }
             HCT_Broadcaster:BroadcastEvent(ev)
         end
