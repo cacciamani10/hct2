@@ -19,7 +19,7 @@ local defaults = {
             [1] = {
                 name = "Crimson Vanguards",
                 color = { r = 255, g = 0, b = 0 },
-                battleTags = { "PeterPiper#1450", "ChampPoyo#1916", "Laobod#1570", "FunkyMonk#16573", "GíngerSWAG#1228", "TheCatMan#11376", "LeapingLupin#1343", "Arsine#1917" },
+                battleTags = { "PeterPiper#1450", "Gad#1916", "Laobod#1570", "FunkyMonk#16573", "GíngerSWAG#1228", "TheCatMan#11376", "LeapingLupin#1343", "Arsine#1917" },
                 tugWins = {},
                 points = 0,
             },

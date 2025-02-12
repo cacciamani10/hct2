@@ -34,4 +34,6 @@ function AchievementSet:ToArray()
     return arr
 end
 
-return AchievementSet
+local AchievementSetLocal = AchievementSet
+_G.AchievementSet = AchievementSetLocal
+return AchievementSetLocal
