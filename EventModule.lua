@@ -36,7 +36,7 @@ function HCT_EventModule:RegisterEvents()
             GetHCT():RegisterEvent(eventType, handlerName)
         end
     end
-    
+
     GetHCT():RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
     --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
     GetHCT():RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
@@ -53,7 +53,6 @@ function HCT_EventModule:UnregisterEvents()
         end
     end
 
-    GetHCT():UnregisterEvent("PLAYER_DEAD")
     GetHCT():UnregisterEvent("COMBAT_LOG_EVENT")
     GetHCT():UnregisterEvent("CHAT_MSG_ADDON")
     GetHCT():UnregisterComm(GetHCT().addonPrefix) -- Unregister for addon messages.
