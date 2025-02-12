@@ -176,9 +176,6 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
         return
     end
 
-    -- Debug: Print the raw message for inspection.
-    print("Received raw message from " .. sender .. ": " .. message)
-
     if not GetHCT() then return end -- Ensure our addon object is available.
     local success, msgType, payload = AceSerializer:Deserialize(message)
     if not success then
@@ -186,11 +183,6 @@ function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
         print("Raw message causing error: " .. message)
         return
     end
-
-    print("Deserialized message type: " .. tostring(msgType) .. " from " .. sender)
-    -- Optionally, pretty-print the payload if you have a PrintTable helper.
-    PrintTable(payload)
-
     -- Handle the different message types.
     if msgType == "EVENT" then
         -- Process a single event.
