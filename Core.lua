@@ -31,16 +31,21 @@ local defaults = {
                 points = 0,
             },
         },
-        users = {},
-        characters = {},
-        myAchievements = {},      -- Local store: a set of achievements earned by the local character.
-        achievementLedger = {},   -- Global ledger: a set aggregating achievements from all players.
+        users = {
+            -- ["PeterPiper#1450"] = { team = 1, totalDeaths = 0, characterKeys = { "Morloe:PeterPiper#1450" }},
+        },
+        characters = {
+            -- [Morloe:PeterPiper#1450] = { battleTag = "PeterPiper#1450", level = 1, name = "Morloe", class = "Warrior", faction = "Alliance", realm = "Doomhowl" isDead = false },
+        },
+        myCompletions = { -- Local store: a set of achievements earned by the local character.
+            -- (completionID = characterKey:achievementID)
+            -- [completionID] = { timestamp = timestamp }
+        },      
+        completionLedger = { -- Global ledger: a set aggregating achievements from all players.
+            -- (completionID = characterKey:achievementID)
+            -- [completionID] = { timestamp = timestamp }
+        },   
         tugOfWarEvents = {},
-        bounties = {},
-        feats = {},
-        dungeonBosses = {},
-        eventLog = {},
-        lastEventTimestamp = 0,
     }
 }
 
@@ -95,7 +100,7 @@ function HCT:OnInitialize()
     self:RegisterChatCommand("hct2", function(input)
         HCT_UIModule:ShowMainGUI()
     end)
-    print("On intialize player " .. UnitName("player"))
+    self:Print("On intialize player " .. UnitName("player"))
     HCT_DataModule:InitializeUserData()
     HCT_DataModule:InitializeCharacterData()
     self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window.")
@@ -105,7 +110,7 @@ function HCT:OnEnable()
     HCT_EventModule:RegisterEvents()
     HCT_ChatModule:RegisterChatCommands()
     self:ScheduleTimer(function()
-        HCT_EventModule:RequestMissingEvents()
+        HCT_EventModule:RequestContestData()
     end, 3)
     -- Schedule bulk event broadcast every 5 minutes as a backup.
     self:ScheduleRepeatingTimer(function()

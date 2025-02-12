@@ -2,25 +2,28 @@
 local AchievementSet = {}
 AchievementSet.__index = AchievementSet
 
+-- (completionID = characterKey:achievementID)
+-- [completionID] = { timestamp = timestamp }
+
 function AchievementSet:New()
     local self = setmetatable({}, AchievementSet)
-    self.items = {}  -- keys are uniqueID, values are achievement tables.
+    self.items = {}  -- keys are completionID and values are timestamp
     return self
 end
 
-function AchievementSet:Add(achievement)
-    if achievement and achievement.uniqueID then
-        if not self.items[achievement.uniqueID] then
-            self.items[achievement.uniqueID] = achievement
+function AchievementSet:Add(completionID)
+    if completionID then
+        if not self.items[completionID] then
+            self.items[completionID] = time()
             return true  
         end
     end
     return false  
 end
 
-function AchievementSet:Remove(uniqueID)
-    if self.items[uniqueID] then
-        self.items[uniqueID] = nil
+function AchievementSet:Remove(completionID)
+    if self.items[completionID] then
+        self.items[completionID] = nil
         return true
     end
     return false

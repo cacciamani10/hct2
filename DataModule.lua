@@ -1,15 +1,11 @@
 -- DataModule.lua
 HCT_DataModule = {}
--- local AchievementSet = require("Set")
-local myAchievements = AchievementSet:New()
-local achievementLedger = AchievementSet:New()
 
+local myCompletions = AchievementSet:New()
 
 local function GetDB()
     return HCT.db.profile
 end
-
--- (No longer need InitializeSavedVariables as AceDB handles that)
 
 function HCT_DataModule:GetBattleTag()
     local info = select(2, BNGetInfo())
@@ -61,37 +57,21 @@ local function AssignPlayerToTeam(player)
 end
 
 function HCT_DataModule:CompleteAchievement(charKey, achievement)
+    if not charKey then
+        HCT:Print("No character key provided.")
+        return
+    end
     if not achievement then 
         HCT:Print("No achievement data found.")
         return 
     end
-    local achievementName = achievement.name
     local charData = GetDB().characters[charKey]
     if not charData then
         HCT:Print("No data found for character: " .. charKey)
         return
     end
-    if charData.achievements and charData.achievements[achievementName] then
-        HCT:Print("Achievement '" .. achievementName .. "' already completed for " .. charKey)
-        return
-    end
-
-    charData.achievements = charData.achievements or {}
-    charData.achievements[achievementName] = time()
-
-    local points = achievement.points or 0
-    charData.achievementPoints = (charData.achievementPoints or 0) + points
-
-    HCT:Print("Achievement completed: " .. achievementName .. " (" .. points .. " points) for " .. charKey)
-
-    local ev = {
-        type = "ACHIEVEMENT",
-        charKey = charKey,
-        achievement = achievementName,
-        pointsAwarded = points,
-        timestamp = time(),
-    }
-    HCT_EventModule:BroadcastEvent(ev)
+    local completionID = charKey .. ":" .. achievement.uniqueID
+    myCompletions:Add(completionID)
 end
 
 function HCT_DataModule:CheckLevelAchievements(charKey)
@@ -104,9 +84,7 @@ function HCT_DataModule:CheckLevelAchievements(charKey)
     for _, ach in ipairs(levelCheckpoints or {}) do
         local requiredLevel = tonumber(ach.name:match("Level (%d+) Reached"))
         if requiredLevel and currentLevel >= requiredLevel then
-            if not (charData.achievements and charData.achievements[ach.name]) then
-                self:CompleteAchievement(charKey, ach)
-            end
+            self:CompleteAchievement(charKey, ach)
         end
     end
 end
@@ -114,10 +92,11 @@ end
 function HCT_DataModule:InitializeUserData()
     local db = GetDB()
     local battleTag = HCT_DataModule:GetBattleTag()
-    print("BattleTag: " .. battleTag)
+    -- Get Team
+    local team = HCT_DataModule:GetPlayerTeam(battleTag) or 1
     db.users = db.users or {}
     if not db.users[battleTag] then
-        db.users[battleTag] = { totalDeaths = 0, characters = {} }
+        db.users[battleTag] = { team = team, totalDeaths = 0, characterKeys = {} }
     end
     AssignPlayerToTeam(battleTag)
 end
@@ -130,9 +109,7 @@ function HCT_DataModule:CheckDungeonClearAchievements(charKey)
     for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Dungeon Clears"] or {}) do
         local dungeonName = ach.name
         if charData.dungeonClears[dungeonName] then
-            if not (charData.achievements and charData.achievements[ach.name]) then
-                self:CompleteAchievement(charKey, ach)
-            end
+            self:CompleteAchievement(charKey, ach)
         end
     end
 end
@@ -148,22 +125,6 @@ function HCT_DataModule:GetProfessionLevel(profName)
     return nil
 end
 
-function HCT_DataModule:BroadcastCharacterInfo()
-    local charKey = UnitName("player")
-    local _, playerClass = UnitClass("player")
-    local race = UnitRace("player")
-    local ev = {
-        type = "CHARACTER_INFO",
-        charKey = charKey,
-        class = playerClass,
-        level = UnitLevel("player"),
-        race = race,    
-        timestamp = time(),
-    }
-    HCT:Print("Broadcasting character info for " .. charKey)
-    HCT_EventModule:BroadcastEvent(ev)
-end
-
 function HCT_DataModule:CheckProfessionAchievements(charKey)
     local characters = GetDB().characters
     local charData = characters[charKey]
@@ -175,9 +136,7 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
         if reqLevel and profName then
             local currentLevel = self:GetProfessionLevel(profName)
             if currentLevel and currentLevel >= reqLevel then
-                if not (charData.achievements and charData.achievements[achDef.name]) then
-                    self:CompleteAchievement(charKey, achDef)
-                end
+                self:CompleteAchievement(charKey, achDef)
             end
         end
     end
@@ -206,41 +165,46 @@ end
 function HCT_DataModule:InitializeCharacterData()
     local playerFaction = UnitFactionGroup("player")
     local playerRealm = GetRealmName()
-    local charKey = UnitName("player")
+    local characterName = UnitName("player")
     local db = GetDB()
+    local battleTag = HCT_DataModule:GetBattleTag()
+    local charKey = characterName .. ":" .. battleTag
     if playerRealm ~= db.realm then
-        print("This character is not eligible. Invalid realm: " .. playerRealm)
+        HCT:Print("This character is not eligible. Invalid realm: " .. playerRealm)
         return
     end
     if playerFaction ~= db.faction then
-        print("This character is not eligible. Invalid faction: " .. playerFaction)
+        HCT:Print("This character is not eligible. Invalid faction: " .. playerFaction)
         return
     end
     db.characters = db.characters or {}
+    -- find the character in the db.characters table by name and realm, if not found, create a new entry
     if not db.characters[charKey] then
         db.characters[charKey] = {
+            battleTag = battleTag,
             level = UnitLevel("player"),
-            achievements = {},
-            bounties = {},
-            feats = {},
-            levelUpPoints = HCT_DataModule:GetLevelPoints(UnitLevel("player"), 1),
-            achievementPoints = 0,
-            featPoints = 0,
+            name = characterName,
+            class = select(2, UnitClass("player")),
+            faction = playerFaction,
+            realm = playerRealm,
             isDead = false,
         }
-        self:BroadcastCharacterInfo()
     end
-    local battleTag = HCT_DataModule:GetBattleTag()
+    -- add the character to the user's character list if it is not already there
     db.users = db.users or {}
-    db.users[battleTag] = db.users[battleTag] or { totalDeaths = 0, characters = {} }
+    db.users[battleTag] = db.users[battleTag] or { team = 1, totalDeaths = 0, characterKeys = {  } }    
+
+    -- check if the character is already in the user's character list, if not, add item
     local found = false
-    for _, key in ipairs(db.users[battleTag].characters) do
-        if key == charKey then
-            found = true
-            break
+    for _, key in ipairs(db.users[battleTag].characterKeys) do
+        if key == charKey then 
+            found = true 
+            break 
+
         end
     end
     if not found then
-        table.insert(db.users[battleTag].characters, charKey)
-    end
+        HCT:Print("Adding new character:" .. charKey)
+        table.insert(db.users[battleTag].characterKeys, charKey)
+    end       
 end
