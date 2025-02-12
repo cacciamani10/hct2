@@ -1,3 +1,5 @@
+local HCT_Broadcaster = _G.HCT_Broadcaster
+
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.PlayerLevelUpHandler = {
@@ -30,7 +32,7 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
                 pointsAwarded = pointsAwarded,
                 timestamp = time()
             }
-            HCT:BroadcastEvent(ev)
+            HCT_Broadcaster:BroadcastEvent(ev)
         end
     end
 }

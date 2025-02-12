@@ -5,10 +5,11 @@
 ## SavedVariables: HardcoreChallengeTracker2DB
 
 embeds.xml
+AddonEnv.lua
+EventBroadcaster.lua
 Handlers/ApiEventHandlers/PlayerDeathHandler.lua
 Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
 Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
-AddonEnv.lua
 HardcoreChallengeTracker2_Data.lua
 HardcoreChallengeTracker2_Teams.lua
 Set.lua
