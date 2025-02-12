@@ -4,17 +4,26 @@
 ## Version: 0.0.1
 ## SavedVariables: HardcoreChallengeTracker2DB
 
+# Libraries and Environment Setup
 embeds.xml
 AddonEnv.lua
+
+# Core Systems
 EventBroadcaster.lua
-Handlers/ApiEventHandlers/PlayerDeathHandler.lua
-Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
-Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
+Set.lua
 HardcoreChallengeTracker2_Data.lua
 HardcoreChallengeTracker2_Teams.lua
-Set.lua
+
+# Data and Module Logic
 DataModule.lua
 UIModule.lua
 EventModule.lua
 ChatModule.lua
+
+# Handlers
+Handlers/ApiEventHandlers/PlayerDeathHandler.lua
+Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
+Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
+
+# Main Core Initialization
 Core.lua
