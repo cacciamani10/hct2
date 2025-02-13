@@ -71,8 +71,9 @@ function HCT_DataModule:CompleteAchievement(charKey, achievement)
     local db = GetDB()
     if db.myCompletions[completionID] then return end -- Already completed
     GetHCT():Print("Completing achievement: " .. achievement.name .. " for " .. charKey)
-    db.myCompletions:Add(completionID)
-    db.completionLedger:Add(completionID)
+    local timeCompleted = time()
+    db.myCompletions[completionID] = { timestamp = timeCompleted } -- Add to myCompletions table
+    db.completionLedger[completionID] = { timestamp = timeCompleted } -- Add to completionLedger table
 end
 
 function HCT_DataModule:CheckLevelAchievements(charKey)

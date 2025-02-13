@@ -55,13 +55,17 @@ function HCT_EventModule:UnregisterEvents()
 end
 
 function HCT_EventModule:ProcessBulkUpdate(payload)
-    if not GetHCT() then return end
+    local HCT = GetHCT()
+    if not HCT then return end
     local db = GetDB()
     -- Merge users
     for userKey, userInfo in pairs(payload.users) do
         if not db.users[userKey] then
+            HCT:Print("Adding new user: " .. userKey)
+
             db.users[userKey] = userInfo
         else
+            HCT:Print("Updating user: " .. userKey)
             for k, v in pairs(userInfo) do
                 db.users[userKey][k] = v
             end
@@ -70,16 +74,30 @@ function HCT_EventModule:ProcessBulkUpdate(payload)
     -- Merge characters
     for charKey, charInfo in pairs(payload.characters) do
         if not db.characters[charKey] then
+            HCT:Print("Adding new character: " .. charKey)
             db.characters[charKey] = charInfo
         else
+            HCT:Print("Updating character: " .. charKey)
             for k, v in pairs(charInfo) do
                 db.characters[charKey][k] = v
             end
         end
     end
     -- Merge completionLedger
+    -- (completionID = characterKey:achievementID)
+    -- [completionID] = { timestamp = timestamp }
     for completionID, completionInfo in pairs(payload.completionLedger) do
-        local achievementID = tonumber(completionID:match(":(.+)$")) or 0
+        if not db.completionLedger[completionID] then
+            HCT:Print("Adding new completion: " .. completionID)
+        else
+            HCT:Print("Updating completion: " .. completionID)
+        end
+        if not completionInfo then
+            HCT:Print("Invalid completionInfo for completionID: " .. completionID)
+            break
+        end
+        HCT:Print("Processing completion: " .. completionID .. " with timestamp: " .. tostring(completionInfo.timestamp))
+        local achievementID = tonumber(completionID:match(":(%d+)$")) or 0
         if achievementID == 0 then
             GetHCT():Print("Invalid achievementID in completionID: " .. tostring(completionID))
             return

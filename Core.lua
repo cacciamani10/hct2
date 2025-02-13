@@ -31,18 +31,41 @@ local defaults = {
         },
         users = {
             -- ["PeterPiper#1450"] = { team = 1, totalDeaths = 0, characterKeys = { 1: "Morloe:PeterPiper#1450" }},
+            ["TheCatMan#11376"] = { team = 1, totalDeaths = 2, characterKeys = { "Cloudycolton:TheCatMan#11376", "Cloudypally:TheCatMan#11376" } },
+            ["Dimenster#1890"] = { team = 2, totalDeaths = 6, characterKeys = { "Bigspank:Dimenster#1890", "Bigspankjr:Dimenster#1890", "Burbur:Dimenster#1890", "Anitadeek:Dimenster#1890", "Goliathen:Dimenster#1890", "Starinn:Dimenster#1890", "Storas:Dimenster#1890" } },
         },
         characters = {
-            -- [Morloe:PeterPiper#1450] = { battleTag = "PeterPiper#1450", level = 1, name = "Morloe", class = "Warrior", race = "Human", faction = "Alliance", realm = "Doomhowl" isDead = false },
+            -- [Morloe:PeterPiper#1450] = { battleTag = "PeterPiper#1450", level = 1, name = "Morloe", class = "WARRIOR", race = "Human", faction = "Alliance", realm = "Doomhowl" isDead = false },
+            ["Cloudycolton:TheCatMan#11376"] = { battleTag = "TheCatMan#11376", level = 20, name = "Cloudycolton", class = "PRIEST", race = "Human", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Cloudypally:TheCatMan#11376"] = { battleTag = "TheCatMan#11376", level = 17, name = "Cloudypally", class = "PALADIN", race = "Human", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Bigspank:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 8, name = "Bigspank", class = "HUNTER", race = "Human", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Bigspankjr:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 11, name = "Bigspankjr", class = "HUNTER", race = "Human", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Burbur:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 8, name = "Burbur", class = "DRUID", race = "Night Elf", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Anitadeek:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 12, name = "Anitadeek", class = "HUNTER", race = "Human", faction = "Alliance", realm = "Doomhowl", isDead = false },
+            ["Goliathen:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 10, name = "Goliathen", class = "DRUID", race = "Human", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Starinn:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 8, name = "Starinn", class = "DRUID", race = "Night Elf", faction = "Alliance", realm = "Doomhowl", isDead = true },
+            ["Storas:Dimenster#1890"] = { battleTag = "Dimenster#1890", level = 14, name = "Storas", class = "DRUID", race = "Night Elf", faction = "Alliance", realm = "Doomhowl", isDead = true },
         },
         myCompletions = { -- Local store: a set of achievements earned by the local character.
             -- (completionID = characterKey:achievementID)
             -- [completionID] = { timestamp = timestamp }
-        },      
-        completionLedger = { -- Global ledger: a set aggregating achievements from all players.
-            -- (completionID = characterKey:achievementID)
-            -- [completionID] = { timestamp = timestamp }
-        },   
+        },
+        -- Example of a completion ledger entry:
+        -- ["Morloe:PeterPiper#1450:1"] = {
+        --     ["timestamp"] = 1739458821,
+        -- },
+        completionLedger = { 
+            ["Cloudycolton:TheCatMan#11376:1"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:2"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:7"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:27"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:39"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:40"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:47"] = { timestamp = 1739131199 },
+            ["Cloudycolton:TheCatMan#11376:48"] = { timestamp = 1739131199 },
+            ["Cloudypally:TheCatMan#11376:1"] = { timestamp = 1739131199 },
+            ["Cloudypally:TheCatMan#11376:35"] = { timestamp = 1739131199 },
+        },
         tugOfWarEvents = {},
     }
 }
@@ -71,6 +94,7 @@ local options = {
 }
 
 function HCT:OnCommReceived(prefix, message, distribution, sender)
+    if prefix ~= self.addonPrefix then return end
     local success, msgType, payload = self:Deserialize(message)
     if not success then
         self:Print("Failed to deserialize message from " .. sender)
@@ -92,7 +116,7 @@ function HCT:OnCommReceived(prefix, message, distribution, sender)
     else
         self:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
     end
-end 
+end
 
 function HCT:OnInitialize()
     -- Initialize AceDB with your defaults.
@@ -104,12 +128,6 @@ function HCT:OnInitialize()
     if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
     if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
-    if type(self.db.profile.myCompletions) ~= "table" or not self.db.profile.myCompletions.Add then
-        self.db.profile.myCompletions = AchievementSet:New()
-    end
-    if type(self.db.profile.completionLedger) ~= "table" or not self.db.profile.completionLedger.Add then
-        self.db.profile.completionLedger = AchievementSet:New()
-    end
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTOptions", options)
     self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTOptions", "Hardcore Challenge Tracker 2")
