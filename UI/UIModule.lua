@@ -11,75 +11,6 @@ local BOUNTY_COLOR      = "00bfff" -- deep sky blue
 local FEAT_COLOR        = "32cd32" -- lime green
 local COMPLETED_COLOR   = "00ff00" -- green
 
-local CONTEST_RULES = {
-    "Scoring: Each character earns points based on their level, achievements, feats, and bounties.",
-    "If you die, half of your points earned from that character are lost (rounded down).",
-    "Feats are excluded from the point loss upon death as they are only earned once per contest.",
-    "Grouping Up: Grouping up with others outside of the contest is allowed, but do not group with someone more than 5 levels above you."
-  }
-  
-
-local UIModel           = {
-    teamPoints = {},  -- keys will be team IDs, values are totals
-    playerPoints = {} -- keys are battleTags, values are their total points
-}
-
-
-local function UpdatePlayerPoints(battleTag)
-    local total = 0
-    local db = GetDB()
-    local user = db.users[battleTag]
-    if user and user.characters then
-        for _, charKey in ipairs(user.characters) do
-            local charData = db.characters[charKey]
-            if charData then
-                -- Use your custom calculation (or HCT_DataModule:CalculateCharacterPoints)
-                total = total + HCT_DataModule:CalculateCharacterPoints(charData)
-            end
-        end
-    end
-    UIModel.playerPoints[battleTag] = total
-    return total
-end
-
-local function UpdateTeamPoints(team)
-    local total = 0
-    for _, battleTag in ipairs(team.battleTags or {}) do
-        total = total + UpdatePlayerPoints(battleTag)
-    end
-    return total
-end
-
-local function CompareAlphabetical(a, b)
-    return a.battleTag < b.battleTag
-end
-
-local function CompareByPoints(a, b)
-    local pa = UIModel.playerPoints[a.battleTag] or 0
-    local pb = UIModel.playerPoints[b.battleTag] or 0
-    return pa > pb -- highest first
-end
-
-local function CompareByAliveStatus(a, b)
-    local db = GetDB()
-    -- Suppose each userData has a flag "isOnline" or check one of their characters' isDead status.
-    local aliveA = false
-    local aliveB = false
-    if a.data.characters and #a.data.characters > 0 then
-        local charA = db.characters[a.data.characters[1]]
-        aliveA = charA and (not charA.isDead)
-    end
-    if b.data.characters and #b.data.characters > 0 then
-        local charB = db.characters[b.data.characters[1]]
-        aliveB = charB and (not charB.isDead)
-    end
-    if aliveA ~= aliveB then
-        return aliveA -- true comes before false
-    else
-        return a.battleTag < b.battleTag
-    end
-end
-
 local function FormatPlayersList(players)
     if not players or #players == 0 then
         return "None"
@@ -91,34 +22,12 @@ local function FormatPlayersList(players)
     return formatted
 end
 
-local function AggregateCompletedAchievements()
-    local completed = {}
-    local db = GetDB()
-    for completionID, data in pairs(db.completionLedger or {}) do
-        local charKey, achievementID = completionID:match("^(.-):(%d+)$")
-        if charKey and achievementID then
-            for cat, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
-                for _, ach in ipairs(achList) do
-                    if tostring(ach.uniqueID) == achievementID then
-                        if not completed[ach.name] then
-                            completed[ach.name] = { category = cat, points = ach.points or 0, completions = {} }
-                        end
-                        table.insert(completed[ach.name].completions, { player = charKey, date = data.timestamp })
-                    end
-                end
-            end
-        end
-    end
-    return completed
-end
-
-
 local function AggregateTeamPoints(team)
     local total = 0
     local db = GetDB()
     for _, battleTag in ipairs(team.battleTags or {}) do
         local user = db.users[battleTag]
-        if user and user.characterKeys then -- use characterKeys as per your data structure
+        if user and user.characterKeys then  -- use characterKeys as per your data structure
             for _, charKey in ipairs(user.characterKeys) do
                 local charData = db.characters[charKey]
                 if charData then
@@ -147,34 +56,51 @@ local function DrawTeamInfo(container)
     local team2ColorCode = string.format("|cff%02x%02x%02x", team2Color.r, team2Color.g, team2Color.b)
 
     -- Dynamically compute team points.
-    local team1Points = UpdateTeamPoints(team1) or 0
-    local team2Points = UpdateTeamPoints(team2) or 0
+    local team1Points = AggregateTeamPoints(team1)
+    local team2Points = AggregateTeamPoints(team2)
 
     local t1Label = AceGUI:Create("Label")
     t1Label:SetFullWidth(true)
     t1Label:SetText(string.format("%s%s|r - Team Points: %s%d|r", team1ColorCode, team1Name, team1ColorCode, team1Points))
     container:AddChild(t1Label)
 
-    for _, battleTag in ipairs(team1.battleTags or {}) do
-        local points = UIModel.playerPoints[battleTag] or 0
-        local playerLabel = AceGUI:Create("Label")
-        playerLabel:SetFullWidth(true)
-        playerLabel:SetText(string.format("   • %s - %d points", battleTag, points))
-        container:AddChild(playerLabel)
-    end
+    local t1PlayersFormatted = FormatPlayersList(team1.battleTags)
+    local t1PlayersLabel = AceGUI:Create("Label")
+    t1PlayersLabel:SetFullWidth(true)
+    t1PlayersLabel:SetText("Players:\n" .. t1PlayersFormatted)
+    container:AddChild(t1PlayersLabel)
+
+    local spacer1 = AceGUI:Create("Label")
+    spacer1:SetFullWidth(true)
+    spacer1:SetText(" ")
+    container:AddChild(spacer1)
 
     local t2Label = AceGUI:Create("Label")
     t2Label:SetFullWidth(true)
     t2Label:SetText(string.format("%s%s|r - Team Points: %s%d|r", team2ColorCode, team2Name, team2ColorCode, team2Points))
     container:AddChild(t2Label)
 
-    for _, battleTag in ipairs(team2.battleTags or {}) do
-        local points = UIModel.playerPoints[battleTag] or 0
-        local playerLabel = AceGUI:Create("Label")
-        playerLabel:SetFullWidth(true)
-        playerLabel:SetText(string.format("   • %s - %d points", battleTag, points))
-        container:AddChild(playerLabel)
-    end
+    local t2PlayersFormatted = FormatPlayersList(team2.battleTags)
+    local t2PlayersLabel = AceGUI:Create("Label")
+    t2PlayersLabel:SetFullWidth(true)
+    t2PlayersLabel:SetText("Players:\n" .. t2PlayersFormatted)
+    container:AddChild(t2PlayersLabel)
+
+    local spacer2 = AceGUI:Create("Label")
+    spacer2:SetFullWidth(true)
+    spacer2:SetText(" ")
+    container:AddChild(spacer2)
+
+    local totalPoints = team1Points + team2Points
+    local percentTeam1 = totalPoints > 0 and (team1Points / totalPoints) * 100 or 50
+
+    local progressSlider = AceGUI:Create("Slider")
+    progressSlider:SetLabel("Tug of War Progress")
+    progressSlider:SetFullWidth(true)
+    progressSlider:SetSliderValues(0, 100, 1)
+    progressSlider:SetValue(percentTeam1)
+    progressSlider:SetDisabled(true)
+    container:AddChild(progressSlider)
 end
 
 local function DrawTeamChat(container)
@@ -211,26 +137,17 @@ local function DrawCharacters(container)
     container:ReleaseChildren()
     local scrollFrame = AceGUI:Create("ScrollFrame")
     local db = GetDB()
-    local userList = {}
     scrollFrame:SetLayout("Flow")
     scrollFrame:SetFullWidth(true)
     scrollFrame:SetFullHeight(true)
     container:AddChild(scrollFrame)
-
-    for battleTag, userData in pairs(db.users) do
-        table.insert(userList, { battleTag = battleTag, data = userData })
-    end
-
-    -- Sort users by alive status, then alphabetically.
-    table.sort(userList, CompareByAliveStatus)
-
-    for _, user in ipairs(userList) do
+    for user, userData in pairs(db.users) do
         local userLabel = AceGUI:Create("Label")
         userLabel:SetFullWidth(true)
-        userLabel:SetText("|cffaaaaaaUser:|r " .. user.battleTag)
+        userLabel:SetText("|cffaaaaaaUser:|r " .. user)
         scrollFrame:AddChild(userLabel)
-        if user.data.characterKeys and #user.data.characterKeys > 0 then
-            for _, charKey in ipairs(user.data.characterKeys) do
+        if userData.characterKeys and #userData.characterKeys > 0 then
+            for _, charKey in ipairs(userData.characterKeys) do
                 local charData = db.characters[charKey]
                 if charData then
                     local status = (charData.isDead and " [DEAD]" or "")
@@ -296,7 +213,7 @@ local function UpdateAchievementsContent(contentContainer, mode)
                 local label = AceGUI:Create("Label")
                 label:SetFullWidth(true)
                 local description = ach.description or "No description available"
-                label:SetText(string.format("|cff%s%s|r - Points: %d\n%s",
+                label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", 
                     ACHIEVEMENT_COLOR, ach.name, ach.points or 0, description))
                 contentContainer:AddChild(label)
             end
@@ -539,20 +456,13 @@ end
 
 local function DrawRules(container)
     container:ReleaseChildren()
+
     local scrollFrame = AceGUI:Create("ScrollFrame")
     scrollFrame:SetLayout("Flow")
     scrollFrame:SetFullWidth(true)
     scrollFrame:SetFullHeight(true)
     container:AddChild(scrollFrame)
-  
-    for i, rule in ipairs(CONTEST_RULES) do
-      local ruleLabel = AceGUI:Create("Label")
-      ruleLabel:SetFullWidth(true)
-      ruleLabel:SetText(rule)
-      scrollFrame:AddChild(ruleLabel)
-    end
-  end
-  
+end
 
 function HCT_UIModule:ShowMainGUI()
     local guiFrame = AceGUI:Create("Frame")

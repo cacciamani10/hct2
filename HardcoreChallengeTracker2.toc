@@ -9,18 +9,19 @@ embeds.xml
 AddonEnv.lua
 
 # Core Systems
-EventBroadcaster.lua
-AddonEventProcessor.lua
-HardcoreChallengeTracker2_Data.lua
-HardcoreChallengeTracker2_Teams.lua
+AddonComm/AddonCommBroadcaster.lua
+AddonComm/AddonCommProcessor.lua
+Data/HardcoreChallengeTracker2_Data.lua
+Data/HardcoreChallengeTracker2_Teams.lua
 
 # Data and Module Logic
 DataModule.lua
-UIModule.lua
+UI/UIModule.lua
 EventModule.lua
 ChatModule.lua
 
 # Handlers
+Handlers/ApiEventHandlers/AddonCommHandler.lua
 Handlers/ApiEventHandlers/PlayerDeathHandler.lua
 Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
 Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
