@@ -26,6 +26,7 @@ function HCT_EventModule:RegisterEvents()
         local handlerName = handler:GetHandlerName()
     
         if eventType and handlerName then
+            GetHCT():Print("Registering event: " .. eventType .. " with handler: " .. handlerName)
             GetHCT()[handlerName] = function(_, ...)
                 handler:HandleEvent(GetHCT(), ...)
             end
@@ -86,7 +87,9 @@ function HCT_EventModule:ProcessEvent(ev)
             db.characters[charKey].isDead = true
             GetHCT():Print(charKey .. " has died.")
         end
-    elseif ev.type == "CHARACTER_INFO" then
+    elseif ev.type == "REQUEST" then
+        HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
+    elseif ev.type == "CHARACTER" then
         -- (Optional) Process a dedicated character info event.
         local charKey = ev.charKey
         if db.characters[charKey] then
