@@ -89,7 +89,7 @@ function HCT_EventModule:ProcessBulkUpdate(payload)
 
             db.users[userKey] = userInfo
         else
-            HCT:Print("Updating user: " .. userKey)
+            -- HCT:Print("Updating user: " .. userKey)
             for k, v in pairs(userInfo) do
                 db.users[userKey][k] = v
             end
@@ -101,7 +101,7 @@ function HCT_EventModule:ProcessBulkUpdate(payload)
             HCT:Print("Adding new character: " .. charKey)
             db.characters[charKey] = charInfo
         else
-            HCT:Print("Updating character: " .. charKey)
+            -- HCT:Print("Updating character: " .. charKey)
             for k, v in pairs(charInfo) do
                 db.characters[charKey][k] = v
             end
@@ -112,9 +112,9 @@ function HCT_EventModule:ProcessBulkUpdate(payload)
     -- [completionID] = { timestamp = timestamp }
     for completionID, completionInfo in pairs(payload.completionLedger) do
         if not db.completionLedger[completionID] then
-            HCT:Print("Adding new completion: " .. completionID)
+            HCT:Print("Adding new ledger completion: " .. completionID)
         else
-            HCT:Print("Updating completion: " .. completionID)
+            -- HCT:Print("Updating completion: " .. completionID)
         end
         if not completionInfo then
             HCT:Print("Invalid completionInfo for completionID: " .. completionID)
@@ -134,7 +134,7 @@ function HCT_EventModule:ProcessBulkUpdate(payload)
             end
         end
     end
-    GetHCT():Print("Processed bulk update.")
+    -- GetHCT():Print("Processed bulk update.")
 end
 
 function HCT_EventModule:RespondToRequest(payload)

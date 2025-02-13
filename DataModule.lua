@@ -86,7 +86,7 @@ function HCT_DataModule:CheckLevelAchievements(charKey)
 
     local currentLevel = charData.level or UnitLevel("player")
     local levelCheckpoints = HardcoreChallengeTracker_Data.achievements["Level Checkpoints"]
-    GetHCT():Print("Checking level achievements for " .. charKey .. " at level " .. currentLevel)
+    -- GetHCT():Print("Checking level achievements for " .. charKey .. " at level " .. currentLevel)
     for _, ach in ipairs(levelCheckpoints or {}) do
         local requiredLevel = tonumber(ach.name:match("Level (%d+) Reached"))
         if requiredLevel and currentLevel >= requiredLevel then
@@ -125,7 +125,6 @@ function HCT_DataModule:CheckDungeonClearAchievements(charKey)
 end
 
 function HCT_DataModule:GetProfessionLevel(profName)
-    --local numProfs = tonumber(GetNumPrimaryProfessions()) or 0
     local profs = { GetProfessions() }
     for i = 1, #profs, 2 do
         local name, _, skillLevel = GetProfessionInfo(profs[i])
@@ -136,16 +135,6 @@ function HCT_DataModule:GetProfessionLevel(profName)
             end
         end
     end
-    -- for i = 1, numProfs do
-    --     local name, _, skillLevel = GetProfessionInfo(i)
-    --     if skillLevel then
-    --         GetHCT():Print("Profession: " .. name .. " Level: " .. skillLevel)
-    --         if name and name:lower() == profName:lower() then
-    --             return skillLevel
-    --         end
-    --     end
-    -- end
-    -- return nil
 end
 
 function HCT_DataModule:CheckProfessionAchievements(charKey)
