@@ -25,7 +25,11 @@ local function CountTable(t)
 end
 
 _G.HCT_Broadcaster = {
+    lastBroadcastTime = 0,
+    lastRequestTime = 0,
     BroadcastEvent = function(self, ev)
+        
+        self.lastBroadcastTime = now
         local HCT = GetHCT()
         if not HCT then return end
 
@@ -41,6 +45,14 @@ _G.HCT_Broadcaster = {
     end,
 
     RequestContestData = function(self)
+        local now = time()
+        if now - self.lastRequestTime < 180 then
+            local remaining = 180 - (now - self.lastRequestTime)
+            GetHCT():Print("RequestContestData is on cooldown. Please wait " .. remaining .. " seconds.")
+            return
+        end
+        self.lastRequestTime = now
+
         local HCT = GetHCT()
         local ev = {
             type = "REQUEST",
@@ -52,6 +64,12 @@ _G.HCT_Broadcaster = {
     end,
 
     BroadcastBulkEvents = function(self)
+        local now = time()
+        if now - self.lastBroadcastTime < 180 then
+            local remaining = 180 - (now - self.lastBroadcastTime)
+            GetHCT():Print("BroadcastEvent is on cooldown. Please wait " .. remaining .. " seconds.")
+            return
+        end
         local HCT = GetHCT()
         local db = GetDB()
         if not HCT then return end
