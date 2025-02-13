@@ -1,7 +1,7 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
 
 _G.HCT_Broadcaster = {
-    BroadcastEvent = function(self, ev)
+    BroadcastEvent = function(ev)
         local HCT = _G.HCT_Env.GetAddon()
         if not HCT then return end
 
@@ -16,20 +16,32 @@ _G.HCT_Broadcaster = {
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
     end,
 
-    BroadcastBulkEvents = function(self)
+    RequestContestData = function()
+        local HCT = _G.HCT_Env.GetAddon()
+        local ev = {
+            type = "REQUEST",
+            payload = "request"
+        }
+        local serialized = AceSerializer:Serialize("REQUEST", ev)
+        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+        HCT:Print("Requesting data update...")
+    end,
+
+
+    BroadcastBulkEvents = function()
         local HCT = _G.HCT_Env.GetAddon()
         if not HCT then return end
-
+        HCT:Print("Bulking this shit up...")
         local broadCastTable = {}                               -- Custom table for broadcasting.
 
         broadCastTable.users = HCT.db.profile.users or {}         -- Copy users table.
         broadCastTable.characters = HCT.db.characters or {}         -- Copy characters table.
         broadCastTable.completionLedger = HCT.db.completionLedger or {} -- Copy completionLedger table.
-
-        if #broadCastTable > 0 then
+        local length = #broadCastTable.users + #broadCastTable.characters + #broadCastTable.completionLedger
+        if length > 0 then
             local serializedBulk = AceSerializer:Serialize("BULK_UPDATE", broadCastTable)
-            HCT:SendCommMessage(HCT.addonPrefix, serializedBulk, "GUILD")
-            HCT:Print("Broadcasted bulk update of " .. #broadCastTable .. " items.")
+            HCT:SendCommMessage(HCT.addonPrefix, serializedBulk, "GUILD")          
+            HCT:Print("Broadcasted bulk update of " .. length .. " items.")
         end
     end
 }

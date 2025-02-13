@@ -32,7 +32,7 @@ function AddonEventProcessor:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
     if not HCT then return end
     local db = GetDB()
-
+    HCT:Print("Processing bulk update - saving to database.")
     -- Merge users
     for userKey, userInfo in pairs(payload.users or {}) do
         if not db.users[userKey] then

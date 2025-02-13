@@ -40,7 +40,7 @@ function HCT_EventModule:RegisterEvents()
     end
 
     --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
-    self:RequestContestData() -- Request missing events from the guild.
+    HCT_Broadcaster:RequestContestData() -- Request contest data from the guild.
     HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
 end
 
@@ -51,16 +51,6 @@ function HCT_EventModule:UnregisterEvents()
             GetHCT():UnregisterEvent(eventType)
         end
     end
-end
-
-function HCT_EventModule:RequestContestData()
-    local ev = {
-        type = "REQUEST",
-        payload = "request"
-    }
-    local serialized = AceSerializer:Serialize("REQUEST", ev)
-    GetHCT():SendCommMessage(GetHCT().addonPrefix, serialized, "GUILD")
-    GetHCT():Print("Requesting data update...")
 end
 
 local function PrintTable(t, indent)
