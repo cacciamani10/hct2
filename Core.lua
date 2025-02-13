@@ -73,6 +73,12 @@ local options = {
 function HCT:OnInitialize()
     -- Initialize AceDB with your defaults.
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
+    -- Register the defaults
+    self.db:RegisterDefaults(defaults)
+    -- If team, faction, or realm is not set, set it to the current player's team, faction, and realm.
+    if not self.db.profile.faction then self.db.profile.faction = HardcoreChallengeTracker_Data.faction end
+    if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
+    if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
     -- Register the main options table and add it as the top-level category.
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTOptions", options)

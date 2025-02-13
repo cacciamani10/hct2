@@ -1,9 +1,8 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
 local AceGUI = LibStub("AceGUI-3.0")
 HCT_ChatModule = {}
-local function GetHCT()
-    return _G.HCT_Env.GetAddon()
-end
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 function HCT_ChatModule:SendTeamChatMessage(text)
     local characterName = UnitName("player")
@@ -12,7 +11,7 @@ function HCT_ChatModule:SendTeamChatMessage(text)
     local team = HCT_DataModule:GetPlayerTeam(battleTag) or 0
 
 
-    local teamData = HCT.db.profile.teams[team] or { color = { r = 255, g = 255, b = 255 } }
+    local teamData = GetHCT().db.profile.teams[team] or { color = { r = 255, g = 255, b = 255 } }
     local teamColor = HCT_DataModule.NormalizeColor(teamData.color)
     local teamColorCode = string.format("|cff%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
 
@@ -68,6 +67,7 @@ end
 
 function HCT_ChatModule:ProcessTeamChatMessage(payload)
     local localBattleTag = HCT_DataModule:GetBattleTag()
+    local db = GetDB()
     if payload.sender == localBattleTag then return end
     local localTeam = HCT_DataModule:GetPlayerTeam(localBattleTag)
     if payload.team and localTeam == payload.team then
@@ -78,8 +78,8 @@ function HCT_ChatModule:ProcessTeamChatMessage(payload)
         if senderClass and RAID_CLASS_COLORS[senderClass] then
             classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
         end
-        if GetHCT().db.profile.teams[payload.team] then
-            local teamColor = HCT_DataModule.NormalizeColor(HCT.db.profile.teams[payload.team].color)
+        if db.teams[payload.team] then
+            local teamColor = HCT_DataModule.NormalizeColor(db.teams[payload.team].color)
             teamColorStr = string.format("%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
         end
         classColorStr = string.gsub(classColorStr, "%s+", "")

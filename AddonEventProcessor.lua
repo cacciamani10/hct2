@@ -7,7 +7,7 @@ local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 function AddonEventProcessor:ProcessEvent(ev)
     local HCT = GetHCT()
     if not HCT then return end
-    local db = GetDB()
+    local db = GetDB().profile
 
     if ev.type == "DEATH" then
         local charKey = ev.charKey
@@ -15,7 +15,7 @@ function AddonEventProcessor:ProcessEvent(ev)
             db.characters[charKey].isDead = true
             HCT:Print(charKey .. " has died.")
         end
-    elseif ev.type == "CHARACTER_INFO" then
+    elseif ev.type == "CHARACTER" then
         local charKey = ev.charKey
         if db.characters[charKey] then
             for k, v in pairs(ev) do
@@ -31,7 +31,7 @@ end
 function AddonEventProcessor:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
     if not HCT then return end
-    local db = GetDB()
+    local db = GetDB().profile
     HCT:Print("Processing bulk update - saving to database.")
     -- Merge users
     for userKey, userInfo in pairs(payload.users or {}) do

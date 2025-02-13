@@ -2,14 +2,14 @@
 HCT_UIModule            = {}
 local AceGUI            = LibStub("AceGUI-3.0")
 
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
+
 -- Define color constants for each category (hex without the "|cff" prefix)
 local ACHIEVEMENT_COLOR = "ffd700" -- gold
 local BOUNTY_COLOR      = "00bfff" -- deep sky blue
 local FEAT_COLOR     = "32cd32" -- lime green
 local COMPLETED_COLOR   = "00ff00" -- green
-
-local function GetHCT() return _G.HCT_Env.GetAddon() end
-local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 local function FormatPlayersList(players)
     if not players or #players == 0 then
@@ -383,6 +383,7 @@ end
 
 local function DrawFeats(container)
     container:ReleaseChildren()
+    local db = GetDB()
 
     local scrollFrame = AceGUI:Create("ScrollFrame")
     scrollFrame:SetLayout("Flow")
@@ -390,7 +391,6 @@ local function DrawFeats(container)
     scrollFrame:SetFullHeight(true)
     container:AddChild(scrollFrame)
 
-    local db = GetDB()
     local feats = db.feats or {}
 
     for _, feat in ipairs(feats) do

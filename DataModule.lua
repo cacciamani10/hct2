@@ -56,16 +56,16 @@ end
 
 function HCT_DataModule:CompleteAchievement(charKey, achievement)
     if not charKey then
-        HCT:Print("No character key provided.")
+        GetHCT():Print("No character key provided.")
         return
     end
     if not achievement then 
-        HCT:Print("No achievement data found.")
+        GetHCT():Print("No achievement data found.")
         return 
     end
     local charData = GetDB().characters[charKey]
     if not charData then
-        HCT:Print("No data found for character: " .. charKey)
+        GetHCT():Print("No data found for character: " .. charKey)
         return
     end
     local completionID = charKey .. ":" .. achievement.uniqueID
@@ -141,6 +141,7 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
 end
 
 function HCT_DataModule:CheckAllAchievements(charKey, filter)
+    GetHCT():Print("Checking all achievements for " .. charKey)
     if not filter or filter == "level" then
         self:CheckLevelAchievements(charKey)
     end
@@ -168,11 +169,11 @@ function HCT_DataModule:InitializeCharacterData()
     local battleTag = HCT_DataModule:GetBattleTag()
     local charKey = characterName .. ":" .. battleTag
     if playerRealm ~= db.realm then
-        HCT:Print("This character is not eligible. Invalid realm: " .. playerRealm)
+        GetHCT():Print("This character is not eligible. Invalid realm: " .. playerRealm)
         return
     end
     if playerFaction ~= db.faction then
-        HCT:Print("This character is not eligible. Invalid faction: " .. playerFaction)
+        GetHCT():Print("This character is not eligible. Invalid faction: " .. playerFaction)
         return
     end
     db.characters = db.characters or {}
@@ -221,7 +222,7 @@ function HCT_DataModule:InitializeCharacterData()
         end
     end
     if not found then
-        HCT:Print("Adding new character:" .. charKey)
+        GetHCT():Print("Adding new character:" .. charKey)
         table.insert(db.users[battleTag].characterKeys, charKey)
     end       
 end
