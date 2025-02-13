@@ -16,7 +16,7 @@ function AddonEventProcessor:ProcessEvent(ev)
             HCT:Print(charKey .. " has died.")
         end
     elseif ev.type == "CHARACTER" then
-        local charKey = ev.charKey
+        local charKey = ev.characterName .. ":" .. ev.battleTag
         if db.characters[charKey] then
             for k, v in pairs(ev) do
                 db.characters[charKey][k] = v
@@ -32,7 +32,9 @@ function AddonEventProcessor:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
     if not HCT then return end
     local db = GetDB().profile
+    if not db then return end
     HCT:Print("Processing bulk update - saving to database.")
+    if not db.users then db.users = {} end
     -- Merge users
     for userKey, userInfo in pairs(payload.users or {}) do
         if not db.users[userKey] then
