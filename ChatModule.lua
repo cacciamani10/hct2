@@ -37,19 +37,19 @@ function HCT_ChatModule:SendTeamChatMessage(text)
         timestamp = time(),
     }
     local serialized = AceSerializer:Serialize("TEAMCHAT", payload)
-    HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+    GetHCT():SendCommMessage(GetHCT().addonPrefix, serialized, "GUILD")
     DEFAULT_CHAT_FRAME:AddMessage(fullMessage)
     HCT_ChatModule:AddTeamChatMessage(fullMessage)
 end
 
 function HCT_ChatModule:AddTeamChatMessage(message)
-    HCT.teamChatLog = HCT.teamChatLog or {}
-    table.insert(HCT.teamChatLog, message)
-    if HCT.teamChatContainer then
+    GetHCT().teamChatLog = GetHCT().teamChatLog or {}
+    table.insert(GetHCT().teamChatLog, message)
+    if GetHCT().teamChatContainer then
         local msgLabel = AceGUI:Create("Label")
         msgLabel:SetFullWidth(true)
         msgLabel:SetText(message)
-        HCT.teamChatContainer:AddChild(msgLabel)
+        GetHCT().teamChatContainer:AddChild(msgLabel)
     end
 end
 
@@ -78,7 +78,7 @@ function HCT_ChatModule:ProcessTeamChatMessage(payload)
         if senderClass and RAID_CLASS_COLORS[senderClass] then
             classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
         end
-        if HCT.db.profile.teams[payload.team] then
+        if GetHCT().db.profile.teams[payload.team] then
             local teamColor = HCT_DataModule.NormalizeColor(HCT.db.profile.teams[payload.team].color)
             teamColorStr = string.format("%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
         end

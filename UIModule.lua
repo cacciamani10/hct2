@@ -8,9 +8,8 @@ local BOUNTY_COLOR      = "00bfff" -- deep sky blue
 local FEAT_COLOR     = "32cd32" -- lime green
 local COMPLETED_COLOR   = "00ff00" -- green
 
-local function GetDB()
-    return HCT.db.profile
-end
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 local function FormatPlayersList(players)
     if not players or #players == 0 then
@@ -108,7 +107,7 @@ end
 
 local function DrawTeamChat(container)
     container:ReleaseChildren()
-    HCT.teamChatContainer = container
+    GetHCT().teamChatContainer = container
 
     local logGroup = AceGUI:Create("SimpleGroup")
     logGroup:SetLayout("Flow")
@@ -116,7 +115,7 @@ local function DrawTeamChat(container)
     logGroup:SetHeight(300)
     container:AddChild(logGroup)
 
-    local chatLog = HCT.teamChatLog or {}
+    local chatLog = GetHCT().teamChatLog or {}
     for _, msg in ipairs(chatLog) do
         local msgLabel = AceGUI:Create("Label")
         msgLabel:SetFullWidth(true)
@@ -223,7 +222,7 @@ local function UpdateAchievementsContent(contentContainer, mode)
     elseif mode == "complete" then
         -- Draw completed achievements (aggregated from user data)
         local completedAch = {}
-        local db = HCT.db.profile
+        local db = GetDB()
         for user, userData in pairs(db.users) do
             if userData.characters then
                 for _, charName in ipairs(userData.characters) do
@@ -497,7 +496,7 @@ function HCT_UIModule:ShowMainGUI()
     guiFrame:SetLayout("Fill")
     guiFrame:SetCallback("OnClose", function(widget)
         AceGUI:Release(widget)
-        HCT.teamChatContainer = nil
+        GetHCT().teamChatContainer = nil
     end)
 
     local tabGroup = AceGUI:Create("TabGroup")
