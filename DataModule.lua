@@ -124,17 +124,22 @@ function HCT_DataModule:CheckDungeonClearAchievements(charKey)
     end
 end
 
-function HCT_DataModule:GetProfessionLevel(profName)
-    local profs = { GetProfessions() }
-    for i = 1, #profs, 2 do
-        local name, _, skillLevel = GetProfessionInfo(profs[i])
-        if skillLevel then
-            GetHCT():Print("Profession: " .. name .. " Level: " .. skillLevel)
-            if name and name:lower() == profName:lower() then
-                return skillLevel
-            end
+function HCT_DataModule:GetProfessionLevels()
+    local professionLevels = {}
+
+    for i = 1, GetNumSkillLines() do
+        local skillName, _, _, skillLevel = GetSkillLineInfo(i)
+        if skillName then
+            professionLevels[skillName:lower()] = skillLevel
+            GetHCT():Print("Found profession: " .. skillName .. " Level: " .. skillLevel)
         end
     end
+
+    if next(professionLevels) == nil then
+        GetHCT():Print("No professions found.")
+    end
+
+    return professionLevels
 end
 
 function HCT_DataModule:CheckProfessionAchievements(charKey)
@@ -142,19 +147,21 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
         GetHCT():Print("No character key provided.")
         return
     end
+
     local characters = GetDB().characters
     local charData = characters[charKey]
     if not charData then return end
 
+    local professionLevels = self:GetProfessionLevels() -- Get all profession levels once
+
     for _, achDef in ipairs(HardcoreChallengeTracker_Data.achievements["Profession Mastery"] or {}) do
         local reqLevelStr, profName = achDef.description:match("Reach level (%d+)%s+(.+)")
         local reqLevel = reqLevelStr and tonumber(reqLevelStr)
-        --():Print("Checking profession achievement for " ..
-           -- charKey .. " at level " .. reqLevel .. " in " .. profName)
         if reqLevel and profName then
-            local currentLevel = self:GetProfessionLevel(profName)
+            local currentLevel = professionLevels[profName:lower()]
             if currentLevel and currentLevel >= reqLevel then
                 self:CompleteAchievement(charKey, achDef)
+                GetHCT():Print("Achievement completed for " .. profName .. " at level " .. currentLevel)
             end
         end
     end
