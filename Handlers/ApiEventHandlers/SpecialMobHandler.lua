@@ -20,14 +20,14 @@ _G.HCT_Handlers.SpecialMobHandler = {
                 local message = "You killed a " .. classification .. ": " .. (destName or "Unknown NPC")
                 HCT:Print(message)
 
-                -- local ev = {
-                --     type = "SPECIAL_KILL",
-                --     name = destName,
-                --     classification = classification,
-                --     characterName = UnitName("player"),
-                --     timestamp = time()
-                -- }
-                -- HCT_Broadcaster:BroadcastEvent(ev)
+                local ev = {
+                    type = "SPECIAL_KILL",
+                    name = destName,
+                    classification = classification,
+                    characterName = UnitName("player"),
+                    timestamp = time()
+                }
+                HCT_Broadcaster:BroadcastEvent(ev)
             end
         end
     end

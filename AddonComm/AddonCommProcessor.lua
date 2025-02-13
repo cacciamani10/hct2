@@ -23,6 +23,11 @@ function AddonCommProcessor:ProcessEvent(ev)
             end
             HCT:Print("Updated info for " .. charKey)
         end
+    elseif ev.type == "SPECIAL_KILL" then
+        local mobName = ev.name or "Unknown Mob"
+        local classification = ev.classification or "unknown classification"
+        local characterName = ev.characterName or "Unknown Player"    
+        HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
     else
         HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
     end
