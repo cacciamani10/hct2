@@ -58,7 +58,8 @@ function HCT_EventModule:RequestContestData()
         type = "REQUEST",
         payload = "request"
     }
-    HCT_Broadcaster:BroadcastEvent(ev)
+    local serialized = AceSerializer:Serialize("REQUEST", ev)
+    GetHCT():SendCommMessage(GetHCT().addonPrefix, serialized, "GUILD")
     GetHCT():Print("Requesting data update...")
 end
 
@@ -72,31 +73,6 @@ local function PrintTable(t, indent)
         else
             print(indentStr .. tostring(k) .. ": " .. tostring(v))
         end
-    end
-end
-
-function HCT_EventModule:ProcessEvent(ev)
-    if not GetHCT() then return end -- Ensure the module is properly initialized.
-    local db = GetDB()
-    if ev.type == "DEATH" then
-        local charKey = ev.charKey
-        if db.characters[charKey] then
-            db.characters[charKey].isDead = true
-            GetHCT():Print(charKey .. " has died.")
-        end
-    elseif ev.type == "REQUEST" then
-        HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
-    elseif ev.type == "CHARACTER" then
-        -- (Optional) Process a dedicated character info event.
-        local charKey = ev.charKey
-        if db.characters[charKey] then
-            for k, v in pairs(ev) do -- Merge the character info.
-                db.characters[charKey][k] = v -- Update the character info.
-            end
-            GetHCT():Print("Updated info for " .. charKey)
-        end
-    else
-        GetHCT():Print("Unknown event type: " .. tostring(ev.type))
     end
 end
 

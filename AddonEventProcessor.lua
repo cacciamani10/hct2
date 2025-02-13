@@ -24,7 +24,7 @@ function AddonEventProcessor:ProcessEvent(ev)
             HCT:Print("Updated info for " .. charKey)
         end
     else
-        HCT:Print("Unknown event type: " .. tostring(ev.type))
+        HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
     end
 end
 
