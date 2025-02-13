@@ -54,6 +54,30 @@ function HCT_EventModule:UnregisterEvents()
     end
 end
 
+function HCT_EventModule:ProcessEvent(ev)
+    local HCT = GetHCT()
+    if not HCT then return end
+    local db = GetDB().profile
+
+    if ev.type == "DEATH" then
+        local charKey = ev.charKey
+        if db.characters[charKey] then
+            db.characters[charKey].isDead = true
+            HCT:Print(charKey .. " has died.")
+        end
+    elseif ev.type == "CHARACTER" then
+        local charKey = ev.characterName .. ":" .. ev.battleTag
+        if db.characters[charKey] then
+            for k, v in pairs(ev) do
+                db.characters[charKey][k] = v
+            end
+            HCT:Print("Updated info for " .. charKey)
+        end
+    else
+        HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
+    end
+end
+
 function HCT_EventModule:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
     if not HCT then return end
@@ -105,7 +129,7 @@ function HCT_EventModule:ProcessBulkUpdate(payload)
         if not db.completionLedger[completionID] then
             db.completionLedger[completionID] = completionInfo
         elseif achievementID <= 799 and achievementID >= 500 then
-            if completionInfo.timestamp < db.completionLedger[completionID].timestamp then
+            if completionInfo.timestamp < db.completionLedger[completionID].timestamp then -- error here
                 db.completionLedger[completionID] = completionInfo
             end
         end

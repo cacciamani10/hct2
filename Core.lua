@@ -95,6 +95,8 @@ local options = {
 
 function HCT:OnCommReceived(prefix, message, distribution, sender)
     if prefix ~= self.addonPrefix then return end
+    local playerName = UnitName("player")
+    if sender == playerName then return end
     local success, msgType, payload = self:Deserialize(message)
     if not success then
         self:Print("Failed to deserialize message from " .. sender)
