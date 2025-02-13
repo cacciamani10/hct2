@@ -33,7 +33,7 @@ _G.HCT_Handlers.AddonEventHandler = {
         elseif msgType == "BULK_UPDATE" then
             AddonEventProcessor:ProcessBulkUpdate(payload)
         elseif msgType == "REQUEST" then
-            HCT.EventModule:RespondToRequest(payload)
+            AddonEventProcessor:RespondToRequest(payload)
         elseif msgType == "TEAMCHAT" then
             HCT_ChatModule:ProcessTeamChatMessage(payload)
         else
