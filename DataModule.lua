@@ -2,10 +2,8 @@
 HCT_DataModule = {}
 
 local myCompletions = AchievementSet:New()
-
-local function GetDB()
-    return HCT.db.profile
-end
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 function HCT_DataModule:GetBattleTag()
     local info = select(2, BNGetInfo())

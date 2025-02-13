@@ -51,9 +51,6 @@ function HCT_EventModule:UnregisterEvents()
             GetHCT():UnregisterEvent(eventType)
         end
     end
-
-    GetHCT():UnregisterEvent("COMBAT_LOG_EVENT")
-    GetHCT():UnregisterComm(GetHCT().addonPrefix) -- Unregister for addon messages.
 end
 
 function HCT_EventModule:RequestContestData()
