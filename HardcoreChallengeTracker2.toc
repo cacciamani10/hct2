@@ -21,10 +21,12 @@ EventModule.lua
 ChatModule.lua
 
 # Handlers
+Handlers/ApiEventHandlers/AddonEventHandler.lua
 Handlers/ApiEventHandlers/PlayerDeathHandler.lua
 Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
 Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
 Handlers/ApiEventHandlers/PlayerEnteringWorldHandler.lua
+Handlers/ApiEventHandlers/AddonCommHandler.lua
 
 # Main Core Initialization
 Core.lua
