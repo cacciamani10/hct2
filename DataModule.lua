@@ -136,7 +136,6 @@ function HCT_DataModule:GetProfessionLevels()
         local skillName, _, _, skillLevel = GetSkillLineInfo(i)
         if skillName then
             professionLevels[skillName:lower()] = skillLevel
-            GetHCT():Print("Found profession: " .. skillName .. " Level: " .. skillLevel)
         end
     end
 
