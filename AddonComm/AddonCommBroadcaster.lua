@@ -28,9 +28,11 @@ _G.HCT_Broadcaster = {
     lastBroadcastTime = 0,
     lastRequestTime = 0,
     BroadcastEvent = function(self, ev)
+        local HCT = GetHCT()
+        HCT:Print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ")
         local now = time()
         self.lastBroadcastTime = now
-        local HCT = GetHCT()
+        
         if not HCT then return end
 
         HCT:Print("Broadcasting event: " .. ev.type)

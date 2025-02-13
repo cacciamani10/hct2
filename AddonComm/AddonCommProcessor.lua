@@ -6,9 +6,10 @@ local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 function AddonCommProcessor:ProcessEvent(ev)
     local HCT = GetHCT()
+
     if not HCT then return end
     local db = GetDB().profile
-
+    HCT:Print("Processing event!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     if ev.type == "DEATH" then
         local charKey = ev.charKey
         if db.characters[charKey] then

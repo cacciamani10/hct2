@@ -35,9 +35,7 @@ function HCT_EventModule:RegisterEvents()
         if eventType ~= GetHCT().addonPrefix then
             GetHCT():RegisterEvent(eventType, handlerName)
         else
-            GetHCT():RegisterComm(GetHCT().addonPrefix, "AddonCommHandler")
-            -- For comm messages, we rely on the centralized AceComm callback (AddonCommHandler) registered in Core.
-            -- If desired, you could store these handlers for later dispatch.
+            GetHCT():RegisterComm(GetHCT().addonPrefix, handlerName)
         end
     end
 
