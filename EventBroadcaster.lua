@@ -69,8 +69,12 @@ _G.HCT_Broadcaster = {
         HCT:Print("BULKED USERS " .. userCount .. ": BULKED CHARS " .. charCount .. ": BULKED LEDGER " .. ledgerCount .. ": TOTAL " .. totalCount)
         
         if totalCount > 0 then
-            local serializedBulk = AceSerializer:Serialize("BULK_UPDATE", broadCastTable)
-            HCT_Broadcaster:BroadcastEvent({ type = "BULK_UPDATE", payload = serializedBulk })
+            local ev = {
+                type = "BULK_UPDATE",
+                payload = broadCastTable
+            }
+            local serializedBulk = AceSerializer:Serialize("BULK_UPDATE", ev)
+            HCT:SendCommMessage(HCT.addonPrefix, serializedBulk, "GUILD")
             HCT:Print("Broadcasted bulk update of " .. totalCount .. " items.")
         end
     end
