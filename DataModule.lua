@@ -159,8 +159,8 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
     for _, achDef in ipairs(HardcoreChallengeTracker_Data.achievements["Profession Mastery"] or {}) do
         local reqLevelStr, profName = achDef.description:match("Reach level (%d+)%s+(.+)")
         local reqLevel = reqLevelStr and tonumber(reqLevelStr)
-        GetHCT():Print("Checking profession achievement for " ..
-            charKey .. " at level " .. reqLevel .. " in " .. profName)
+        --():Print("Checking profession achievement for " ..
+           -- charKey .. " at level " .. reqLevel .. " in " .. profName)
         if reqLevel and profName then
             local currentLevel = self:GetProfessionLevel(profName)
             if currentLevel and currentLevel >= reqLevel then
@@ -191,12 +191,11 @@ function HCT_DataModule.NormalizeColor(color)
     end
 end
 
-function HCT_DataModule:CalculateCharacterPoints()
-    local charKey = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
-    local charData = GetDB().characters[charKey] or {}
-    if not charData then
-        GetHCT():Print("No data found for character: " .. charKey)
-        return 0
+function HCT_DataModule:CalculateCharacterPoints(charData)
+    if not charData then 
+        local charKey = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
+        charData = GetDB().characters[charKey] or {}
+        if not charData then return 0 end -- No data found for character. Return 0 points.
     end
     local total = 0
 
@@ -206,43 +205,26 @@ function HCT_DataModule:CalculateCharacterPoints()
     total = total + self:GetLevelPoints(currentLevel, 0)
 
     -- Achievement Points: Loop through achievements the character has completed.
-    if charData.achievements then
-        for achName, completionTime in pairs(charData.achievements) do
+    local achievements = GetDB().completionLedger or {}
+    
+    for completionID, _ in pairs(achievements) do
+        -- Get Character name and achievementID from completionLedger keys.
+        local achID = completionID:match(":(.+)")
+        local charName = completionID:match("(.+):")
+        if charName == charData.name then -- Only count achievements for this character.
             for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
                 for _, achDef in ipairs(achList) do
-                    if achDef.name == achName then
-                        total = total + (achDef.points or 0)
+                    if achDef.uniqueID == achID then
+                        -- ids 500 - 799 are feats and will not be reduced by death.
+                        if achDef.uniqueID >= 500 and achDef.uniqueID <= 799 then
+                            total = total + achDef.points
+                        else
+                            total = total + achDef.points * (1 - charData.totalDeaths * 0.1)
+                        end
                     end
                 end
             end
         end
-    end
-
-    -- Feat Points: Sum points for feats (assuming feats are stored with a count).
-    if charData.feats then
-        for featName, count in pairs(charData.feats) do
-            for _, featDef in ipairs(HardcoreChallengeTracker_Data.feats or {}) do
-                if featDef.name == featName then
-                    total = total + ((featDef.points or 0) * count)
-                end
-            end
-        end
-    end
-
-    -- Bounty Points: Sum points for bounties.
-    if charData.bounties then
-        for bountyName, count in pairs(charData.bounties) do
-            for _, bountyDef in ipairs(HardcoreChallengeTracker_Data.bounties or {}) do
-                if bountyDef.name == bountyName then
-                    total = total + ((bountyDef.points or 0) * count)
-                end
-            end
-        end
-    end
-
-    -- Apply death penalty (halved, truncated) if the character is dead.
-    if charData.isDead then
-        total = math.floor(total / 2)
     end
 
     return total

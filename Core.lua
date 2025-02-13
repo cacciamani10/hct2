@@ -70,6 +70,30 @@ local options = {
     },
 }
 
+function HCT:OnCommReceived(prefix, message, distribution, sender)
+    local success, msgType, payload = self:Deserialize(message)
+    if not success then
+        self:Print("Failed to deserialize message from " .. sender)
+        self:Print("event: CHAT_MSG_ADDON")
+        self:Print("prefix: " .. prefix)
+        self:Print("message: " .. message)
+        return
+    end
+
+    if msgType == "EVENT" then
+        HCT_EventModule:ProcessEvent(payload)
+    elseif msgType == "BULK_UPDATE" then
+        HCT_EventModule:ProcessBulkUpdate(payload)
+        self:Print("Bulk update received and processed from " .. sender)
+    elseif msgType == "REQUEST" then
+        HCT_EventModule:RespondToRequest(payload)
+    elseif msgType == "TEAMCHAT" then
+        HCT_ChatModule:ProcessTeamChatMessage(payload)
+    else
+        self:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
+    end
+end 
+
 function HCT:OnInitialize()
     -- Initialize AceDB with your defaults.
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
@@ -80,21 +104,15 @@ function HCT:OnInitialize()
     if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
     if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
-    -- If the myCompletions field isn’t already an AchievementSet, initialize it:
     if type(self.db.profile.myCompletions) ~= "table" or not self.db.profile.myCompletions.Add then
         self.db.profile.myCompletions = AchievementSet:New()
     end
-
-    -- If the completionLedger field isn’t already an AchievementSet, initialize it:
     if type(self.db.profile.completionLedger) ~= "table" or not self.db.profile.completionLedger.Add then
         self.db.profile.completionLedger = AchievementSet:New()
     end
 
-    -- Register the main options table and add it as the top-level category.
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTOptions", options)
     self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTOptions", "Hardcore Challenge Tracker 2")
-
-    -- Now register the profile options and add them as a subcategory of the already-created top-level category.
     local profileOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTProfiles", profileOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTProfiles", "Profiles", "Hardcore Challenge Tracker 2")
@@ -106,6 +124,7 @@ function HCT:OnInitialize()
     HCT_DataModule:InitializeUserData()
     HCT_DataModule:InitializeCharacterData()
     self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window.")
+    self:RegisterComm(self.addonPrefix, "OnCommReceived")
 end
 
 function HCT:OnEnable()

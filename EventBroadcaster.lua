@@ -55,79 +55,30 @@ _G.HCT_Broadcaster = {
         local HCT = GetHCT()
         local db = GetDB()
         if not HCT then return end
-        HCT:Print("Bulking this shit up...")
-        local broadCastTable = {}                                   -- Custom table for broadcasting.
+        HCT:Print("Broadcasting bulk events...")
 
-        broadCastTable.users = db.users or {}                       -- Copy users table.
-        broadCastTable.characters = db.characters or {}             -- Copy characters table.
-        broadCastTable.completionLedger = db.completionLedger or {} -- Copy completionLedger table.
+        local broadCastTable = {
+            users = db.users or {},
+            characters = db.characters or {},
+            completionLedger = db.completionLedger or {}
+        }
 
         local userCount = CountTable(broadCastTable.users)
         local charCount = CountTable(broadCastTable.characters)
         local ledgerCount = CountTable(broadCastTable.completionLedger)
         local totalCount = userCount + charCount + ledgerCount
-        HCT:Print("BULKED USERS " ..
-            userCount .. ": BULKED CHARS " .. charCount .. ": BULKED LEDGER " .. ledgerCount .. ": TOTAL " .. totalCount)
-        local chunks = {}
-        local chunkSize = 200
-        -- User table into chunks
-        for i = 1, #broadCastTable.users do
-            local chunk = {}
+        HCT:Print("BULKED USERS " .. userCount .. ": BULKED CHARS " .. charCount .. ": BULKED LEDGER " .. ledgerCount .. ": TOTAL " .. totalCount)
 
-            for j = i, math.min(i + chunkSize - 1, #broadCastTable.users) do
-                table.insert(chunk, broadCastTable.users[j])
-            end
-
-            table.insert(chunks, broadCastTable.users)
+        -- Serialize the entire broadCastTable
+        local serialized = AceSerializer:Serialize("BULK_UPDATE", broadCastTable)
+        if not serialized or serialized == "" then
+            HCT:Print("Error: Serialized bulk data is empty!")
+            return
         end
 
-        -- Character table into chunks
-        for i = 1, #broadCastTable.characters do
-            local chunk = {}
-
-            for j = i, math.min(i + chunkSize - 1, #broadCastTable.characters) do
-                table.insert(chunk, broadCastTable.characters[j])
-            end
-
-            table.insert(chunks, broadCastTable.characters)
-        end
-
-        -- CompletionLedger table into chunks
-
-        for i = 1, #broadCastTable.completionLedger do
-            local chunk = {}
-
-            for j = i, math.min(i + chunkSize - 1, #broadCastTable.completionLedger) do
-                table.insert(chunk, broadCastTable.completionLedger[j])
-            end
-
-            table.insert(chunks, broadCastTable.completionLedger)
-        end
-
-    -- elseif msgType == "BULK_UPDATE" then
-    --     Chunks_Remaining = payload.chunks
-    
-        -- Broadcast Length of Incoming Chunks to prevent desync
-        local ev = {
-            type = "BULK_UPDATE",
-            payload = #chunks
-        }
-        local serialized = AceSerializer:Serialize(ev)
+        -- Send the serialized data
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
 
-        -- Broadcast each chunk
-        for id, chunk in ipairs(chunks) do
-            local ev = {
-                type = "BULK_CHUNK",
-                id = id,
-                payload = chunk
-            }
-            local serialized = AceSerializer:Serialize(ev)
-            HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
-        end
-
         HCT:Print("Bulk update complete.")
-        
     end
-
 }

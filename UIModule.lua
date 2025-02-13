@@ -39,7 +39,6 @@ local function AggregateTeamPoints(team)
     return total
 end
 
-
 local function DrawTeamInfo(container)
     container:ReleaseChildren()
     local db = GetDB()
