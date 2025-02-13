@@ -210,6 +210,7 @@ function HCT_DataModule:InitializeCharacterData()
     -- add the character to the user's character list if it is not already there
     db.users = db.users or {}
     db.users[battleTag] = db.users[battleTag] or { team = 1, totalDeaths = 0, characterKeys = {  } }    
+    db.users[battleTag].characterKeys = db.users[battleTag].characterKeys or {}
 
     -- check if the character is already in the user's character list, if not, add item
     local found = false

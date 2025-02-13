@@ -29,15 +29,16 @@ function HCT_EventModule:RegisterEvents()
             GetHCT()[handlerName] = function(_, ...)
                 handler:HandleEvent(GetHCT(), ...)
             end
-    
-            GetHCT():RegisterEvent(eventType, handlerName)
+            
+            if eventType == GetHCT().addonPrefix then 
+                GetHCT():RegisterComm(eventType, handlerName)
+            else 
+                GetHCT():RegisterEvent(eventType, handlerName)
+            end
         end
     end
 
-    GetHCT():RegisterEvent("COMBAT_LOG_EVENT", "OnCombatLogEvent") -- This event has only the user's combat log.
     --GetHCT():RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "OnCombatLogEventUnfiltered") -- This event has the entire guild's combat log.
-    GetHCT():RegisterEvent("CHAT_MSG_ADDON", "OnChatMsgAddon")
-    GetHCT():RegisterComm(GetHCT().addonPrefix, "OnCommReceived") -- Register for addon messages.
     self:RequestContestData() -- Request missing events from the guild.
     HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
 end
@@ -51,7 +52,6 @@ function HCT_EventModule:UnregisterEvents()
     end
 
     GetHCT():UnregisterEvent("COMBAT_LOG_EVENT")
-    GetHCT():UnregisterEvent("CHAT_MSG_ADDON")
     GetHCT():UnregisterComm(GetHCT().addonPrefix) -- Unregister for addon messages.
 end
 
@@ -150,41 +150,4 @@ end
 function HCT_EventModule:RespondToRequest(payload)
     if not GetHCT() then return end -- Ensure the module is properly initialized.
     HCT_Broadcaster:BroadcastBulkEvents() -- Broadcast bulk events to the guild.
-end
-
-function HCT_EventModule:OnChatMsgAddon(event, prefix, message, channel, sender)
-    -- Only process messages with the correct prefix.
-    local addonPrefix = GetHCT().addonPrefix
-    if prefix ~= addonPrefix then
-        return
-    end
-
-    -- Filter out messages from ourselves.
-    local myName = UnitName("player")
-    if sender == myName or Ambiguate(sender, "none") == myName then
-        return
-    end
-
-    if not GetHCT() then return end -- Ensure our addon object is available.
-    local success, msgType, payload = AceSerializer:Deserialize(message)
-    if not success then
-        GetHCT():Print("Failed to deserialize message from " .. sender)
-        print("Raw message causing error: " .. message)
-        return
-    end
-    -- Handle the different message types.
-    if msgType == "EVENT" then
-        -- Process a single event.
-        HCT_EventModule:ProcessEvent(payload)
-    elseif msgType == "BULK_UPDATE" then
-        -- Process a bulk update. This could involve merging multiple events.
-        HCT_EventModule:ProcessBulkUpdate(payload)
-    elseif msgType == "REQUEST" then
-        -- If the payload indicates a full ledger request, respond with your bulk update.
-        HCT_EventModule:RespondToRequest(payload)
-    elseif msgType == "TEAMCHAT" then
-        HCT_ChatModule:ProcessTeamChatMessage(payload)
-    else
-        GetHCT():Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
-    end
 end

@@ -3,6 +3,7 @@ local addonName = ...
 local HCT_Env = _G.HCT_Env
 local HCT = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0",
     "AceSerializer-3.0", "AceComm-3.0")
+local HCT_Broadcaster = _G.HCT_Broadcaster
 HCT_Env.InitializeAddon(HCT);
 HCT_EventModule.owner = HCT
 HCT.ProcessEvent = HCT_EventModule.ProcessEvent -- Alias for convenience.
@@ -72,18 +73,6 @@ local options = {
     },
 }
 
-
-HCT.OnPlayerDead = HCT_EventModule.OnPlayerDead
-HCT.OnCombatLogEvent = HCT_EventModule.OnCombatLogEvent
-HCT.OnChatMsgAddon = HCT_EventModule.OnChatMsgAddon
-
-function HCT:OnCommReceived(prefix, message, distribution, sender)
-    if prefix == self.addonPrefix then
-        --self:Print("Received message from " .. sender)
-        HCT_EventModule:OnChatMsgAddon("CHAT_MSG_ADDON", prefix, message, distribution, sender)
-    end
-end
-
 function HCT:OnInitialize()
     -- Initialize AceDB with your defaults.
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
@@ -114,7 +103,7 @@ function HCT:OnEnable()
     end, 3)
     -- Schedule bulk event broadcast every 5 minutes as a backup.
     self:ScheduleRepeatingTimer(function()
-        HCT_EventModule:BroadcastBulkEvents()
+        HCT_Broadcaster:BroadcastBulkEvents()
     end, 300)
     local charKey = UnitName("player")
     HCT_DataModule:CheckAllAchievements(charKey)
