@@ -30,7 +30,7 @@ local defaults = {
             },
         },
         users = {
-            -- ["PeterPiper#1450"] = { team = 1, totalDeaths = 0, characterKeys = { "Morloe:PeterPiper#1450" }},
+            -- ["PeterPiper#1450"] = { team = 1, totalDeaths = 0, characterKeys = { 1: "Morloe:PeterPiper#1450" }},
         },
         characters = {
             -- [Morloe:PeterPiper#1450] = { battleTag = "PeterPiper#1450", level = 1, name = "Morloe", class = "Warrior", race = "Human", faction = "Alliance", realm = "Doomhowl" isDead = false },
