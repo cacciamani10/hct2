@@ -25,6 +25,11 @@ function HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
     return points
 end
 
+function HCT_DataModule:GetCharacterKey()
+    local name = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
+    return name or "unknown" end
+
+
 function HCT_DataModule:GetPlayerTeam(player)
     local teams = GetDB().teams
     for i, team in ipairs(teams) do
@@ -142,6 +147,26 @@ function HCT_DataModule:GetProfessionLevels()
     return professionLevels
 end
 
+function HCT_DataModule:CheckProfessionAchievement(charKey, professionName, professionLevel)
+    if not charKey then
+        GetHCT():Print("No character key provided.")
+        return
+    end
+
+    local characters = GetDB().characters
+    local charData = characters[charKey]
+    if not charData then return end
+
+    for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Profession Mastery"] or {}) do
+        local reqLevelStr, profName = ach.description:match("Reach level (%d+)%s+(.+)")
+        local requiredLevel = reqLevelStr and tonumber(reqLevelStr)
+        if requiredLevel and professionLevel >= requiredLevel then
+            self:CompleteAchievement(charKey, ach)
+        end
+    end
+end
+
+-- Searches for all profession mastery achievements and checks if the character has completed them. If not, it will complete them.
 function HCT_DataModule:CheckProfessionAchievements(charKey)
     if not charKey then
         GetHCT():Print("No character key provided.")

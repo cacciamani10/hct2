@@ -12,6 +12,15 @@ _G.HCT_Handlers.PlayerDeathHandler = {
     end,
 
     HandleEvent = function(self, HCT, event)
-        
+         --  arg1 your skill in mining has increased to 57
+        if HCT then
+
+            local skillName, skillLevel = string.match(event, "your skill in (.+) has increased to (%d+)")
+            if skillName and skillLevel then
+                local charKey = HCT_DataModule:GetCharacterKey()
+                HCT_DataModule:CheckProfessionAchievement(charKey, skillName, skillLevel)
+            end
+            HCT:Print("ChatMsgSkillHandler handled.")
+        end
     end
 }
