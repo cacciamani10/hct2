@@ -1,5 +1,6 @@
 local realm = "Doomhowl"
 local faction = "Alliance"
+local guildName = "WELL MET"
 
 local achievements = {
     ["Level Checkpoints"] = {
@@ -164,6 +165,7 @@ local broadcastChannels = { "GUILD", "PARTY", "RAID", "INSTANCE_CHAT" }
 HardcoreChallengeTracker_Data = {
     realm = realm,
     faction = faction,
+    guildName = guildName,
     achievements = achievements,
     tugOfWarEvents = tugOfWarEvents,
     bounties = bounties,

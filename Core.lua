@@ -13,6 +13,7 @@ local defaults = {
     profile = {
         realm = HardcoreChallengeTracker_Data.realm,
         faction = HardcoreChallengeTracker_Data.faction,
+        guildName = HardcoreChallengeTracker_Data.guildName,
         teams = {
             [1] = {
                 name = "Crimson Vanguards",
