@@ -7,12 +7,13 @@ _G.HCT_Handlers.PlayerLogoutHandler = {
 
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
-        -- Force db save
-        HCT:Print("Player logout event handled.")
+
+        local characterName = UnitName("player")
+        local ev = {
+            type = "PLAYER_LOGOUT",
+            characterName = characterName
+        }
+
+        HCT_Broadcaster:BroadcastEvent(ev)
     end
 }
-
-
-
-
-

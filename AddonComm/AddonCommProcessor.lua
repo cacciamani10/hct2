@@ -28,6 +28,9 @@ function AddonCommProcessor:ProcessEvent(ev)
         local classification = ev.classification or "unknown classification"
         local characterName = ev.characterName or "Unknown Player"    
         HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
+    elseif ev.type == "PLAYER_LOGOUT" then
+        local characterName = ev.characterName or "Unknown Player"
+        HCT:Print(characterName .. " logged out")
     else
         HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
     end
