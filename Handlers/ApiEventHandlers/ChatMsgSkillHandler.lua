@@ -1,5 +1,3 @@
-local HCT_Broadcaster = _G.HCT_Broadcaster
-
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.ChatMsgSkillHandler = {
