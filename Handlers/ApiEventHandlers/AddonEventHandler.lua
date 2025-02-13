@@ -5,6 +5,8 @@ local AddonEventProcessor = _G.AddonEventProcessor
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.AddonEventHandler = {
+    Chunks = {},
+    Chunks_Remaining = 0,
     GetEventType = function()
         return "CHAT_MSG_ADDON"
     end,
@@ -21,6 +23,7 @@ _G.HCT_Handlers.AddonEventHandler = {
         if sender == myName or Ambiguate(sender, "none") == myName then return end
 
         local success, msgType, payload = AceSerializer:Deserialize(message)
+
         if not success then
             HCT:Print("Failed to deserialize message from " .. sender)
             HCT:Print("event: " .. event)
@@ -33,7 +36,18 @@ _G.HCT_Handlers.AddonEventHandler = {
         if msgType == "EVENT" then
             AddonEventProcessor:ProcessEvent(payload)
         elseif msgType == "BULK_UPDATE" then
-            AddonEventProcessor:ProcessBulkUpdate(payload)
+            Chunks_Remaining = payload.chunks
+        elseif msgType == "BULK_CHUNK" then
+            if Chunks_Remaining == 0 then
+                HCT:Print("Received chunk without expecting one from " .. sender)
+                return
+            end
+            Chunks[payload.id] = payload.chunkData
+            Chunks_Remaining = Chunks_Remaining - 1
+            if Chunks_Remaining == 0 then
+                AddonEventProcessor:ProcessBulkUpdate(Chunks)
+                Chunks = {}
+            end
         elseif msgType == "REQUEST" then
             AddonEventProcessor:RespondToRequest(payload)
         elseif msgType == "TEAMCHAT" then
