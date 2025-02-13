@@ -80,6 +80,16 @@ function HCT:OnInitialize()
     if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
     if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
+    -- If the myCompletions field isn’t already an AchievementSet, initialize it:
+    if type(self.db.profile.myCompletions) ~= "table" or not self.db.profile.myCompletions.Add then
+        self.db.profile.myCompletions = AchievementSet:New()
+    end
+
+    -- If the completionLedger field isn’t already an AchievementSet, initialize it:
+    if type(self.db.profile.completionLedger) ~= "table" or not self.db.profile.completionLedger.Add then
+        self.db.profile.completionLedger = AchievementSet:New()
+    end
+
     -- Register the main options table and add it as the top-level category.
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTOptions", options)
     self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTOptions", "Hardcore Challenge Tracker 2")
@@ -108,7 +118,7 @@ function HCT:OnEnable()
     self:ScheduleRepeatingTimer(function()
         HCT_Broadcaster:BroadcastBulkEvents()
     end, 900)
-    local charKey = UnitName("player")
+    local charKey = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
     HCT_DataModule:CheckAllAchievements(charKey)
 end
 
