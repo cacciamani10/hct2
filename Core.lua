@@ -93,32 +93,7 @@ local options = {
     },
 }
 
-function HCT:OnCommReceived(prefix, message, distribution, sender)
-    if prefix ~= self.addonPrefix then return end
-    local playerName = UnitName("player")
-    if sender == playerName then return end
-    local success, msgType, payload = self:Deserialize(message)
-    if not success then
-        self:Print("Failed to deserialize message from " .. sender)
-        self:Print("event: CHAT_MSG_ADDON")
-        self:Print("prefix: " .. prefix)
-        self:Print("message: " .. message)
-        return
-    end
 
-    if msgType == "EVENT" then
-        HCT_EventModule:ProcessEvent(payload)
-    elseif msgType == "BULK_UPDATE" then
-        HCT_EventModule:ProcessBulkUpdate(payload)
-        self:Print("Bulk update received and processed from " .. sender)
-    elseif msgType == "REQUEST" then
-        HCT_EventModule:RespondToRequest(payload)
-    elseif msgType == "TEAMCHAT" then
-        HCT_ChatModule:ProcessTeamChatMessage(payload)
-    else
-        self:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
-    end
-end
 
 function HCT:OnInitialize()
     -- Initialize AceDB with your defaults.
@@ -144,7 +119,6 @@ function HCT:OnInitialize()
     HCT_DataModule:InitializeUserData()
     HCT_DataModule:InitializeCharacterData()
     self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window.")
-    self:RegisterComm(self.addonPrefix, "OnCommReceived")
 end
 
 function HCT:OnEnable()

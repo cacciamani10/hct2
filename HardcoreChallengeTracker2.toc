@@ -21,6 +21,7 @@ EventModule.lua
 ChatModule.lua
 
 # Handlers
+Handlers/ApiEventHandlers/AddonCommHandler.lua
 Handlers/ApiEventHandlers/PlayerDeathHandler.lua
 Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
 Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
