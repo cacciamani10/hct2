@@ -212,6 +212,7 @@ function HCT_DataModule:InitializeCharacterData()
 
     -- check if the character is already in the user's character list, if not, add item
     local found = false
+    if not db.users[battleTag].characterKeys then db.users[battleTag].characterKeys = {} end
     for _, key in ipairs(db.users[battleTag].characterKeys) do
         if key == charKey then 
             found = true 

@@ -5,7 +5,6 @@ _G.HCT_Broadcaster = {
         local HCT = _G.HCT_Env.GetAddon()
         if not HCT then return end
 
-        table.insert(HCT.db.profile.eventLog, ev)
         HCT:Print("Broadcasting event: " .. ev.type)
 
         local serialized = AceSerializer:Serialize("EVENT", ev)
