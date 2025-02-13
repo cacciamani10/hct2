@@ -1,5 +1,6 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
 local HCT_Broadcaster = _G.HCT_Broadcaster
+local AddonEventProcessor = _G.AddonEventProcessor
 
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
@@ -28,9 +29,9 @@ _G.HCT_Handlers.AddonEventHandler = {
 
         -- Handle different message types
         if msgType == "EVENT" then
-            HCT.EventModule:ProcessEvent(payload)
+            AddonEventProcessor:ProcessEvent(payload)
         elseif msgType == "BULK_UPDATE" then
-            HCT.EventModule:ProcessBulkUpdate(payload)
+            AddonEventProcessor:ProcessBulkUpdate(payload)
         elseif msgType == "REQUEST" then
             HCT.EventModule:RespondToRequest(payload)
         elseif msgType == "TEAMCHAT" then

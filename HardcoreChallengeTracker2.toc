@@ -10,6 +10,7 @@ AddonEnv.lua
 
 # Core Systems
 EventBroadcaster.lua
+AddonEventProcessor.lua
 Set.lua
 HardcoreChallengeTracker2_Data.lua
 HardcoreChallengeTracker2_Teams.lua

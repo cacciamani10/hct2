@@ -5,9 +5,6 @@ local HCT = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceCons
     "AceSerializer-3.0", "AceComm-3.0")
 local HCT_Broadcaster = _G.HCT_Broadcaster
 HCT_Env.InitializeAddon(HCT);
-HCT_EventModule.owner = HCT
-HCT.ProcessEvent = HCT_EventModule.ProcessEvent -- Alias for convenience.
-_G.HCT = HCT
 HCT.teamChatLog = HCT.teamChatLog or {}
 HCT.addonPrefix = "HCT2Addon"
 
