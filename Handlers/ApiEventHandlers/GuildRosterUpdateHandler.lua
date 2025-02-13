@@ -12,7 +12,7 @@ _G.HCT_Handlers.GuildRosterUpdateHandler = {
     HandleEvent = function(self, HCT, event)
         if HCT then
             HCT_Broadcaster:BroadcastBulkEvents()
-            HCT:Print("Guild roster updated.")
+            HCT:Print("Guild roster update handled.")
         end
     end
 }

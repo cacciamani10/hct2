@@ -5,6 +5,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     GetHandlerName = function() return "PlayerEnteringWorldHandler" end,
 
     HandleEvent = function(self, HCT, event)
+        if not HCT then return end
         -- Request data
         HCT_Broadcaster:RequestContestData() -- Request contest data from the guild.
         HCT:Print("Player entering world event handled.")

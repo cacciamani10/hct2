@@ -12,6 +12,7 @@ _G.HCT_Handlers.PlayerDeathHandler = {
     end,
 
     HandleEvent = function(self, HCT, event)
+        if not HCT then return end
         local charKey = UnitName("player")
         local charData = HCT.db.profile.characters[charKey]
 

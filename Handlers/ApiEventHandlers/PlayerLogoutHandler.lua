@@ -6,6 +6,7 @@ _G.HCT_Handlers.PlayerLogoutHandler = {
     GetHandlerName = function() return "PlayerLogoutHandler" end,
 
     HandleEvent = function(self, HCT, event)
+        if not HCT then return end
         -- Force db save
         HCT:Print("Player logout event handled.")
     end

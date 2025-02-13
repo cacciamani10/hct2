@@ -12,6 +12,7 @@ _G.HCT_Handlers.AddonCommHandler = {
     end,
 
     HandleEvent = function(self, HCT, prefix, message, distribution, sender)
+        if not HCT then return end
         if prefix == HCT.addonPrefix then
             local myName = UnitName("player")
             -- if sender == myName or Ambiguate(sender, "none") == myName then return end

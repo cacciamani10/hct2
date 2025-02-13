@@ -7,6 +7,7 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
     GetHandlerName = function() return "PlayerLevelUpHandler" end,
     
     HandleEvent = function(self, HCT, event, newLevel)
+        if not HCT then return end
         newLevel = tonumber(newLevel)
         local characterName = UnitName("player")
         local battleTag = HCT_DataModule:GetBattleTag()
