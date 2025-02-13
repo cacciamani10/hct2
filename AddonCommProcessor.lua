@@ -1,10 +1,10 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
-local AddonEventProcessor = {}
+local AddonCommProcessor = {}
 local HCT_Broadcaster = _G.HCT_Broadcaster
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-function AddonEventProcessor:ProcessEvent(ev)
+function AddonCommProcessor:ProcessEvent(ev)
     local HCT = GetHCT()
     if not HCT then return end
     local db = GetDB().profile
@@ -28,7 +28,7 @@ function AddonEventProcessor:ProcessEvent(ev)
     end
 end
 
-function AddonEventProcessor:ProcessBulkUpdate(payload)
+function AddonCommProcessor:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
     if not HCT then return end
     local db = GetDB().profile
@@ -74,9 +74,9 @@ function AddonEventProcessor:ProcessBulkUpdate(payload)
     HCT:Print("Processed bulk update.")
 end
 
-function AddonEventProcessor:RespondToRequest(payload)
+function AddonCommProcessor:RespondToRequest(payload)
     if not GetHCT() then return end
     HCT_Broadcaster:BroadcastBulkEvents()
 end
 
-_G.AddonEventProcessor = AddonEventProcessor
+_G.AddonCommProcessor = AddonCommProcessor
