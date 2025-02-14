@@ -35,12 +35,11 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                     if charLevel >= minLevel and charLevel <= maxLevel then
                         local db = GetDB()
                         db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
-                        db.localAchievementProgressData[charKey].clothCount = (GetDB().localAchievementProgressData[charKey].clothCount or 0) + lootQuantity
-                        return 
+                        db.localAchievementProgressData[charKey].clothCount = (GetDB().localAchievementProgressData[charKey].clothCount or 0) +
+                        lootQuantity
+                        return
                     end
                 end
-            else 
-                HCT:Print("Invalid loot detected. " .. text)
             end
         end
     end
