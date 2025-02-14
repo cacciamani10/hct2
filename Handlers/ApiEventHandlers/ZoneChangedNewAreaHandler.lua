@@ -11,8 +11,9 @@ _G.HCT_Handlers.ZoneChangedNewAreaHandler = {
         if not HCT then return end
         local subzone = GetSubZoneText()
         local zone = GetZoneText()
-        local mapId = C_Map.GetBestMapForUnit("player")
-        HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " ..
-        zone .. " - " .. subzone .. " (Map ID: " .. mapId .. ")")
+        local mapId = C_Map.GetBestMapForUnit("player") or 0
+        local mapInfo = C_Map.GetMapInfo(mapId)
+        local mapName = mapInfo and mapInfo.name or "Unknown"
+        HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " .. zone .. " - " .. subzone .. " - " .. mapName)
     end,
 }
