@@ -34,7 +34,6 @@ function HCT_EventModule:RegisterEvents()
         -- For comm events (when eventType equals the addon prefix), skip registering here.
         if handlerName == "AddonCommHandler" then
             GetHCT():RegisterComm(GetHCT().addonPrefix, handlerName)
-            GetHCT():Print("Registered comm handler: " .. handlerName)
         elseif eventType ~= GetHCT().addonPrefix then
             GetHCT():RegisterEvent(eventType, handlerName)
         end
