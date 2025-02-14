@@ -1,22 +1,11 @@
-local AceSerializer = LibStub("AceSerializer-3.0")
 HCT_EventModule = {}
 
 local function GetHCT()
     return _G.HCT_Env.GetAddon()
 end
 
-local function GetHandlers()
-    return _G.HCT_Env.GetAddon().HCT_Handlers
-end
-
 local function GetDB()
     return _G.HCT_Env.GetAddon().db.profile
-end
-
--- Helper function: compute a unique ID for an event.
-local function ComputeEventID(ev)
-    local key = ev.charKey or ev.team or ""
-    return ev.type .. ":" .. key .. ":" .. ev.timestamp
 end
 
 function HCT_EventModule:RegisterEvents()
