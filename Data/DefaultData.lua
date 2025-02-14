@@ -6,20 +6,8 @@ _G.DefaultData.defaults = {
         faction = HardcoreChallengeTracker_Data.faction,
         guildName = HardcoreChallengeTracker_Data.guildName,
         teams = {
-            [1] = {
-                name = "Crimson Vanguards",
-                color = { r = 255, g = 0, b = 0 },
-                battleTags = { "PeterPiper#1450", "Gad#1916", "Laobod#1570", "FunkyMonk#16573", "GíngerSWAG#1228", "TheCatMan#11376", "LeapingLupin#1343", "Arsine#1917" },
-                tugWins = {},
-                points = 0,
-            },
-            [2] = {
-                name = "Emerald Guardians",
-                color = { r = 0, g = 255, b = 0 },
-                battleTags = { "DuncanIdaho#11811", "Dimenster#1890", "LinChengSi#1303", "Necro638#1679", "Handhunter13#1683", "ShadowStorm#13165", "Lolispater71#1962", "TruckLover99#1730" },
-                tugWins = {},
-                points = 0,
-            },
+            [1] = HardcoreChallengeTracker2_Teams[1],
+            [2] = HardcoreChallengeTracker2_Teams[2],
         },
         users = {
             -- ["PeterPiper#1450"] = { team = 1, totalDeaths = 0, characterKeys = { 1: "Morloe:PeterPiper#1450" }},
