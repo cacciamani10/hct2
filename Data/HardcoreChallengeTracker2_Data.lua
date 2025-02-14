@@ -1,6 +1,14 @@
 local realm = "Doomhowl"
 local faction = "Alliance"
 local guildName = "WELL MET"
+local ACHIEVEMENT_START_ID = 1
+local ACHIEVEMENT_END_ID = 499
+
+local FEAT_START_ID = 500
+local FEAT_END_ID = 799
+
+local BOUNTY_START_ID = 800
+local BOUNTY_END_ID = 899
 
 local achievements = {
     ["Level Checkpoints"] = {
@@ -110,7 +118,6 @@ local feats = {
     { uniqueID = 515, name = "Beast Artisan",         description = "Learn 3 unique pet abilities before level 20. (Hunter Only).",                                           points = 5 },
     { uniqueID = 516, name = "Robes of the Arcane",   description = "Create the Lesser Spellfire Robes or Manaweave Robe before reaching level 16. (Mage Only)",              points = 4 },
     { uniqueID = 517, name = "Shadow Orb",            description = "Receive the shadow orb while level 38 or below (Warlock Only).",                                         points = 7 },
-
 }
 
 local bounties = {
@@ -119,10 +126,11 @@ local bounties = {
     { uniqueID = 802, name = "Death Defier",                   description = "Escape near death from an enemy 5 times (20% health or less)", points = 1 }, -- Add a check to see if recently in combat they took some big hits or were attacked by several enemies rather than self damage
     { uniqueID = 803, name = "Treasure Hunter",                description = "Every 5 rare or better items looted",                          points = 2 },
     { uniqueID = 804, name = "Deungeoneer",                    description = "Every 3 dungeons cleared",                                     points = 1 },
-    { uniqueID = 805, name = "Team-work makes-the dream-work", description = "Complete 2 dungeons with a full team of guild memebers",       points = 1 },
+    { uniqueID = 805, name = "Team-work makes the dream-work", description = "Complete a dungeon with a full team of guild memebers",       points = 1 },
     { uniqueID = 806, name = "GrAy-okay",                      description = "Every 500 grey mobs killed",                                   points = 1 },
     { uniqueID = 807, name = "Dedicated Quester",              description = "Every 25 unique quests completed",                             points = 1 },
     { uniqueID = 808, name = "Exalted Hero",                   description = "Reach Exalted reputation with a faction",                      points = 2 },
+    { uniqueID = 809, name = "Treasure Hunter",                description = "Open 5 treasure chests in the world",                          points = 1 },
     -- Add more bounties
 }
 
@@ -172,4 +180,10 @@ HardcoreChallengeTracker_Data = {
     feats = feats,
     dungeonBosses = dungeonBosses,
     broadcastChannels = broadcastChannels,
+    ACHIEVEMENT_START_ID = ACHIEVEMENT_START_ID,
+    ACHIEVEMENT_END_ID = ACHIEVEMENT_END_ID,
+    FEAT_START_ID = FEAT_START_ID,
+    FEAT_END_ID = FEAT_END_ID,
+    BOUNTY_START_ID = BOUNTY_START_ID,
+    BOUNTY_END_ID = BOUNTY_END_ID,
 }
