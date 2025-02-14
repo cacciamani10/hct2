@@ -11,11 +11,8 @@ local defaults = _G.DefaultData.defaults
 local options = _G.DefaultData:GetOptions(HCT)
 
 function HCT:OnInitialize()
-    -- Initialize AceDB with your defaults.
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
-    -- Register the defaults
     self.db:RegisterDefaults(defaults)
-    -- If team, faction, or realm is not set, set it to the current player's team, faction, and realm.
     if not self.db.profile.faction then self.db.profile.faction = HardcoreChallengeTracker_Data.faction end
     if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
     if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
@@ -36,9 +33,9 @@ function HCT:OnInitialize()
 end
 
 function HCT:OnEnable()
-    HCT_EventModule:RegisterEvents()
+    HCT:RegisterEvents()
     HCT_ChatModule:RegisterChatCommands()
-    self:ScheduleTimer(function()
+    HCT:ScheduleTimer(function()
         HCT_Broadcaster:RequestContestData()
     end, 600)
     -- Schedule bulk event broadcast every 15 minutes.
@@ -50,7 +47,36 @@ function HCT:OnEnable()
 end
 
 function HCT:OnDisable()
-    HCT_EventModule:UnregisterEvents()
+    self:UnregisterEvents()
     HCT_ChatModule:UnregisterChatCommands()
     self:CancelAllTimers()
+end
+
+function HCT:RegisterEvents()
+    for _, handler in pairs(_G.HCT_Handlers) do
+        local eventType = handler:GetEventType()
+        local handlerName = handler:GetHandlerName()
+
+        HCT[handlerName] = function(_, ...)
+            handler:HandleEvent(HCT, ...)
+        end
+
+        if handlerName == "AddonCommHandler" then
+            HCT:RegisterComm(HCT.addonPrefix, handlerName)
+        elseif eventType ~= HCT.addonPrefix then
+            HCT:RegisterEvent(eventType, handlerName)
+        end
+    end
+
+    HCT_Broadcaster:RequestContestData()
+    HCT_Broadcaster:BroadcastBulkEvents()
+end
+
+function HCT:UnregisterEvents()
+    for _, handler in pairs(_G.HCT_Handlers) do
+        local eventType = handler:GetEventType()
+        if eventType ~= HCT.addonPrefix then
+            HCT:UnregisterEvent(eventType)
+        end
+    end
 end

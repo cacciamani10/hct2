@@ -18,7 +18,6 @@ Data/DefaultData.lua
 # Data and Module Logic
 DataModule.lua
 UI/UIModule.lua
-EventModule.lua
 ChatModule.lua
 
 # Handlers
