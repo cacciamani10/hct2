@@ -10,6 +10,17 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         if xp == 0 then
             HCT:Print("PlayerEnteringWorldHandler: New character detected.") 
         end
+        if UnitIsGhost("player") then
+            local charKey = HCT_DataModule:GetCharacterKey()
+            if charKey == nil then 
+                return 
+            end
+            local charData = HCT.db.profile.characters[charKey]
+            if charData then
+                charData.isDead = true
+                HCT:Print("You have died... but we go agane!")
+            end
+        end
         -- Request data
         HCT_Broadcaster:RequestContestData() -- Request contest data from the guild.
         HCT:Print("Player entering world event handled.")
