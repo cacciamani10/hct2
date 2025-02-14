@@ -19,7 +19,6 @@ _G.HCT_Handlers.AddonCommHandler = {
             local success, msgType, payload = AceSerializer:Deserialize(message)
             if not success then
                 HCT:Print("Failed to deserialize message from " .. sender)
-                HCT:Print("event: " .. event)
                 HCT:Print("prefix: " .. prefix)
                 HCT:Print("message: " .. message)
                 return

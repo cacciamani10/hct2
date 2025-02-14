@@ -24,7 +24,7 @@ function HCT_EventModule:RegisterEvents()
         local eventType = handler:GetEventType()
         local handlerName = handler:GetHandlerName()
 
-        GetHCT():Print("Registering event: " .. eventType .. " with handler: " .. handlerName)
+        --GetHCT():Print("Registering event: " .. eventType .. " with handler: " .. handlerName)
         -- Define the callback that calls the handler's HandleEvent.
         GetHCT()[handlerName] = function(_, ...)
             handler:HandleEvent(GetHCT(), ...)
@@ -32,10 +32,11 @@ function HCT_EventModule:RegisterEvents()
 
         -- If this handler is for non-comm events, register it normally.
         -- For comm events (when eventType equals the addon prefix), skip registering here.
-        if eventType ~= GetHCT().addonPrefix then
-            GetHCT():RegisterEvent(eventType, handlerName)
-        else
+        if handlerName == "AddonCommHandler" then
             GetHCT():RegisterComm(GetHCT().addonPrefix, handlerName)
+            GetHCT():Print("Registered comm handler: " .. handlerName)
+        elseif eventType ~= GetHCT().addonPrefix then
+            GetHCT():RegisterEvent(eventType, handlerName)
         end
     end
 

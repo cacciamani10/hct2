@@ -29,14 +29,10 @@ _G.HCT_Broadcaster = {
     lastRequestTime = 0,
     BroadcastEvent = function(self, ev)
         local HCT = GetHCT()
-        HCT:Print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ")
         local now = time()
         self.lastBroadcastTime = now
         
         if not HCT then return end
-
-        HCT:Print("Broadcasting event: " .. ev.type)
-
         local serialized = AceSerializer:Serialize("EVENT", ev)
         if not serialized or serialized == "" then
             HCT:Print("Error: Serialized event is empty!")

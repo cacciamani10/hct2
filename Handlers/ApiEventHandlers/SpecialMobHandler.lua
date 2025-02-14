@@ -10,14 +10,13 @@ _G.HCT_Handlers.SpecialMobHandler = {
     end,
 
     HandleEvent = function(self, HCT, event)
-        local _, subEvent, _, _, _, _, _, destGUID, destName, _, _, _, overkill = CombatLogGetCurrentEventInfo()
-
-        if subEvent == "UNIT_DIED" and overkill and overkill > 0 then
+        local _, subEvent, _, _, sourceName, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
+        if subEvent == "UNIT_DIED" then
             local unitType, npcID = strsplit("-", destGUID)
             local classification = UnitClassification(destName) or "normal" -- Default to normal if nil
 
             local validClassifications = {
-                normal = "Normal Mob",
+                --normal = "Normal Mob",
                 elite = "Elite Mob",
                 rare = "Rare Mob",
                 rareelite = "Rare Elite Mob",
@@ -26,9 +25,6 @@ _G.HCT_Handlers.SpecialMobHandler = {
 
             if validClassifications[classification] then
                 local characterName = UnitName("player")
-                local message = characterName .. " killed a " .. validClassifications[classification] .. ": " .. (destName or "Unknown NPC")
-                
-                HCT:Print(message)
                 
                 local ev = {
                     type = "SPECIAL_KILL",
