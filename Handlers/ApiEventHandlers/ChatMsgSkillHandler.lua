@@ -18,7 +18,6 @@ _G.HCT_Handlers.ChatMsgSkillHandler = {
                 local charKey = HCT_DataModule:GetCharacterKey()
                 HCT_DataModule:CheckProfessionAchievement(charKey, skillName, skillLevel)
             end
-            HCT:Print("ChatMsgSkillHandler handled.")
         end
     end
 }
