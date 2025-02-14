@@ -29,7 +29,7 @@ function HCT:OnInitialize()
     end)
     HCT_DataModule:InitializeUserData()
     HCT_DataModule:InitializeCharacterData()
-    self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window.")
+    self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window or /t to chat with your team.")
 end
 
 function HCT:OnEnable()
