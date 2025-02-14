@@ -192,7 +192,7 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
 end
 
 function HCT_DataModule:CheckAllAchievements(charKey, filter)
-    GetHCT():Print("Checking all achievements for " .. charKey)
+    --GetHCT():Print("Checking all achievements for " .. charKey)
     if not filter or filter == "level" then
         self:CheckLevelAchievements(charKey)
     end

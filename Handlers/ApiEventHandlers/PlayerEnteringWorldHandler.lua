@@ -12,6 +12,5 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         end
         -- Request data
         HCT_Broadcaster:RequestContestData() -- Request contest data from the guild.
-        HCT:Print("Player entering world event handled.")
     end
 }
