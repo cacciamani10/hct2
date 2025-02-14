@@ -8,7 +8,7 @@ function AddonCommProcessor:ProcessEvent(ev)
     local HCT = GetHCT()
 
     if not HCT then return end
-    local db = GetDB().profile
+    local db = GetDB()
     if ev.type == "DEATH" then
         local charKey = ev.charKey
         if db.characters[charKey] then
@@ -16,7 +16,7 @@ function AddonCommProcessor:ProcessEvent(ev)
             HCT:Print(charKey .. " has died.")
         end
     elseif ev.type == "CHARACTER" then
-        local charKey = ev.characterName .. ":" .. ev.battleTag
+        local charKey = ev.name .. ":" .. ev.battleTag
         if db.characters[charKey] then
             for k, v in pairs(ev) do
                 db.characters[charKey][k] = v
@@ -31,6 +31,10 @@ function AddonCommProcessor:ProcessEvent(ev)
     elseif ev.type == "PLAYER_LOGOUT" then
         local characterName = ev.characterName or "Unknown Player"
         HCT:Print(characterName .. " logged out")
+    elseif ev.type == "GUILD_JOIN_REQUEST" then
+        local requester = ev.requester or "Unknown Player"
+        HCT:Print(requester .. " requested to join the guild")
+        HCT_GuildManager:HandleGuildInviteRequest(ev.type, requester)
     else
         HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
     end
@@ -38,9 +42,16 @@ end
 
 function AddonCommProcessor:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
-    if not HCT then return end
-    local db = GetDB().profile
-    if not db then return end
+    if not HCT then 
+        print("HCT is not initialized.") 
+        return 
+    end
+    
+    local db = HCT.db and HCT.db.profile
+    if not db then 
+        HCT:Print("Database profile is missing.") 
+        return 
+    end
     HCT:Print("Processing bulk update - saving to database.")
     if not db.users then db.users = {} end
     -- Merge users
@@ -67,9 +78,9 @@ function AddonCommProcessor:ProcessBulkUpdate(payload)
 
     -- Merge completionLedger
     for completionID, completionInfo in pairs(payload.completionLedger or {}) do
-        local achievementID = tonumber(completionID:match(":(.+)$")) or 0
+        local achievementID = tonumber(completionID:match(":(%d+)$")) or 0
         if achievementID == 0 then
-            HCT:Print("Invalid achievementID in completionID: " .. tostring(completionID))
+            error("Invalid achievementID in completionID: " .. tostring(completionID))
         elseif not db.completionLedger[completionID] then
             db.completionLedger[completionID] = completionInfo
         elseif achievementID >= 500 and achievementID <= 799 then

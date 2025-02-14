@@ -13,6 +13,7 @@ AddonComm/AddonCommBroadcaster.lua
 AddonComm/AddonCommProcessor.lua
 Data/HardcoreChallengeTracker2_Data.lua
 Data/HardcoreChallengeTracker2_Teams.lua
+Data/DefaultData.lua
 
 # Data and Module Logic
 DataModule.lua
@@ -29,6 +30,7 @@ Handlers/ApiEventHandlers/PlayerEnteringWorldHandler.lua
 Handlers/ApiEventHandlers/PlayerLogoutHandler.lua
 Handlers/ApiEventHandlers/ChatMsgSkillHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
+Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 
 # Main Core Initialization
 Core.lua

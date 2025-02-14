@@ -192,7 +192,7 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
 end
 
 function HCT_DataModule:CheckAllAchievements(charKey, filter)
-    GetHCT():Print("Checking all achievements for " .. charKey)
+    --GetHCT():Print("Checking all achievements for " .. charKey)
     if not filter or filter == "level" then
         self:CheckLevelAchievements(charKey)
     end
@@ -257,6 +257,10 @@ function HCT_DataModule:InitializeCharacterData()
     local characterName = UnitName("player")
     local db = GetDB()
     local battleTag = HCT_DataModule:GetBattleTag()
+    if not battleTag then 
+        GetHCT():Print("No battle tag found.")
+        return 
+    end -- No battle tag found. Return.
     local charKey = characterName .. ":" .. battleTag
     if playerRealm ~= db.realm then
         GetHCT():Print("This character is not eligible. Invalid realm: " .. playerRealm)

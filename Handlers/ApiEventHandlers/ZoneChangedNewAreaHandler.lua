@@ -9,10 +9,13 @@ _G.HCT_Handlers.ZoneChangedNewAreaHandler = {
 
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
-        local subzone = GetSubZoneText()
-        local zone = GetZoneText()
-        local mapId = C_Map.GetBestMapForUnit("player")
-        HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " ..
-        zone .. " - " .. subzone .. " (Map ID: " .. mapId .. ")")
+        C_Timer.After(0.5, function()
+            local subzone = GetSubZoneText()
+            local zone = GetZoneText()
+            local mapId = C_Map.GetBestMapForUnit("player")
+            local mapInfo = mapId and C_Map.GetMapInfo(mapId)
+            local mapName = mapInfo and mapInfo.name or "Unknown"
+            HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " .. zone .. " - " .. subzone .. " - " .. mapName)
+        end)
     end,
 }
