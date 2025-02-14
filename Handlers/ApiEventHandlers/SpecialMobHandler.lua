@@ -16,7 +16,7 @@ _G.HCT_Handlers.SpecialMobHandler = {
             local classification = UnitClassification(destName) or "normal" -- Default to normal if nil
 
             local validClassifications = {
-                normal = "Normal Mob",
+                --normal = "Normal Mob",
                 elite = "Elite Mob",
                 rare = "Rare Mob",
                 rareelite = "Rare Elite Mob",
