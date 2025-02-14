@@ -60,6 +60,5 @@ function HCT_GuildManager:HandleGuildInviteRequest(event, requester)
     if not GetHCT() then return end
     GetHCT():Print("Handling guild invite request from " .. requester)
     local db = GetDB()
-    local targetGuild = db.guildName
-    GuildInvite(requester) -- TODO: Fix this
+    C_GuildInfo.Invite(requester)
 end
