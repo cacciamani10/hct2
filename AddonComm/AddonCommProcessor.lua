@@ -8,7 +8,7 @@ function AddonCommProcessor:ProcessEvent(ev)
     local HCT = GetHCT()
 
     if not HCT then return end
-    local db = GetDB().profile
+    local db = GetDB()
     if ev.type == "DEATH" then
         local charKey = ev.charKey
         if db.characters[charKey] then
