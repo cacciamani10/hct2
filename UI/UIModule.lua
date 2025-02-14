@@ -10,33 +10,170 @@ local ACHIEVEMENT_COLOR = "ffd700" -- gold
 local BOUNTY_COLOR      = "00bfff" -- deep sky blue
 local FEAT_COLOR        = "32cd32" -- lime green
 local COMPLETED_COLOR   = "00ff00" -- green
+local PLAYER_COLOR      = "ffffff" -- white for names
+local POINTS_COLOR      = "00ff00" -- green for points
+local RAID_CLASS_COLORS = RAID_CLASS_COLORS -- use the default class colors from Blizzard's API
 
-local function FormatPlayersList(players)
+local function FormatPlayersList(players, contestData)
     if not players or #players == 0 then
         return "None"
     end
     local formatted = ""
     for i, player in ipairs(players) do
-        formatted = formatted .. "• " .. player .. "\n"
+        local points = contestData[player] or 0
+        formatted = formatted .. "• |cff" .. PLAYER_COLOR .. player .. "|r " ..
+            "(|cff" .. POINTS_COLOR .. points .. " points|r)" .. "\n"
     end
     return formatted
 end
 
-local function AggregateTeamPoints(team)
-    local total = 0
+local function CalculateCharacterDetails(charData)
+    local details = {}
+    -- Base points
+    details.levelPoints = HCT_DataModule:GetLevelPoints(charData.level, 0)
+    details.achievementPoints = 0
+    details.bountyPoints = 0
+
     local db = GetDB()
-    for _, battleTag in ipairs(team.battleTags or {}) do
-        local user = db.users[battleTag]
-        if user and user.characterKeys then  -- use characterKeys as per your data structure
-            for _, charKey in ipairs(user.characterKeys) do
-                local charData = db.characters[charKey]
-                if charData then
-                    total = total + HCT_DataModule:CalculateCharacterPoints(charData)
+    local penaltyFactor = charData.isDead and 0.5 or 1
+    for completionID, _ in pairs(db.completionLedger or {}) do
+        -- Expected format: "characterName:battleTag:achievementID"
+        local cName, battleTag, achievementID = completionID:match("^(.-):(.-):(%d+)$")
+        if cName and achievementID and cName == charData.name then
+            local achID = tonumber(achievementID)
+            for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
+                for _, achDef in ipairs(achList) do
+                    if achDef.uniqueID == achID then
+                        -- For simplicity, let's assume bounty IDs are 800-899 and achievements are below 500.
+                        if achID >= 800 and achID <= 899 then
+                            details.bountyPoints = details.bountyPoints + math.floor(achDef.points * penaltyFactor)
+                        elseif achID < 500 then
+                            details.achievementPoints = details.achievementPoints +
+                            math.floor(achDef.points * penaltyFactor)
+                        end
+                    end
                 end
             end
         end
     end
-    return total
+    details.totalPoints = details.levelPoints + details.achievementPoints + details.bountyPoints
+    return details
+end
+
+-- Characters Page
+function HCT_UIModule:DrawCharactersPage(container)
+    container:ReleaseChildren()
+
+    local db = GetDB()
+    local users = db.users or {}
+    local characters = db.characters or {}
+
+    -- Filter state variables
+    local selectedTeam = 1
+    local showDead = false
+
+    -- Create a horizontal group for filter buttons.
+    local filterGroup = AceGUI:Create("SimpleGroup")
+    filterGroup:SetLayout("Flow")
+    filterGroup:SetFullWidth(true)
+    container:AddChild(filterGroup)
+
+    local btnTeam1 = AceGUI:Create("Button")
+    btnTeam1:SetText("Team 1")
+    btnTeam1:SetCallback("OnClick", function()
+        selectedTeam = 1
+        UpdateCharactersContent()
+    end)
+    filterGroup:AddChild(btnTeam1)
+
+    local btnTeam2 = AceGUI:Create("Button")
+    btnTeam2:SetText("Team 2")
+    btnTeam2:SetCallback("OnClick", function()
+        selectedTeam = 2
+        UpdateCharactersContent()
+    end)
+    filterGroup:AddChild(btnTeam2)
+
+    local btnToggleDead = AceGUI:Create("Button")
+    local function UpdateToggleButtonText()
+        btnToggleDead:SetText(showDead and "Disable Dead" or "Enable Dead")
+    end
+    UpdateToggleButtonText()
+    btnToggleDead:SetCallback("OnClick", function()
+        showDead = not showDead
+        UpdateToggleButtonText()
+        UpdateCharactersContent()
+    end)
+    filterGroup:AddChild(btnToggleDead)
+
+    -- Create the scroll frame for character listing.
+    local contentContainer = AceGUI:Create("ScrollFrame")
+    contentContainer:SetLayout("Flow")
+    contentContainer:SetFullWidth(true)
+    contentContainer:SetFullHeight(true)
+    container:AddChild(contentContainer)
+
+    -- Function to update the content based on filters.
+    function UpdateCharactersContent()
+        contentContainer:ReleaseChildren()
+        -- Loop over each user in db.users.
+        for battleTag, userData in pairs(users) do
+            if userData.team == selectedTeam then
+                local userHeader = AceGUI:Create("Heading")
+                userHeader:SetFullWidth(true)
+                userHeader:SetText(battleTag)
+                contentContainer:AddChild(userHeader)
+                -- For each character for this user.
+                for _, charKey in ipairs(userData.characterKeys or {}) do
+                    local charData = characters[charKey]
+                    if charData and (showDead or not charData.isDead) then
+                        local details = CalculateCharacterDetails(charData)
+
+                        local charGroup = AceGUI:Create("InlineGroup")
+                        charGroup:SetLayout("Flow")
+                        charGroup:SetFullWidth(true)
+
+                        -- Name (in red if dead, otherwise white)
+                        local nameColor = charData.isDead and "ff0000" or PLAYER_COLOR
+                        local nameHeading = AceGUI:Create("Heading")
+                        nameHeading:SetFullWidth(true)
+                        nameHeading:SetText(string.format("|cff%s%s|r", nameColor, charData.name))
+                        charGroup:AddChild(nameHeading)
+
+                        -- Basic info: Level and Class (with class colored)
+                        local classColor = RAID_CLASS_COLORS[charData.class:upper()]
+                        local classColorCode = classColor and
+                        string.format("|cff%02x%02x%02x", classColor.r * 255, classColor.g * 255, classColor.b * 255) or
+                        "|cffffffff"
+                        local basicInfo = AceGUI:Create("Label")
+                        basicInfo:SetFullWidth(true)
+                        basicInfo:SetText(string.format("Level: %d  |  Class: %s%s|r", charData.level, classColorCode,
+                            charData.class))
+                        charGroup:AddChild(basicInfo)
+
+                        -- Total Points (highlighted, e.g., using a bold or distinct color)
+                        local totalPointsLabel = AceGUI:Create("Label")
+                        totalPointsLabel:SetFullWidth(true)
+                        totalPointsLabel:SetText(string.format("Total Points: |cff%s%d|r", ACHIEVEMENT_COLOR,
+                            details.totalPoints))
+                        charGroup:AddChild(totalPointsLabel)
+
+                        -- Breakdown: Level, Achievement, and Bounty Points
+                        local pointsInfo = AceGUI:Create("Label")
+                        pointsInfo:SetFullWidth(true)
+                        pointsInfo:SetText(string.format(
+                            "Level Points: %d  |  Achievement Points: %d  |  Bounty Points: %d",
+                            details.levelPoints, details.achievementPoints, details.bountyPoints))
+                        charGroup:AddChild(pointsInfo)
+
+                        contentContainer:AddChild(charGroup)
+                    end
+                end
+            end
+        end
+    end
+
+    UpdateCharactersContent()
 end
 
 local function DrawTeamInfo(container)
@@ -55,16 +192,19 @@ local function DrawTeamInfo(container)
     local team1ColorCode = string.format("|cff%02x%02x%02x", team1Color.r, team1Color.g, team1Color.b)
     local team2ColorCode = string.format("|cff%02x%02x%02x", team2Color.r, team2Color.g, team2Color.b)
 
-    -- Dynamically compute team points.
-    local team1Points = AggregateTeamPoints(team1)
-    local team2Points = AggregateTeamPoints(team2)
+    -- Assume HCT_DataModule.calculatedData has been updated with player contributions.
+    local contestData = HCT_DataModule.calculatedData or {}
+
+    local team1Points = contestData["team1"] or 0
+    local team2Points = contestData["team2"] or 0
 
     local t1Label = AceGUI:Create("Label")
     t1Label:SetFullWidth(true)
     t1Label:SetText(string.format("%s%s|r - Team Points: %s%d|r", team1ColorCode, team1Name, team1ColorCode, team1Points))
     container:AddChild(t1Label)
 
-    local t1PlayersFormatted = FormatPlayersList(team1.battleTags)
+    -- Now include each player's point contribution in the list.
+    local t1PlayersFormatted = FormatPlayersList(team1.battleTags, contestData)
     local t1PlayersLabel = AceGUI:Create("Label")
     t1PlayersLabel:SetFullWidth(true)
     t1PlayersLabel:SetText("Players:\n" .. t1PlayersFormatted)
@@ -80,27 +220,11 @@ local function DrawTeamInfo(container)
     t2Label:SetText(string.format("%s%s|r - Team Points: %s%d|r", team2ColorCode, team2Name, team2ColorCode, team2Points))
     container:AddChild(t2Label)
 
-    local t2PlayersFormatted = FormatPlayersList(team2.battleTags)
+    local t2PlayersFormatted = FormatPlayersList(team2.battleTags, contestData)
     local t2PlayersLabel = AceGUI:Create("Label")
     t2PlayersLabel:SetFullWidth(true)
     t2PlayersLabel:SetText("Players:\n" .. t2PlayersFormatted)
     container:AddChild(t2PlayersLabel)
-
-    local spacer2 = AceGUI:Create("Label")
-    spacer2:SetFullWidth(true)
-    spacer2:SetText(" ")
-    container:AddChild(spacer2)
-
-    local totalPoints = team1Points + team2Points
-    local percentTeam1 = totalPoints > 0 and (team1Points / totalPoints) * 100 or 50
-
-    local progressSlider = AceGUI:Create("Slider")
-    progressSlider:SetLabel("Tug of War Progress")
-    progressSlider:SetFullWidth(true)
-    progressSlider:SetSliderValues(0, 100, 1)
-    progressSlider:SetValue(percentTeam1)
-    progressSlider:SetDisabled(true)
-    container:AddChild(progressSlider)
 end
 
 local function DrawTeamChat(container)
@@ -133,70 +257,6 @@ local function DrawTeamChat(container)
     container:AddChild(chatBox)
 end
 
-local function DrawCharacters(container)
-    container:ReleaseChildren()
-    local scrollFrame = AceGUI:Create("ScrollFrame")
-    local db = GetDB()
-    scrollFrame:SetLayout("Flow")
-    scrollFrame:SetFullWidth(true)
-    scrollFrame:SetFullHeight(true)
-    container:AddChild(scrollFrame)
-    for user, userData in pairs(db.users) do
-        local userLabel = AceGUI:Create("Label")
-        userLabel:SetFullWidth(true)
-        userLabel:SetText("|cffaaaaaaUser:|r " .. user)
-        scrollFrame:AddChild(userLabel)
-        if userData.characterKeys and #userData.characterKeys > 0 then
-            for _, charKey in ipairs(userData.characterKeys) do
-                local charData = db.characters[charKey]
-                if charData then
-                    local status = (charData.isDead and " [DEAD]" or "")
-                    local charText = string.format(
-                        "  - %s, Level: %d, Lvl Points: %d, Ach Points: %d, Trib Points: %d%s",
-                        charKey, charData.level, charData.levelUpPoints or 0, charData.achievementPoints or 0,
-                        charData.featPoints or 0, status)
-                    local charLabel = AceGUI:Create("Label")
-                    charLabel:SetFullWidth(true)
-                    charLabel:SetText(charText)
-                    scrollFrame:AddChild(charLabel)
-                    -- Display achievements if available.
-                    if charData.achievements then
-                        local achText = "Achievements: "
-                        if next(charData.achievements) == nil then
-                            achText = achText .. "None"
-                        else
-                            for achName, completed in pairs(charData.achievements) do
-                                if completed then
-                                    achText = achText .. achName .. ", "
-                                end
-                            end
-                            achText = achText:gsub(", $", "")
-                        end
-                        local achLabel = AceGUI:Create("Label")
-                        achLabel:SetFullWidth(true)
-                        achLabel:SetText("|cff" .. ACHIEVEMENT_COLOR .. achText .. "|r")
-                        scrollFrame:AddChild(achLabel)
-                    end
-                else
-                    local charLabel = AceGUI:Create("Label")
-                    charLabel:SetFullWidth(true)
-                    charLabel:SetText("  - " .. charKey .. " (No data)")
-                    scrollFrame:AddChild(charLabel)
-                end
-            end
-        else
-            local noneLabel = AceGUI:Create("Label")
-            noneLabel:SetFullWidth(true)
-            noneLabel:SetText("  No characters recorded.")
-            scrollFrame:AddChild(noneLabel)
-        end
-        local spacer = AceGUI:Create("Label")
-        spacer:SetFullWidth(true)
-        spacer:SetText(" ")
-        scrollFrame:AddChild(spacer)
-    end
-end
-
 local function UpdateAchievementsContent(contentContainer, mode)
     contentContainer:ReleaseChildren()
 
@@ -213,7 +273,7 @@ local function UpdateAchievementsContent(contentContainer, mode)
                 local label = AceGUI:Create("Label")
                 label:SetFullWidth(true)
                 local description = ach.description or "No description available"
-                label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", 
+                label:SetText(string.format("|cff%s%s|r - Points: %d\n%s",
                     ACHIEVEMENT_COLOR, ach.name, ach.points or 0, description))
                 contentContainer:AddChild(label)
             end
@@ -312,138 +372,6 @@ function HCT_UIModule:DrawAchievementsPage(container)
     UpdateAchievementsContent(contentContainer, viewMode)
 end
 
-local function DrawBounties(container)
-    container:ReleaseChildren()
-
-    local scrollFrame = AceGUI:Create("ScrollFrame")
-    scrollFrame:SetLayout("Flow")
-    scrollFrame:SetFullWidth(true)
-    scrollFrame:SetFullHeight(true)
-    container:AddChild(scrollFrame)
-
-    local db = GetDB()
-    local bounties = db.bounties or {}
-
-    for _, bounty in ipairs(bounties) do
-        local label = AceGUI:Create("Label")
-        label:SetFullWidth(true)
-        local description = bounty.description or "No description available"
-        label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", BOUNTY_COLOR, bounty.name, bounty.points or 0,
-            description))
-        scrollFrame:AddChild(label)
-    end
-
-    local completedHeader = AceGUI:Create("Heading")
-    completedHeader:SetText("Completed Bounties")
-    completedHeader:SetFullWidth(true)
-    scrollFrame:AddChild(completedHeader)
-
-    local completedBounties = {}                                      -- List of completed bounties.
-    for user, userData in pairs(db.users) do                          -- Iterate over all users.
-        if userData.characters then                                   -- Check if the user has characters.
-            for _, charName in ipairs(userData.characters) do         -- Iterate over each character.
-                local charData = db.characters[charName]              -- Get character data.
-                if charData and charData.bounties then                -- Check if the character has completed bounties.
-                    for bountyName, ts in pairs(charData.bounties) do -- Iterate over each completed bounty.
-                        local found, points = nil,
-                            0                                         -- Initialize variables to find the bounty and its points.
-                        for _, bounty in ipairs(bounties) do          -- Iterate over all bounties.
-                            if bounty.name == bountyName then         -- Check if the bounty matches the completed one.
-                                found = true                          -- Mark the bounty as found.
-                                points = bounty.points or 0           -- Get the points for the bounty.
-                                break                                 -- Exit the loop since we found the bounty.
-                            end                                       -- End of if bounty.name == bountyName.
-                        end                                           -- End of for _, bounty in ipairs(bounties).
-                        if found then                                 -- Check if the bounty was found.
-                            table.insert(completedBounties, {         -- Add the completed bounty to the list.
-                                player = charName,                    -- The player who completed the bounty.
-                                bounty = bountyName,                  -- The name of the bounty.
-                                points = points,                      -- The points for the bounty.
-                                timestamp = ts
-                            })                                        -- End of table.insert.
-                        end                                           -- End of if found.
-                    end                                               -- End of for bountyName, ts in pairs(charData.bounties).
-                end                                                   -- End of if charData and charData.bounties.
-            end                                                       -- End of for _, charName in ipairs(userData.characters).
-        end                                                           -- End of if userData.characters.
-    end                                                               -- End of for user, userData in pairs(db.users).
-end
-
-local function DrawFeats(container)
-    container:ReleaseChildren()
-    local db = GetDB()
-
-    local scrollFrame = AceGUI:Create("ScrollFrame")
-    scrollFrame:SetLayout("Flow")
-    scrollFrame:SetFullWidth(true)
-    scrollFrame:SetFullHeight(true)
-    container:AddChild(scrollFrame)
-
-    local feats = db.feats or {}
-
-    for _, feat in ipairs(feats) do
-        local label = AceGUI:Create("Label")
-        label:SetFullWidth(true)
-
-        local description = feat.description or "No description available"
-        label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", FEAT_COLOR, feat.name, feat.points or 0,
-            description))
-        scrollFrame:AddChild(label)
-    end
-
-    local completedHeader = AceGUI:Create("Heading")
-    completedHeader:SetText("Completed Feats")
-    completedHeader:SetFullWidth(true)
-    scrollFrame:AddChild(completedHeader)
-
-    local completedFeats = {}                                       -- List of completed feats.
-    for user, userData in pairs(db.users) do                        -- Iterate over all users.
-        if userData.characters then                                 -- Check if the user has characters.
-            for _, charName in ipairs(userData.characters) do       -- Iterate over each character.
-                local charData = db.characters[charName]            -- Get character data.
-                if charData and charData.feats then                 -- Check if the character has completed feats.
-                    for featName, count in pairs(charData.feats) do -- Iterate over each completed feat.
-                        local found, points = nil,
-                            0                                       -- Initialize variables to find the feat and its points.
-                        for _, feat in ipairs(feats) do             -- Iterate over all feats.
-                            if feat.name == featName then           -- Check if the feat matches the completed one.
-                                found = true                        -- Mark the feat as found.
-                                points = feat.points or 0           -- Get the points for the feat.
-                                break                               -- Exit the loop since we found the feat.
-                            end                                     -- End of if feat.name == featName.
-                        end                                         -- End of for _, feat in ipairs(feats).
-                        if found then                               -- Check if the feat was found.
-                            table.insert(completedFeats, {          -- Add the completed feat to the list.
-
-                                player = charName,                  -- The player who completed the feat.
-                                feat = featName,                    -- The name of the feat.
-                                points = points,                    -- The points for the feat.
-                                count = count                       -- The number of times the feat was completed
-                            })                                      -- End of table.insert.
-                        end                                         -- End of if found.
-                    end                                             -- End of for featName, count in pairs(charData.feats).
-                end                                                 -- End of if charData and charData.feats.
-            end                                                     -- End of for _, charName in ipairs(userData.characters).
-        end                                                         -- End of if userData.characters.
-    end                                                             -- End of for user, userData in pairs(db.users).
-
-    table.sort(completedFeats, function(a, b)
-        if a.player == b.player then
-            return a.feat < b.feat
-        else
-            return a.player < b.player
-        end
-    end)
-
-    for _, entry in ipairs(completedFeats) do
-        local label = AceGUI:Create("Label")
-        label:SetFullWidth(true)
-        label:SetText(string.format("|cff%s%s|r - Points: %d - Completed: %d times", COMPLETED_COLOR, entry.feat,
-            entry.points, entry.count))
-        scrollFrame:AddChild(label)
-    end
-end
-
 local function DrawTugOfWar(container)
     container:ReleaseChildren()
 
@@ -467,15 +395,16 @@ end
 function HCT_UIModule:ShowMainGUI()
     local guiFrame = AceGUI:Create("Frame")
     guiFrame:SetTitle("Hardcore Challenge Tracker")
+    HCT_DataModule:CalculateContestData()
     local statusText = "Neither team has scored yet."
     local db = GetDB()
     if db.teams[1].points and db.teams[2].points then
-        local t1 = AggregateTeamPoints(db.teams[1])
-        local t2 = AggregateTeamPoints(db.teams[2])
+        local t1 = HCT_DataModule.calculatedData["team1"] or 0
+        local t2 = HCT_DataModule.calculatedData["team2"] or 0
         if t1 > t2 then
-            statusText = "Team 1 is ahead!"
+            statusText = db.teams[1].name .. " are ahead!"
         elseif t2 > t1 then
-            statusText = "Team 2 is ahead!"
+            statusText = db.teams[2].name .. " are ahead!"
         elseif t1 == t2 and t1 > 0 then
             statusText = "It's neck and neck!"
         end
@@ -492,9 +421,9 @@ function HCT_UIModule:ShowMainGUI()
     tabGroup:SetTabs({
         { text = "Team Info",    value = "teamInfo" },
         { text = "Characters",   value = "characters" },
-        { text = "Feats",        value = "feats" },
         { text = "Achievements", value = "achievements" },
         { text = "Bounties",     value = "bounties" },
+        { text = "Feats",        value = "feats" },
         { text = "Tug of War",   value = "tugOfWar" },
         { text = "Team Chat",    value = "teamChat" },
         { text = "Rules",        value = "rules" },
@@ -504,30 +433,23 @@ function HCT_UIModule:ShowMainGUI()
         if group == "teamInfo" then
             DrawTeamInfo(container)
             guiFrame:SetStatusText(statusText)
-        elseif group == "teamChat" then
-            DrawTeamChat(container)
-            -- Get the users team from their battleTag
-            local team = HCT_DataModule:GetPlayerTeam(HCT_DataModule:GetBattleTag()) or ""
-            guiFrame:SetStatusText(team .. " Chat")
         elseif group == "characters" then
-            DrawCharacters(container)
-            guiFrame:SetStatusText("Character Information")
+            HCT_UIModule:DrawCharactersPage(container)
+            guiFrame:SetStatusText("Characters are listed by team.")
         elseif group == "achievements" then
             HCT_UIModule:DrawAchievementsPage(container)
             guiFrame:SetStatusText("Achievements are earnable once per character.")
-        elseif group == "feats" then
-            DrawFeats(container)
-            guiFrame:SetStatusText("Feats can only be earned once per contest.")
-        elseif group == "bounties" then
-            DrawBounties(container)
-            guiFrame:SetStatusText(
-                "Bounties can be earned infinitely - the level will reflect how many times you've completed it.")
         elseif group == "tugOfWar" then
             DrawTugOfWar(container)
             guiFrame:SetStatusText("Coming in Phase 2!")
         elseif group == "rules" then
             DrawRules(container)
             guiFrame:SetStatusText("Rules of the contest.")
+        elseif group == "teamChat" then
+            DrawTeamChat(container)
+            -- Get the users team from their battleTag
+            local team = HCT_DataModule:GetPlayerTeam(HCT_DataModule:GetBattleTag()) or ""
+            guiFrame:SetStatusText(team .. " Chat")
         else
             local placeholder = AceGUI:Create("Label")
             placeholder:SetFullWidth(true)
@@ -537,24 +459,4 @@ function HCT_UIModule:ShowMainGUI()
     end)
     tabGroup:SelectTab("teamInfo")
     guiFrame:AddChild(tabGroup)
-end
-
--- Helper function to aggregate team points.
-function AggregateTeamPoints(team)
-    local total = 0
-    local db = GetDB()
-    for _, battleTag in ipairs(team.battleTags or {}) do
-        local user = db.users[battleTag]
-        if user and user.characters then
-            for _, charName in ipairs(user.characters) do
-                local charData = db.characters[charName]
-                if charData then
-                    total = total + (charData.levelUpPoints or 0)
-                        + (charData.achievementPoints or 0)
-                        + (charData.featPoints or 0)
-                end
-            end
-        end
-    end
-    return total
 end

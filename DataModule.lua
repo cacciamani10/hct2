@@ -1,12 +1,39 @@
 -- DataModule.lua
 HCT_DataModule = {}
 
+HCT_DataModule.calculatedData = {}
+
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 function HCT_DataModule:GetBattleTag()
     local info = select(2, BNGetInfo())
     return info and info:match("^(%S+#%S+)") or "unknown"
+end
+
+-- Helper: iterate through a set of data tables (e.g. achievements or bounties)
+-- and return the matching entry for a given uniqueID.
+local function FindEntryByID(uniqueID, dataTables)
+    for category, list in pairs(dataTables) do
+        for _, entry in ipairs(list) do
+            if entry.uniqueID == uniqueID then
+                return entry
+            end
+        end
+    end
+    return nil
+end
+
+-- Helper: Given a uniqueID and one or more data tables, return its point value.
+local function GetPointsForCompletion(uniqueID, ...)
+    local tables = {...}
+    for _, dataTable in ipairs(tables) do
+        local entry = FindEntryByID(uniqueID, dataTable)
+        if entry then
+            return entry.points or 0
+        end
+    end
+    return 0
 end
 
 function HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
@@ -25,10 +52,36 @@ function HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
     return points
 end
 
+function HCT_DataModule:CalculateContestData()
+    local db = GetDB()
+    local contestData = { team1 = 0, team2 = 0 }
+    local players = db.users or {}
+    local characters = db.characters or {}
+
+    for playerKey, playerData in pairs(players) do
+        local playerPoints = 0
+        for _, charKey in ipairs(playerData.characterKeys or {}) do
+            local charData = characters[charKey]
+            if charData then
+                local points = self:CalculateCharacterPoints(charData)
+                playerPoints = playerPoints + points
+                if playerData.team == 1 then
+                    contestData.team1 = contestData.team1 + points
+                elseif playerData.team == 2 then
+                    contestData.team2 = contestData.team2 + points
+                end
+            end
+        end
+        contestData[playerKey] = playerPoints
+    end
+    self.calculatedData = contestData
+    return contestData
+end
+
 function HCT_DataModule:GetCharacterKey()
     local name = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
-    return name or "unknown" end
-
+    return name or "unknown"
+end
 
 function HCT_DataModule:GetPlayerTeam(player)
     local teams = GetDB().teams
@@ -77,7 +130,7 @@ function HCT_DataModule:CompleteAchievement(charKey, achievement)
     if db.myCompletions[completionID] then return end -- Already completed
     GetHCT():Print("Completing achievement: " .. achievement.name .. " for " .. charKey)
     local timeCompleted = time()
-    db.myCompletions[completionID] = { timestamp = timeCompleted } -- Add to myCompletions table
+    db.myCompletions[completionID] = { timestamp = timeCompleted }    -- Add to myCompletions table
     db.completionLedger[completionID] = { timestamp = timeCompleted } -- Add to completionLedger table
 end
 
@@ -213,43 +266,56 @@ function HCT_DataModule.NormalizeColor(color)
 end
 
 function HCT_DataModule:CalculateCharacterPoints(charData)
-    if not charData then 
+    local HCT = GetHCT()
+    local db = GetDB()
+    if not charData then
         local charKey = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
         charData = GetDB().characters[charKey] or {}
-        if not charData then return 0 end -- No data found for character. Return 0 points.
+        if not charData then
+            GetHCT():Print("CalculateCharacterPoints: No data found for character: " .. charKey)
+            return 0
+        end
     end
     local total = 0
 
+    -- Determine penaltyFactor based solely on isDead.
+    local penaltyFactor = charData.isDead and 0.5 or 1
+
     -- Level Points: Calculate based on current level.
     local currentLevel = charData.level or UnitLevel("player")
-    -- Assuming GetLevelPoints calculates points from level 1 to currentLevel.
-    total = total + self:GetLevelPoints(currentLevel, 0)
+    total = total + math.floor(HCT_DataModule:GetLevelPoints(currentLevel) * penaltyFactor)
 
     -- Achievement Points: Loop through achievements the character has completed.
-    local achievements = GetDB().completionLedger or {}
-    
-    for completionID, _ in pairs(achievements) do
-        -- Get Character name and achievementID from completionLedger keys.
-        local achID = completionID:match(":(.+)")
-        local charName = completionID:match("(.+):")
-        if charName == charData.name then -- Only count achievements for this character.
+    for completionID, _ in pairs(db.completionLedger or {}) do
+        -- Expected format: "<characterName>:<battleTag>:<achievementID>"
+        local charName, battleTag, achIDStr = completionID:match("^(.-):(.-):(%d+)$")
+        if charName and achIDStr and charName == charData.name then
+            local achID = tonumber(achIDStr)
             for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
                 for _, achDef in ipairs(achList) do
                     if achDef.uniqueID == achID then
-                        -- ids 500 - 799 are feats and will not be reduced by death.
-                        if achDef.uniqueID >= 500 and achDef.uniqueID <= 799 then
+                        if achDef.uniqueID >= HardcoreChallengeTracker_Data.FEAT_START_ID and achDef.uniqueID <= HardcoreChallengeTracker_Data.FEAT_END_ID then
                             total = total + achDef.points
                         else
-                            total = total + achDef.points * (1 - charData.totalDeaths * 0.1)
+                            local penaltyFactor = charData.isDead and 0.5 or 1
+                            total = total + math.floor(achDef.points * penaltyFactor)
                         end
                     end
                 end
             end
         end
     end
+    
 
+    -- Tug-of-war points remain unaffected.
+    if charData.tugPoints then
+        total = total + charData.tugPoints
+    end
+
+    HCT:Print("Total points for " .. charData.name .. ": " .. total)
     return total
 end
+
 
 function HCT_DataModule:InitializeCharacterData()
     local playerFaction = UnitFactionGroup("player")
@@ -257,9 +323,9 @@ function HCT_DataModule:InitializeCharacterData()
     local characterName = UnitName("player")
     local db = GetDB()
     local battleTag = HCT_DataModule:GetBattleTag()
-    if not battleTag then 
+    if not battleTag then
         GetHCT():Print("No battle tag found.")
-        return 
+        return
     end -- No battle tag found. Return.
     local charKey = characterName .. ":" .. battleTag
     if playerRealm ~= db.realm then
