@@ -118,6 +118,10 @@ local feats = {
     { uniqueID = 515, name = "Beast Artisan",         description = "Learn 3 unique pet abilities before level 20. (Hunter Only).",                                           points = 5 },
     { uniqueID = 516, name = "Robes of the Arcane",   description = "Create the Lesser Spellfire Robes or Manaweave Robe before reaching level 16. (Mage Only)",              points = 4 },
     { uniqueID = 517, name = "Shadow Orb",            description = "Receive the shadow orb while level 38 or below (Warlock Only).",                                         points = 7 },
+    { uniqueID = 518, name = "Loot Hoarder",  description = "Win a need roll by 1",                                                                                   points = 2 },
+    { uniqueID = 519, name = "Unworthy Roller",       description = "Lose a need roll by 1",                                                                                  points = 2 },
+    { uniqueID = 520, name = "I Have A Mage Alt",     description = "Roll 100 on a need roll.",                                                                               points = 2 },
+    { uniqueID = 521, name = "Roll Under Pressure",   description = "Roll 1 on a need roll.",                                                                                 points = 2 },
 }
 
 local bounties = {
@@ -126,7 +130,7 @@ local bounties = {
     { uniqueID = 802, name = "Death Defier",                   description = "Escape near death from an enemy 5 times (20% health or less)", points = 1 }, -- Add a check to see if recently in combat they took some big hits or were attacked by several enemies rather than self damage
     { uniqueID = 803, name = "Treasure Hunter",                description = "Every 5 rare or better items looted",                          points = 2 },
     { uniqueID = 804, name = "Deungeoneer",                    description = "Every 3 dungeons cleared",                                     points = 1 },
-    { uniqueID = 805, name = "Team-work makes the dream-work", description = "Complete a dungeon with a full team of guild memebers",       points = 1 },
+    { uniqueID = 805, name = "Team-work makes the dream-work", description = "Complete a dungeon with a full team of guild memebers",        points = 1 },
     { uniqueID = 806, name = "GrAy-okay",                      description = "Every 500 grey mobs killed",                                   points = 1 },
     { uniqueID = 807, name = "Dedicated Quester",              description = "Every 25 unique quests completed",                             points = 1 },
     { uniqueID = 808, name = "Exalted Hero",                   description = "Reach Exalted reputation with a faction",                      points = 2 },
