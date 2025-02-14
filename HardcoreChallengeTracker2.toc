@@ -28,6 +28,7 @@ Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
 Handlers/ApiEventHandlers/PlayerEnteringWorldHandler.lua
 Handlers/ApiEventHandlers/PlayerLogoutHandler.lua
 Handlers/ApiEventHandlers/ChatMsgSkillHandler.lua
+Handlers/ApiEventHandlers/ChatMsgLootHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
 Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 
