@@ -31,6 +31,10 @@ function AddonCommProcessor:ProcessEvent(ev)
     elseif ev.type == "PLAYER_LOGOUT" then
         local characterName = ev.characterName or "Unknown Player"
         HCT:Print(characterName .. " logged out")
+    elseif ev.type == "GUILD_JOIN_REQUEST" then
+        local requester = ev.requester or "Unknown Player"
+        HCT:Print(requester .. " requested to join the guild")
+        HCT_GuildManager:HandleGuildInviteRequest(ev.type, requester)
     else
         HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
     end

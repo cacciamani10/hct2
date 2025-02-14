@@ -51,13 +51,14 @@ function HCT_GuildManager:AutoRequestToJoinGuild()
             type = "GUILD_JOIN_REQUEST",
             requester = requester,
         }
-        GetHCT().HCT_Broadcaster:BroadcastEvent(ev)
+        HCT_Broadcaster:BroadcastEvent(ev)
     end
 end
 
 function HCT_GuildManager:HandleGuildInviteRequest(event, requester)
     
     if not GetHCT() then return end
+    GetHCT():Print("Handling guild invite request from " .. requester)
     local db = GetDB()
     local targetGuild = db.guildName
     GuildInvite(requester) -- TODO: Fix this
