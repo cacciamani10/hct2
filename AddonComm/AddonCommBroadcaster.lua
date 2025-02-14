@@ -95,6 +95,6 @@ _G.HCT_Broadcaster = {
         -- Send the serialized data
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
 
-        HCT:Print("Bulk update complete.")
+        --HCT:Print("Bulk update complete.")
     end
 }

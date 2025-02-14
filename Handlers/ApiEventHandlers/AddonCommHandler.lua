@@ -28,7 +28,7 @@ _G.HCT_Handlers.AddonCommHandler = {
                 AddonCommProcessor:ProcessEvent(payload)
             elseif msgType == "BULK_UPDATE" then
                 AddonCommProcessor:ProcessBulkUpdate(payload)
-                HCT:Print("Bulk update received and processed from " .. sender)
+                --HCT:Print("Bulk update received and processed from " .. sender)
             elseif msgType == "REQUEST" then
                 AddonCommProcessor:RespondToRequest(payload)
             elseif msgType == "TEAMCHAT" then
