@@ -26,8 +26,6 @@ _G.HCT_Handlers.ChatMsgSkillHandler = {
                         HCT_DataModule:CheckProfessionAchievement(charKey, skillName, skillLevelNumber)
                     end
                 end
-            else
-                HCT:Print("No skill match in: " .. text)
             end
         end
     end

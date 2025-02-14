@@ -28,8 +28,6 @@ _G.HCT_Handlers.ChatMsgSkillHandler = {
             local lootName, lootQuantityStr = string.match(cleanedText, "You receive loot: %[(.-)%]x?(%d*)")
             if lootName then
                 local lootQuantity = tonumber(lootQuantityStr) or 1 -- Default to 1 if no quantity is found
-                HCT:Print("DEBUG: lootName = >" ..
-                tostring(lootName) .. "<, lootQuantity = >" .. tostring(lootQuantity) .. "<")
                 local charKey = HCT_DataModule:GetCharacterKey()
                 local charLevel = UnitLevel("player")
                 if clothNames[lootName] then
