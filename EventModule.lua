@@ -66,7 +66,7 @@ function HCT_EventModule:ProcessEvent(ev)
             HCT:Print(charKey .. " has died.")
         end
     elseif ev.type == "CHARACTER" then
-        local charKey = ev.characterName .. ":" .. ev.battleTag
+        local charKey = ev.name .. ":" .. ev.battleTag
         if db.characters[charKey] then
             for k, v in pairs(ev) do
                 db.characters[charKey][k] = v
