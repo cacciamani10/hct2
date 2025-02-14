@@ -15,7 +15,7 @@ _G.HCT_Handlers.AddonCommHandler = {
         if not HCT then return end
         if prefix == HCT.addonPrefix then
             local myName = UnitName("player")
-            -- if sender == myName or Ambiguate(sender, "none") == myName then return end
+            if sender == myName or Ambiguate(sender, "none") == myName then return end
             local success, msgType, payload = AceSerializer:Deserialize(message)
             if not success then
                 HCT:Print("Failed to deserialize message from " .. sender)

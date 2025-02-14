@@ -128,7 +128,7 @@ function HCT:OnEnable()
     self:ScheduleTimer(function()
         HCT_Broadcaster:RequestContestData()
     end, 600)
-    -- Schedule bulk event broadcast every 5 minutes as a backup.
+    -- Schedule bulk event broadcast every 15 minutes.
     self:ScheduleRepeatingTimer(function()
         HCT_Broadcaster:BroadcastBulkEvents()
     end, 900)
