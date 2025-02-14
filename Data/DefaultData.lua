@@ -30,6 +30,11 @@ _G.DefaultData.defaults = {
             -- (completionID = characterKey:achievementID)
             -- [completionID] = { timestamp = timestamp }
         },
+        localAchievementProgressData = {
+            -- Use this however you can imagine to track progress towards achievements.
+            -- characterKey entry for specific data, or just add a property for something global
+        }, 
+
         -- Example of a completion ledger entry:
         -- ["Morloe:PeterPiper#1450:1"] = {
         --     ["timestamp"] = 1739458821,
