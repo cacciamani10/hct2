@@ -11,7 +11,9 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
             HCT:Print("PlayerEnteringWorldHandler: New character detected.") 
         end
         -- Request data
-        HCT_Broadcaster:RequestContestData() -- Request contest data from the guild.
+        if event.isInitialLogin then
+            HCT_Broadcaster:RequestContestData()
+        end
         HCT:Print("Player entering world event handled.")
     end
 }

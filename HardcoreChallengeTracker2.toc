@@ -29,6 +29,7 @@ Handlers/ApiEventHandlers/PlayerEnteringWorldHandler.lua
 Handlers/ApiEventHandlers/PlayerLogoutHandler.lua
 Handlers/ApiEventHandlers/ChatMsgSkillHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
+Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 
 # Main Core Initialization
 Core.lua
