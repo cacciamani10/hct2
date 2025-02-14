@@ -145,14 +145,17 @@ function HCT_DataModule:CheckDungeonClearAchievements(charKey)
         GetHCT():Print("No character key provided.")
         return
     end
-    local characters = GetDB().characters
-    local charData = characters[charKey]
-    if not charData or not charData.dungeonClears then return end
+    local localAchievementProgressData = GetDB().localAchievementProgressData or {}
+    local dungeonBossKills = localAchievementProgressData[charKey] and localAchievementProgressData[charKey].dungeonBossKills or {}
 
-    for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Dungeon Clears"] or {}) do
-        local dungeonName = ach.name
-        if charData.dungeonClears[dungeonName] then
+    for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Dungeon Clear"] or {}) do
+        local requiredBoss = ach.description:match("Defeat (.+)")
+        GetHCT():Print("Checking dungeon clear achievement: " .. ach.name .. " for " .. charKey .. " with boss " .. requiredBoss)
+        if requiredBoss and dungeonBossKills[requiredBoss] then
             self:CompleteAchievement(charKey, ach)
+            GetHCT():Print("Achievement completed: " .. ach.name)
+        else
+            GetHCT():Print("Achievement not completed: " .. ach.name)
         end
     end
 end
