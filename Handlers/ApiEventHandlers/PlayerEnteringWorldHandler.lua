@@ -4,11 +4,14 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     GetEventType = function() return "PLAYER_ENTERING_WORLD" end,
     GetHandlerName = function() return "PlayerEnteringWorldHandler" end,
 
-    HandleEvent = function(self, HCT, event)
+    HandleEvent = function(self, HCT, event, isLogin)
         if not HCT then return end
         local xp = UnitXP("player") 
         if xp == 0 then
             HCT:Print("PlayerEnteringWorldHandler: New character detected.") 
+        end
+        if isLogin then
+            HCT_DataModule:InitializeCharacterData()
         end
         if UnitIsGhost("player") then
             local charKey = HCT_DataModule:GetCharacterKey()
