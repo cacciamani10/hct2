@@ -11,31 +11,6 @@ function HCT_DataModule:GetBattleTag()
     return info and info:match("^(%S+#%S+)") or "unknown"
 end
 
--- Helper: iterate through a set of data tables (e.g. achievements or bounties)
--- and return the matching entry for a given uniqueID.
-local function FindEntryByID(uniqueID, dataTables)
-    for category, list in pairs(dataTables) do
-        for _, entry in ipairs(list) do
-            if entry.uniqueID == uniqueID then
-                return entry
-            end
-        end
-    end
-    return nil
-end
-
--- Helper: Given a uniqueID and one or more data tables, return its point value.
-local function GetPointsForCompletion(uniqueID, ...)
-    local tables = {...}
-    for _, dataTable in ipairs(tables) do
-        local entry = FindEntryByID(uniqueID, dataTable)
-        if entry then
-            return entry.points or 0
-        end
-    end
-    return 0
-end
-
 function HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
     newLevel = tonumber(newLevel) or 0
     oldLevel = tonumber(oldLevel) or 0
@@ -305,17 +280,8 @@ function HCT_DataModule:CalculateCharacterPoints(charData)
             end
         end
     end
-    
-
-    -- Tug-of-war points remain unaffected.
-    if charData.tugPoints then
-        total = total + charData.tugPoints
-    end
-
-    HCT:Print("Total points for " .. charData.name .. ": " .. total)
     return total
 end
-
 
 function HCT_DataModule:InitializeCharacterData()
     local playerFaction = UnitFactionGroup("player")
