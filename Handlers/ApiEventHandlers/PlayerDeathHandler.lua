@@ -13,7 +13,7 @@ _G.HCT_Handlers.PlayerDeathHandler = {
 
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
-        local charKey = UnitName("player")
+        local charKey = (UnitName("player")..":"..HCT_DataModule:GetBattleTag())
         local charData = HCT.db.profile.characters[charKey]
 
         if charData then
