@@ -14,6 +14,6 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         if event.isInitialLogin then
             HCT_Broadcaster:RequestContestData()
         end
-        HCT:Print("Player entering world event handled.")
+        --HCT:Print("Player entering world event handled.")
     end
 }
