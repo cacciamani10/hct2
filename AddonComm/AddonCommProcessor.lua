@@ -13,7 +13,7 @@ function AddonCommProcessor:ProcessEvent(ev)
         local charKey = ev.charKey
         if db.characters[charKey] then
             db.characters[charKey].isDead = true
-            HCT:Print(charKey .. " has died.")
+            --HCT:Print(charKey .. " has died.")
         end
     elseif ev.type == "CHARACTER" then
         local charKey = ev.name .. ":" .. ev.battleTag
@@ -21,16 +21,16 @@ function AddonCommProcessor:ProcessEvent(ev)
             for k, v in pairs(ev) do
                 db.characters[charKey][k] = v
             end
-            HCT:Print("Updated info for " .. charKey)
+            --HCT:Print("Updated info for " .. charKey)
         end
     elseif ev.type == "SPECIAL_KILL" then
         local mobName = ev.name or "Unknown Mob"
         local classification = ev.classification or "unknown classification"
         local characterName = ev.characterName or "Unknown Player"    
-        HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
+        --HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
     elseif ev.type == "PLAYER_LOGOUT" then
         local characterName = ev.characterName or "Unknown Player"
-        HCT:Print(characterName .. " logged out")
+        --HCT:Print(characterName .. " logged out")
     elseif ev.type == "GUILD_JOIN_REQUEST" then
         local requester = ev.requester or "Unknown Player"
         HCT:Print(requester .. " requested to join the guild")
