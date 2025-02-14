@@ -2,7 +2,7 @@ _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-_G.HCT_Handlers.ChatMsgSkillHandler = {
+_G.HCT_Handlers.ChatMsgLootHandler = {
     GetEventType = function()
         return "CHAT_MSG_LOOT"
     end,
