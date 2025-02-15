@@ -17,7 +17,7 @@ _G.HCT_Handlers.ZoneChangedNewAreaHandler = {
             local mapId = C_Map.GetBestMapForUnit("player")
             local mapInfo = mapId and C_Map.GetMapInfo(mapId)
             local mapName = mapInfo and mapInfo.name or "Unknown"
-            HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " .. zone .. " - " .. subzone .. " - " .. mapName)
+            --HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " .. zone .. " - " .. subzone .. " - " .. mapName)
             local db = GetDB()
             db.localAchievementProgressData = db.localAchievementProgressData or {}
             local charKey = HCT_DataModule:GetCharacterKey()

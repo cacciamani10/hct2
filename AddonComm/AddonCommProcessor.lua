@@ -29,11 +29,11 @@ function AddonCommProcessor:ProcessEvent(ev)
             end
             HCT:Print("Updated info for " .. charKey)
         end
-    elseif ev.type == "SPECIAL_KILL" then
-        local mobName = ev.name or "Unknown Mob"
-        local classification = ev.classification or "unknown classification"
-        local characterName = ev.characterName or "Unknown Player"
-        HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
+    -- elseif ev.type == "SPECIAL_KILL" then
+    --     local mobName = ev.name or "Unknown Mob"
+    --     local classification = ev.classification or "unknown classification"
+    --     local characterName = ev.characterName or "Unknown Player"
+    --     HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
     elseif ev.type == "PLAYER_LOGOUT" then
         local characterName = ev.characterName or "Unknown Player"
         HCT:Print(characterName .. " logged out")
@@ -64,7 +64,7 @@ function AddonCommProcessor:ProcessBulkUpdate(payload)
         HCT:Print("Database profile is missing.")
         return
     end
-    HCT:Print("Processing bulk update - saving to database.")
+    -- HCT:Print("Processing bulk update - saving to database.")
     if not db.users then
         db.users = {}
     end

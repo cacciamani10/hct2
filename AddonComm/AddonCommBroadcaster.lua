@@ -3,19 +3,6 @@ local AceSerializer = LibStub("AceSerializer-3.0")
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-local function PrintTable(t, indent)
-    indent = indent or 0
-    local indentStr = string.rep("  ", indent)
-    for k, v in pairs(t) do
-        if type(v) == "table" then
-            print(indentStr .. tostring(k) .. ":")
-            PrintTable(v, indent + 1)
-        else
-            print(indentStr .. tostring(k) .. ": " .. tostring(v))
-        end
-    end
-end
-
 local function CountTable(t)
     local count = 0
     for _ in pairs(t) do
@@ -46,7 +33,7 @@ _G.HCT_Broadcaster = {
         local now = time()
         if now - self.lastRequestTime < 180 then
             local remaining = 180 - (now - self.lastRequestTime)
-            GetHCT():Print("RequestContestData is on cooldown. Please wait " .. remaining .. " seconds.")
+            --GetHCT():Print("RequestContestData is on cooldown. Please wait " .. remaining .. " seconds.")
             return
         end
         self.lastRequestTime = now
@@ -65,7 +52,7 @@ _G.HCT_Broadcaster = {
         local now = time()
         if now - self.lastBroadcastTime < 180 then
             local remaining = 180 - (now - self.lastBroadcastTime)
-            GetHCT():Print("BroadcastEvent is on cooldown. Please wait " .. remaining .. " seconds.")
+            --GetHCT():Print("BroadcastEvent is on cooldown. Please wait " .. remaining .. " seconds.")
             return
         end
         local HCT = GetHCT()
