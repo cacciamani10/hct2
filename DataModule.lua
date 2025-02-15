@@ -333,7 +333,7 @@ function HCT_DataModule:InitializeCharacterData()
             realm = playerRealm,
             isDead = false,
         }
-        HCT_Broadcaster:BroadcastEvent(ev)
+        --HCT_Broadcaster:BroadcastEvent(ev)
     end
     -- add the character to the user's character list if it is not already there
     db.users = db.users or {}

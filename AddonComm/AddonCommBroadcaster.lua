@@ -39,7 +39,7 @@ _G.HCT_Broadcaster = {
             return
         end
 
-        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+        --HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
     end,
 
     RequestContestData = function(self)
@@ -57,7 +57,7 @@ _G.HCT_Broadcaster = {
             payload = "request"
         }
         local serialized = AceSerializer:Serialize("REQUEST", ev)
-        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+        --HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
         --HCT:Print("Requesting data update...")
     end,
 
@@ -93,7 +93,7 @@ _G.HCT_Broadcaster = {
         end
 
         -- Send the serialized data
-        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+        --HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
 
         --HCT:Print("Bulk update complete.")
     end

@@ -14,6 +14,6 @@ _G.HCT_Handlers.PlayerLogoutHandler = {
             characterName = characterName
         }
 
-        HCT_Broadcaster:BroadcastEvent(ev)
+        --HCT_Broadcaster:BroadcastEvent(ev)
     end
 }

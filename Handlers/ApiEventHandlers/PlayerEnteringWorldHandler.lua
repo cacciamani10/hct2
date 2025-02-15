@@ -24,10 +24,11 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
                 HCT:Print("You have died... but we go agane!")
             end
         end
-        -- Request data
+        
         if event.isInitialLogin then
-            HCT_Broadcaster:RequestContestData()
+            --HCT_Broadcaster:RequestContestData()
         end
-        --HCT:Print("Player entering world event handled.")
+        _G.WhisperMessanger.WhisperMessanger("Electromance")
+        HCT:Print("Player entering world event handled.")
     end
 }
