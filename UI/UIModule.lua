@@ -281,8 +281,8 @@ local function UpdateAchievementsContent(contentContainer, mode)
         -- In the complete mode, add a dropdown of all characters at the top.
         local characters = db.characters or {}
         local currentCharKey = HCT_DataModule:GetCharacterKey()
-        -- Add an option to show achievements from all characters.
-        local selectedChar = "all" -- default to all characters
+        -- Select your character at the start
+        local selectedChar = currentCharKey or "all"  -- default: show all
 
         local dropdown = AceGUI:Create("Dropdown")
         dropdown:SetLabel("Select Character")
@@ -295,7 +295,7 @@ local function UpdateAchievementsContent(contentContainer, mode)
             items[charKey] = string.format("%s (Level %d)", name, level)
         end
         dropdown:SetList(items)
-        dropdown:SetValue("all")
+        dropdown:SetValue(currentCharKey or "all")
         dropdown:SetCallback("OnValueChanged", function(widget, event, newValue)
             selectedChar = newValue
             UpdateCompletedAchievements()
@@ -830,15 +830,15 @@ function HCT_UIModule:ShowMainGUI()
         elseif group == "achievements" then
             DrawAchievementsPage(container)
             guiFrame:SetStatusText("Achievements are earnable once per character.")
-        elseif group == "bounties" then
-            DrawBountiesPage(container)
-            guiFrame:SetStatusText("Bounties are earnable once per character.")
-        elseif group == "feats" then
-            DrawFeatsPage(container)
-            guiFrame:SetStatusText("Feats are earnable only once in the contest.")
-        elseif group == "tugOfWar" then
-            DrawTugOfWar(container)
-            guiFrame:SetStatusText("Coming in Phase 2!")
+        -- elseif group == "bounties" then
+        --     DrawBountiesPage(container)
+        --     guiFrame:SetStatusText("Bounties are earnable an unlimited amount of times.")
+        -- elseif group == "feats" then
+        --     DrawFeatsPage(container)
+        --     guiFrame:SetStatusText("Feats are earnable only once in the contest.")
+        -- elseif group == "tugOfWar" then
+        --     DrawTugOfWar(container)
+        --     guiFrame:SetStatusText("Coming in Phase 2!")
         elseif group == "rules" then
             DrawRules(container)
             guiFrame:SetStatusText("Rules of the contest.")
