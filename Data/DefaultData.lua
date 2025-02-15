@@ -2,6 +2,7 @@ _G.DefaultData = {}
 
 _G.DefaultData.defaults = {
     profile = {
+        schemaVersion = 1,
         realm = HardcoreChallengeTracker_Data.realm,
         faction = HardcoreChallengeTracker_Data.faction,
         guildName = HardcoreChallengeTracker_Data.guildName,
