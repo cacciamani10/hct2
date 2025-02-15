@@ -9,6 +9,7 @@ embeds.xml
 AddonEnv.lua
 
 # Core Systems
+AddonComm/AddonCommWhisper.lua
 AddonComm/AddonCommBroadcaster.lua
 AddonComm/AddonCommProcessor.lua
 Data/HardcoreChallengeTracker2_Data.lua
