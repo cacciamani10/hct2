@@ -8,7 +8,7 @@ _G.WhisperMessanger = {
 WhisperMessanger = function(targetPlayer)
     local serialized = AceSerializer:Serialize("WHISPER", "Hello World!")
     if not serialized or serialized == "" then
-        GetHCT():Print("Error: Serialized bulk data is empty!")
+        GetHCT():Print("Error: Serialized data is empty!")
         return
     end
 

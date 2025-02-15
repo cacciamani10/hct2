@@ -28,7 +28,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         if event.isInitialLogin then
             --HCT_Broadcaster:RequestContestData()
         end
-        _G.WhisperMessanger.WhisperMessanger("Electromance")
+        _G.WhisperMessanger.WhisperMessanger("Pandaexp")
         HCT:Print("Player entering world event handled.")
     end
 }
