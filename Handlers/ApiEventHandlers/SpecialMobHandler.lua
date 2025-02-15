@@ -15,13 +15,13 @@ _G.HCT_Handlers.SpecialMobHandler = {
         local _, subEvent, _, _, sourceName, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()
         local db = GetDB()
         if subEvent == "PARTY_KILL" then
-            HCT:Print("SpecialMobHandler Party Kill: " .. subEvent .. ": " .. sourceName .. " killed " .. destName .. ".")
+            --HCT:Print("SpecialMobHandler Party Kill: " .. subEvent .. ": " .. sourceName .. " killed " .. destName .. ".")
             local charKey = HCT_DataModule:GetCharacterKey()
             -- Check if the unit killed is in the list of dungeon bosses 
             db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
             db.localAchievementProgressData[charKey].dungeonBossKills = db.localAchievementProgressData[charKey].dungeonBossKills or {}
             if HCT_DataModule:IsDungeonBoss(destName) then
-                HCT:Print("SpecialMobHandler: Dungeon Boss Killed: " .. destName)
+                --HCT:Print("SpecialMobHandler: Dungeon Boss Killed: " .. destName)
                 db.localAchievementProgressData[charKey].dungeonBossKills[destName] = db.localAchievementProgressData[charKey].dungeonBossKills[destName] or 0
                 db.localAchievementProgressData[charKey].dungeonBossKills[destName] = db.localAchievementProgressData[charKey].dungeonBossKills[destName] + 1
                 -- Check if all players in your party are in your guild
