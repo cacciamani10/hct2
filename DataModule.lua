@@ -140,22 +140,52 @@ function HCT_DataModule:InitializeUserData()
     AssignPlayerToTeam(battleTag)
 end
 
+function HCT_DataModule:IsDungeonBoss(name)
+    for _, boss in pairs(HardcoreChallengeTracker_Data.dungeonBosses) do
+        if boss == name then return true end
+    end
+    return false
+end
+
+-- Example function to handle boss defeat
+function HCT_DataModule:OnBossDefeated(charKey, bossName)
+    -- Check if the boss is a dungeon boss
+    if self:IsDungeonBoss(bossName) then
+
+        -- Update the dungeonBossKills table
+        local localAchievementProgressData = GetDB().localAchievementProgressData or {}
+        local dungeonBossKills = localAchievementProgressData[charKey] and localAchievementProgressData[charKey].dungeonBossKills or {}
+        dungeonBossKills[bossName] = true
+
+        -- Ensure the data is saved back to the database
+        localAchievementProgressData[charKey] = localAchievementProgressData[charKey] or {}
+        localAchievementProgressData[charKey].dungeonBossKills = dungeonBossKills
+        GetDB().localAchievementProgressData = localAchievementProgressData
+
+        -- Check for dungeon clear achievements
+        self:CheckDungeonClearAchievements(charKey)
+    end
+end
+
 function HCT_DataModule:CheckDungeonClearAchievements(charKey)
     if not charKey then
         GetHCT():Print("No character key provided.")
         return
     end
+
+    -- Retrieve the character's dungeon boss kills from SavedVariables
     local localAchievementProgressData = GetDB().localAchievementProgressData or {}
     local dungeonBossKills = localAchievementProgressData[charKey] and localAchievementProgressData[charKey].dungeonBossKills or {}
 
-    for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Dungeon Clear"] or {}) do
-        local requiredBoss = ach.description:match("Defeat (.+)")
-        GetHCT():Print("Checking dungeon clear achievement: " .. ach.name .. " for " .. charKey .. " with boss " .. requiredBoss)
+    -- Iterate through the "Dungeon Clears" achievements
+    for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Dungeon Clears"] or {}) do
+        -- Extract the boss name from the achievement description
+        local dungeonName = ach.description:match("Complete (.+)") -- Get Dungeon Name
+        local requiredBoss = HardcoreChallengeTracker_Data.dungeonBosses[dungeonName] -- Get Boss Name from Dungeon Name
+        -- Check if the boss has been killed
         if requiredBoss and dungeonBossKills[requiredBoss] then
+            -- Complete the achievement if the boss kill is found
             self:CompleteAchievement(charKey, ach)
-            GetHCT():Print("Achievement completed: " .. ach.name)
-        else
-            GetHCT():Print("Achievement not completed: " .. ach.name)
         end
     end
 end
@@ -216,7 +246,6 @@ function HCT_DataModule:CheckProfessionAchievements(charKey)
             local currentLevel = professionLevels[profName:lower()]
             if currentLevel and currentLevel >= reqLevel then
                 self:CompleteAchievement(charKey, achDef)
-                GetHCT():Print("Achievement completed for " .. profName .. " at level " .. currentLevel)
             end
         end
     end

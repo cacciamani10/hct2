@@ -20,9 +20,26 @@ _G.HCT_Handlers.SpecialMobHandler = {
             -- Check if the unit killed is in the list of dungeon bosses 
             db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
             db.localAchievementProgressData[charKey].dungeonBossKills = db.localAchievementProgressData[charKey].dungeonBossKills or {}
-            db.localAchievementProgressData[charKey].dungeonBossKills[destName] = true
-
-            HCT_DataModule:CheckDungeonClearAchievements(charKey)
+            if HCT_DataModule:IsDungeonBoss(destName) then
+                HCT:Print("SpecialMobHandler: Dungeon Boss Killed: " .. destName)
+                db.localAchievementProgressData[charKey].dungeonBossKills[destName] = db.localAchievementProgressData[charKey].dungeonBossKills[destName] or 0
+                db.localAchievementProgressData[charKey].dungeonBossKills[destName] = db.localAchievementProgressData[charKey].dungeonBossKills[destName] + 1
+                -- Check if all players in your party are in your guild
+                local allInGuild = true
+                local myGuild = select(1, GetGuildInfo("player"))
+                for i = 1, GetNumGroupMembers() do
+                    local partyMemberName = UnitName("party" .. i)
+                    if myGuild ~= select(1, GetGuildInfo(partyMemberName)) then
+                            allInGuild = false
+                        break
+                    end
+                end
+                if allInGuild then
+                    db.localAchievementProgressData[charKey].dungeonsClearedWithGroup = db.localAchievementProgressData[charKey].dungeonsClearedWithGroup or 0
+                    db.localAchievementProgressData[charKey].dungeonsClearedWithGroup = db.localAchievementProgressData[charKey].dungeonsClearedWithGroup + 1
+                end
+                HCT_DataModule:CheckDungeonClearAchievements(charKey)
+            end
         end
     end
 }
