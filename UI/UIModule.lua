@@ -29,13 +29,19 @@ end
 
 local function CalculateCharacterDetails(charData)
     local details = {}
-    -- Base points
-    details.levelPoints = HCT_DataModule:GetLevelPoints(charData.level, 0)
+    
+    -- Compute raw level points and then actual level points based on death.
+    local rawLevelPoints = HCT_DataModule:GetLevelPoints(charData.level, 0)
+    local penaltyFactor = charData.isDead and 0.5 or 1
+    details.levelPoints = math.floor(rawLevelPoints * penaltyFactor)
+    details.rawLevelPoints = rawLevelPoints
+
     details.achievementPoints = 0
+    details.rawAchievementPoints = 0
     details.bountyPoints = 0
+    details.rawBountyPoints = 0
 
     local db = GetDB()
-    local penaltyFactor = charData.isDead and 0.5 or 1
     for completionID, _ in pairs(db.completionLedger or {}) do
         -- Expected format: "characterName:battleTag:achievementID"
         local cName, battleTag, achievementID = completionID:match("^(.-):(.-):(%d+)$")
@@ -44,21 +50,30 @@ local function CalculateCharacterDetails(charData)
             for category, achList in pairs(HardcoreChallengeTracker_Data.achievements) do
                 for _, achDef in ipairs(achList) do
                     if achDef.uniqueID == achID then
-                        -- For simplicity, let's assume bounty IDs are 800-899 and achievements are below 500.
                         if achID >= 800 and achID <= 899 then
-                            details.bountyPoints = details.bountyPoints + math.floor(achDef.points * penaltyFactor)
+                            details.rawBountyPoints = details.rawBountyPoints + (achDef.points or 0)
+                            details.bountyPoints = details.bountyPoints + math.floor((achDef.points or 0) * penaltyFactor)
                         elseif achID < 500 then
-                            details.achievementPoints = details.achievementPoints +
-                                math.floor(achDef.points * penaltyFactor)
+                            details.rawAchievementPoints = details.rawAchievementPoints + (achDef.points or 0)
+                            details.achievementPoints = details.achievementPoints + math.floor((achDef.points or 0) * penaltyFactor)
                         end
                     end
                 end
             end
         end
     end
+
     details.totalPoints = details.levelPoints + details.achievementPoints + details.bountyPoints
+    local totalRaw = details.rawLevelPoints + details.rawAchievementPoints + details.rawBountyPoints
+    if charData.isDead then
+        details.lostPoints = totalRaw - details.totalPoints
+    else
+        details.lostPoints = 0
+    end
     return details
 end
+
+
 
 local function DrawCharactersPage(container)
     container:ReleaseChildren()
@@ -123,6 +138,7 @@ local function DrawCharactersPage(container)
                 userHeader:SetText(battleTag)
                 contentContainer:AddChild(userHeader)
                 -- For each character for this user.
+                -- For each character for this user.
                 for _, charKey in ipairs(userData.characterKeys or {}) do
                     local charData = characters[charKey]
                     if charData and (showDead or not charData.isDead) then
@@ -142,15 +158,15 @@ local function DrawCharactersPage(container)
                         -- Basic info: Level and Class (with class colored)
                         local classColor = RAID_CLASS_COLORS[charData.class:upper()]
                         local classColorCode = classColor and
-                            string.format("|cff%02x%02x%02x", classColor.r * 255, classColor.g * 255, classColor.b * 255) or
-                            "|cffffffff"
+                        string.format("|cff%02x%02x%02x", classColor.r * 255, classColor.g * 255, classColor.b * 255) or
+                        "|cffffffff"
                         local basicInfo = AceGUI:Create("Label")
                         basicInfo:SetFullWidth(true)
                         basicInfo:SetText(string.format("Level: %d  |  Class: %s%s|r", charData.level, classColorCode,
                             charData.class))
                         charGroup:AddChild(basicInfo)
 
-                        -- Total Points (highlighted, e.g., using a bold or distinct color)
+                        -- Total Points (highlighted)
                         local totalPointsLabel = AceGUI:Create("Label")
                         totalPointsLabel:SetFullWidth(true)
                         totalPointsLabel:SetText(string.format("Total Points: |cff%s%d|r", ACHIEVEMENT_COLOR,
@@ -164,6 +180,14 @@ local function DrawCharactersPage(container)
                             "Level Points: %d  |  Achievement Points: %d  |  Bounty Points: %d",
                             details.levelPoints, details.achievementPoints, details.bountyPoints))
                         charGroup:AddChild(pointsInfo)
+
+                        -- If the character is dead, show lost points.
+                        if charData.isDead then
+                            local lostLabel = AceGUI:Create("Label")
+                            lostLabel:SetFullWidth(true)
+                            lostLabel:SetText(string.format("Points lost due to death: |cffff0000%d|r", details.lostPoints))
+                            charGroup:AddChild(lostLabel)
+                        end                        
 
                         contentContainer:AddChild(charGroup)
                     end
@@ -282,7 +306,7 @@ local function UpdateAchievementsContent(contentContainer, mode)
         local characters = db.characters or {}
         local currentCharKey = HCT_DataModule:GetCharacterKey()
         -- Select your character at the start
-        local selectedChar = currentCharKey or "all"  -- default: show all
+        local selectedChar = currentCharKey or "all" -- default: show all
 
         local dropdown = AceGUI:Create("Dropdown")
         dropdown:SetLabel("Select Character")
@@ -417,7 +441,7 @@ local function UpdateBountiesContent(contentContainer, mode)
             local label = AceGUI:Create("Label")
             label:SetFullWidth(true)
             local description = bounty.description or "No description available"
-            label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", 
+            label:SetText(string.format("|cff%s%s|r - Points: %d\n%s",
                 BOUNTY_COLOR, bounty.name, bounty.points or 0, description))
             contentContainer:AddChild(label)
         end
@@ -425,7 +449,7 @@ local function UpdateBountiesContent(contentContainer, mode)
         -- Completed mode: add dropdown to select a character.
         local characters = db.characters or {}
         local currentCharKey = HCT_DataModule:GetCharacterKey()
-        local selectedChar = "all"  -- default: show all
+        local selectedChar = "all" -- default: show all
 
         local dropdown = AceGUI:Create("Dropdown")
         dropdown:SetLabel("Select Character")
@@ -490,34 +514,34 @@ local function UpdateBountiesContent(contentContainer, mode)
             header:SetText("Completed Bounties")
             header:SetFullWidth(true)
             bountyContainer:AddChild(header)
-            for _, entry in ipairs(completedBounties) do    
-                local label = AceGUI:Create("Label")        
-                label:SetFullWidth(true)                
+            for _, entry in ipairs(completedBounties) do
+                local label = AceGUI:Create("Label")
+                label:SetFullWidth(true)
                 label:SetText(string.format("|cff%s[%s]|r |cffffffff%s|r - Points: %d - Completed: %s",
                     COMPLETED_COLOR, entry.category, entry.achievement, entry.points, entry.date))
                 bountyContainer:AddChild(label)
             end
         end
-        
+
         UpdateCompletedBounties()
     end
 end
 
 local function DrawBountiesPage(container)
     container:ReleaseChildren()
-    
-    local viewMode = "all"  -- default mode
+
+    local viewMode = "all" -- default mode
     local contentContainer = AceGUI:Create("ScrollFrame")
     contentContainer:SetLayout("Flow")
     contentContainer:SetFullWidth(true)
     contentContainer:SetFullHeight(true)
     container:AddChild(contentContainer)
-    
+
     local buttonGroup = AceGUI:Create("SimpleGroup")
     buttonGroup:SetLayout("Flow")
     buttonGroup:SetFullWidth(true)
     container:AddChild(buttonGroup)
-    
+
     local btnAll = AceGUI:Create("Button")
     btnAll:SetText("All")
     btnAll:SetCallback("OnClick", function()
@@ -525,7 +549,7 @@ local function DrawBountiesPage(container)
         UpdateBountiesContent(contentContainer, viewMode)
     end)
     buttonGroup:AddChild(btnAll)
-    
+
     local btnComplete = AceGUI:Create("Button")
     btnComplete:SetText("Complete")
     btnComplete:SetCallback("OnClick", function()
@@ -533,12 +557,12 @@ local function DrawBountiesPage(container)
         UpdateBountiesContent(contentContainer, viewMode)
     end)
     buttonGroup:AddChild(btnComplete)
-    
+
     local heading = AceGUI:Create("Heading")
     heading:SetText(viewMode .. " bounties")
     heading:SetFullWidth(true)
     contentContainer:AddChild(heading)
-    
+
     UpdateBountiesContent(contentContainer, viewMode)
 end
 
@@ -552,7 +576,7 @@ local function UpdateFeatsContent(contentContainer, mode)
             local label = AceGUI:Create("Label")
             label:SetFullWidth(true)
             local description = feat.description or "No description available"
-            label:SetText(string.format("|cff%s%s|r - Points: %d\n%s", 
+            label:SetText(string.format("|cff%s%s|r - Points: %d\n%s",
                 FEAT_COLOR, feat.name, feat.points or 0, description))
             contentContainer:AddChild(label)
         end
@@ -624,34 +648,34 @@ local function UpdateFeatsContent(contentContainer, mode)
             header:SetText("Completed Feats")
             header:SetFullWidth(true)
             featsContainer:AddChild(header)
-            for _, entry in ipairs(completedFeats) do    
-                local label = AceGUI:Create("Label")        
-                label:SetFullWidth(true)                
+            for _, entry in ipairs(completedFeats) do
+                local label = AceGUI:Create("Label")
+                label:SetFullWidth(true)
                 label:SetText(string.format("|cff%s[%s]|r |cffffffff%s|r - Points: %d - Completed: %s",
                     COMPLETED_COLOR, entry.category, entry.achievement, entry.points, entry.date))
                 featsContainer:AddChild(label)
             end
         end
-        
+
         UpdateCompletedFeats()
     end
 end
 
 local function DrawFeatsPage(container)
     container:ReleaseChildren()
-    
-    local viewMode = "all"  -- default mode
+
+    local viewMode = "all" -- default mode
     local contentContainer = AceGUI:Create("ScrollFrame")
     contentContainer:SetLayout("Flow")
     contentContainer:SetFullWidth(true)
     contentContainer:SetFullHeight(true)
     container:AddChild(contentContainer)
-    
+
     local buttonGroup = AceGUI:Create("SimpleGroup")
     buttonGroup:SetLayout("Flow")
     buttonGroup:SetFullWidth(true)
     container:AddChild(buttonGroup)
-    
+
     local btnAll = AceGUI:Create("Button")
     btnAll:SetText("All")
     btnAll:SetCallback("OnClick", function()
@@ -659,7 +683,7 @@ local function DrawFeatsPage(container)
         UpdateFeatsContent(contentContainer, viewMode)
     end)
     buttonGroup:AddChild(btnAll)
-    
+
     local btnComplete = AceGUI:Create("Button")
     btnComplete:SetText("Complete")
     btnComplete:SetCallback("OnClick", function()
@@ -667,12 +691,12 @@ local function DrawFeatsPage(container)
         UpdateFeatsContent(contentContainer, viewMode)
     end)
     buttonGroup:AddChild(btnComplete)
-    
+
     local heading = AceGUI:Create("Heading")
     heading:SetText(viewMode .. " feats")
     heading:SetFullWidth(true)
     contentContainer:AddChild(heading)
-    
+
     UpdateFeatsContent(contentContainer, viewMode)
 end
 
@@ -830,15 +854,15 @@ function HCT_UIModule:ShowMainGUI()
         elseif group == "achievements" then
             DrawAchievementsPage(container)
             guiFrame:SetStatusText("Achievements are earnable once per character.")
-        -- elseif group == "bounties" then
-        --     DrawBountiesPage(container)
-        --     guiFrame:SetStatusText("Bounties are earnable an unlimited amount of times.")
-        -- elseif group == "feats" then
-        --     DrawFeatsPage(container)
-        --     guiFrame:SetStatusText("Feats are earnable only once in the contest.")
-        -- elseif group == "tugOfWar" then
-        --     DrawTugOfWar(container)
-        --     guiFrame:SetStatusText("Coming in Phase 2!")
+            -- elseif group == "bounties" then
+            --     DrawBountiesPage(container)
+            --     guiFrame:SetStatusText("Bounties are earnable an unlimited amount of times.")
+            -- elseif group == "feats" then
+            --     DrawFeatsPage(container)
+            --     guiFrame:SetStatusText("Feats are earnable only once in the contest.")
+            -- elseif group == "tugOfWar" then
+            --     DrawTugOfWar(container)
+            --     guiFrame:SetStatusText("Coming in Phase 2!")
         elseif group == "rules" then
             DrawRules(container)
             guiFrame:SetStatusText("Rules of the contest.")
