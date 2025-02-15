@@ -24,6 +24,8 @@ _G.HCT_Handlers.PlayerDeathHandler = {
             local ev = {
                 type = "DEATH",
                 charKey = charKey,
+                level = UnitLevel("player"),
+                name = UnitName("player"),
                 timestamp = time()
             }
             

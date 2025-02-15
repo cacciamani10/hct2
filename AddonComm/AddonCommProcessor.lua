@@ -19,7 +19,9 @@ function AddonCommProcessor:ProcessEvent(ev)
         local charKey = ev.charKey
         if db.characters[charKey] then
             db.characters[charKey].isDead = true
-            HCT:Print(charKey .. " has died.")
+            local name = ev.name or "Unknown"
+            local level = ev.level or "Unknown"
+            HCT:Print("|cffff0000" .. name .. " has died at level " .. level .. "|r")
         end
     elseif ev.type == "CHARACTER" then
         local charKey = ev.name .. ":" .. ev.battleTag
