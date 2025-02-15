@@ -1,5 +1,7 @@
 local HCT_Broadcaster = _G.HCT_Broadcaster
 
+local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
+
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.PlayerDeathHandler = {
@@ -13,8 +15,10 @@ _G.HCT_Handlers.PlayerDeathHandler = {
 
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
-        local charKey = (UnitName("player")..":"..HCT_DataModule:GetBattleTag())
-        local charData = HCT.db.profile.characters[charKey]
+        --HCT:Print("PlayerDeathHandler:HandleEvent")
+        local charKey = HCT_DataModule:GetCharacterKey()
+        local db = GetDB()
+        local charData = db.characters[charKey]
 
         if charData then
             charData.isDead = true
