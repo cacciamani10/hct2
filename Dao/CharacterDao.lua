@@ -64,7 +64,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
     end
 end
 
-function _G.DAO.CharacterDao:CharacterDead()
+function _G.DAO.CharacterDao:MarkCharacterAsDead()
     local db = GetDB()
     local battleTag = HCT_DataModule:GetBattleTag()
     local username = UnitName("player")

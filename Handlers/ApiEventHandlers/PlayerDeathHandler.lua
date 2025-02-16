@@ -16,6 +16,6 @@ _G.HCT_Handlers.PlayerDeathHandler = {
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
         HCT:Print("PlayerDeathHandler:HandleEvent")
-        _G.DAO.CharacterDao:CharacterDead()
+        _G.DAO.CharacterDao:MarkCharacterAsDead()
     end
 }
