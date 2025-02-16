@@ -66,26 +66,26 @@ function HCT_ChatModule:UnregisterChatCommands()
 end
 
 function HCT_ChatModule:ProcessTeamChatMessage(payload)
-    local localBattleTag = HCT_DataModule:GetBattleTag()
-    local db = GetDB()
-    if payload.sender == localBattleTag then return end
-    local localTeam = HCT_DataModule:GetPlayerTeam(localBattleTag)
-    if payload.team and localTeam == payload.team then
-        local senderName = payload.character or payload.sender
-        local senderClass = payload.class
-        local classColorStr = "ffffff"
-        local teamColorStr = "ffffff"
-        if senderClass and RAID_CLASS_COLORS[senderClass] then
-            classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
-        end
-        if db.teams[payload.team] then
-            local teamColor = HCT_DataModule.NormalizeColor(db.teams[payload.team].color)
-            teamColorStr = string.format("%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
-        end
-        classColorStr = string.gsub(classColorStr, "%s+", "")
-        classColorStr = string.sub(classColorStr, 1, 6)
-        local formattedMsg = string.format("|cff%s[Team Chat]|r |cff%s%s|r: %s", teamColorStr, classColorStr, senderName, payload.text)
-        DEFAULT_CHAT_FRAME:AddMessage(formattedMsg)
-        HCT_ChatModule:AddTeamChatMessage(formattedMsg)
-    end
+    -- local localBattleTag = HCT_DataModule:GetBattleTag()
+    -- local db = GetDB()
+    -- if payload.sender == localBattleTag then return end
+    -- local localTeam = HCT_DataModule:GetPlayerTeam(localBattleTag)
+    -- if payload.team and localTeam == payload.team then
+    --     local senderName = payload.character or payload.sender
+    --     local senderClass = payload.class
+    --     local classColorStr = "ffffff"
+    --     local teamColorStr = "ffffff"
+    --     if senderClass and RAID_CLASS_COLORS[senderClass] then
+    --         classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
+    --     end
+    --     if db.teams[payload.team] then
+    --         local teamColor = HCT_DataModule.NormalizeColor(db.teams[payload.team].color)
+    --         teamColorStr = string.format("%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
+    --     end
+    --     classColorStr = string.gsub(classColorStr, "%s+", "")
+    --     classColorStr = string.sub(classColorStr, 1, 6)
+    --     local formattedMsg = string.format("|cff%s[Team Chat]|r |cff%s%s|r: %s", teamColorStr, classColorStr, senderName, payload.text)
+    --     DEFAULT_CHAT_FRAME:AddMessage(formattedMsg)
+    --     HCT_ChatModule:AddTeamChatMessage(formattedMsg)
+    -- end
 end

@@ -10,11 +10,13 @@ HCT.addonPrefix = "HCT2Addon"
 local defaults = _G.DefaultData.defaults
 local options = _G.DefaultData:GetOptions(HCT)
 
+-- OnInitialize is an Ace3 internal hook that fires after your addon’s saved variables are loaded but before the player actually enters the world.
+-- Addons load each time you enter the game world (after selecting a character) and also whenever you perform a “reload” (e.g., via /reload).
 function HCT:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
     self.db:RegisterDefaults(defaults)
-    if not self.db.profile.faction then self.db.profile.faction = HardcoreChallengeTracker_Data.faction end
-    if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
+    -- if not self.db.profile.faction then self.db.profile.faction = HardcoreChallengeTracker_Data.faction end
+    -- if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
     if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
 
@@ -27,29 +29,20 @@ function HCT:OnInitialize()
     self:RegisterChatCommand("hct2", function(input)
         HCT_UIModule:ShowMainGUI()
     end)
-    HCT_DataModule:InitializeUserData()
-    HCT_DataModule:InitializeCharacterData()
+    _G.DAO.UserDao:InitializeUser()
+    _G.DAO.CharacterDao:InitializeCharacter()
     self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window or /t to chat with your team.")
 end
 
 function HCT:OnEnable()
     HCT:RegisterEvents()
     HCT_ChatModule:RegisterChatCommands()
-    HCT:ScheduleTimer(function()
-        HCT_Broadcaster:RequestContestData()
-    end, 600)
-    -- Schedule bulk event broadcast every 15 minutes.
-    self:ScheduleRepeatingTimer(function()
-        HCT_Broadcaster:BroadcastBulkEvents()
-    end, 900)
-    local charKey = UnitName("player") .. ":" .. HCT_DataModule:GetBattleTag()
-    HCT_DataModule:CheckAllAchievements(charKey)
+    -- TODO check all achievements
 end
 
 function HCT:OnDisable()
     self:UnregisterEvents()
     HCT_ChatModule:UnregisterChatCommands()
-    self:CancelAllTimers()
 end
 
 function HCT:RegisterEvents()

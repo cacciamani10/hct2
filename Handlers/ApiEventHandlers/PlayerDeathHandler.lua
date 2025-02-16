@@ -15,25 +15,7 @@ _G.HCT_Handlers.PlayerDeathHandler = {
 
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
-        --HCT:Print("PlayerDeathHandler:HandleEvent")
-        local charKey = HCT_DataModule:GetCharacterKey()
-        local db = GetDB()
-        local charData = db.characters[charKey]
-
-        if charData then
-            charData.isDead = true
-
-            HCT:Print("You have died... but we go agane!")
-
-            local ev = {
-                type = "DEATH",
-                charKey = charKey,
-                level = UnitLevel("player"),
-                name = UnitName("player"),
-                timestamp = time()
-            }
-            
-            HCT_Broadcaster:BroadcastEvent(ev)
-        end
+        HCT:Print("PlayerDeathHandler:HandleEvent")
+        _G.DAO.CharacterDao:CharacterDead()
     end
 }

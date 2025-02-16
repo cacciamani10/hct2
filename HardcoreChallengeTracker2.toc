@@ -21,6 +21,13 @@ DataModule.lua
 UI/UIModule.lua
 ChatModule.lua
 
+#Utils
+Utils/TimeUtils.lua
+
+#Dao
+Dao/CharacterDao.lua
+Dao/UserDao.lua
+
 # Handlers
 Handlers/ApiEventHandlers/AddonCommHandler.lua
 Handlers/ApiEventHandlers/PlayerDeathHandler.lua

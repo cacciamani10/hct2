@@ -34,9 +34,9 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                     local minLevel, maxLevel = unpack(clothNames[lootName])
                     if charLevel >= minLevel and charLevel <= maxLevel then
                         local db = GetDB()
-                        db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
-                        db.localAchievementProgressData[charKey].clothCount = (GetDB().localAchievementProgressData[charKey].clothCount or 0) +
-                        lootQuantity
+                        --db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
+                        --db.localAchievementProgressData[charKey].clothCount = (GetDB().localAchievementProgressData[charKey].clothCount or 0) +
+                        --lootQuantity
                         return
                     end
                 end
