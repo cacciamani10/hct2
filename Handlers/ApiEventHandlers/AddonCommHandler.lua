@@ -1,5 +1,4 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
-local HCT_EventModule = _G.HCT_EventModule
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.AddonCommHandler = {
@@ -24,20 +23,20 @@ _G.HCT_Handlers.AddonCommHandler = {
                 return
             end
 
-            if msgType == "EVENT" then
-                AddonCommProcessor:ProcessEvent(payload)
-            elseif msgType == "DEATH" then
-                AddonCommProcessor:ProcessEvent(payload)
-            elseif msgType == "BULK_UPDATE" then
-                AddonCommProcessor:ProcessBulkUpdate(payload)
-                --HCT:Print("Bulk update received and processed from " .. sender)
-            elseif msgType == "REQUEST" then
-                AddonCommProcessor:RespondToRequest(payload)
-            elseif msgType == "TEAMCHAT" then
-                HCT_ChatModule:ProcessTeamChatMessage(payload)
-            else
-                HCT:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
-            end
+            -- if msgType == "EVENT" then
+            --     AddonCommProcessor:ProcessEvent(payload)
+            -- elseif msgType == "DEATH" then
+            --     AddonCommProcessor:ProcessEvent(payload)
+            -- elseif msgType == "BULK_UPDATE" then
+            --     AddonCommProcessor:ProcessBulkUpdate(payload)
+            --     --HCT:Print("Bulk update received and processed from " .. sender)
+            -- elseif msgType == "REQUEST" then
+            --     AddonCommProcessor:RespondToRequest(payload)
+            -- elseif msgType == "TEAMCHAT" then
+            --     HCT_ChatModule:ProcessTeamChatMessage(payload)
+            -- else
+            --     HCT:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
+            -- end
         end
     end
 }
