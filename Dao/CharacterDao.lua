@@ -26,8 +26,8 @@ function _G.DAO.CharacterDao:InitializeCharacter()
     --     return
     -- end
 
-    if not db.users[battleTag].characters.alive[username] and not UnitIsGhost("player") then
-        GetHCT():Print("adding new character")
+    if not db.users[battleTag].characters.alive[username] then
+        GetHCT():Print("CharacterDao:InitializeCharacter:Creating New Character: " .. username)
         local level = UnitLevel("player") or 1
         local class = select(2, UnitClass("player")) or "Unknown"
         local race = select(2, UnitRace("player")) or "Unknown"

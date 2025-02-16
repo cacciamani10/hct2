@@ -8,6 +8,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
 
     HandleEvent = function(self, HCT, event, isLogin)
         if not HCT then return end
+        self:InitializeCharacter()
         self:HandleNewCharacterLogin(HCT)
         self:HandleLogin(HCT, isLogin)
         self:HandleGhostState(HCT)
@@ -15,6 +16,8 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     end,
 
     HandleGhostState = function(HCT)
+        --_G.HCT_Env.GetAddon():Print("PlayerEnteringWorldHandler:HandleGhostState: " .. tostring(UnitIsGhost("player")))
+        --     end
         -- if UnitIsGhost("player") then
         --     local charKey = HCT_DataModule:GetCharacterKey()
         --     if not charKey then return end
@@ -38,10 +41,21 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         end
     end,
 
+    -- if a character dies without earning exp this logic will execute
     HandleNewCharacterLogin = function(HCT)
         local xp = UnitXP("player") 
         if xp == 0 then
-            _G.HCT_Env.GetAddon():Print("PlayerEnteringWorldHandler: New character detected.")
+            --_G.HCT_Env.GetAddon():Print("PlayerEnteringWorldHandler: New character detected.")
+        end
+    end,
+
+    -- new character login for first time: UnitIsDeadOrGhost, UnitIsGhost, UnitIsDead will return false
+    -- second login alive character, UnitIsDeadOrGhost, UnitIsGhost, UnitIsDead will return false
+    -- first login after character death, UnitIsDeadOrGhost will return true, UnitIsGhost will return false, UnitIsDead will return true
+    -- second login after character death, UnitIsDeadOrGhost will return true, UnitIsGhost will return true, UnitIsDead will return false
+    InitializeCharacter = function(HCT)
+        if not UnitIsDeadOrGhost("player") then
+            _G.DAO.CharacterDao:InitializeCharacter()
         end
     end
 }

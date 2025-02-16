@@ -12,6 +12,8 @@ local options = _G.DefaultData:GetOptions(HCT)
 
 -- OnInitialize is an Ace3 internal hook that fires after your addon’s saved variables are loaded but before the player actually enters the world.
 -- Addons load each time you enter the game world (after selecting a character) and also whenever you perform a “reload” (e.g., via /reload).
+-- Beware there be dragons here! This is the first time your addon is loaded, so you should be careful about what you do here.
+-- WOW classic functions like UnitIsGhost will not return the correct value in this function.
 function HCT:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
     self.db:RegisterDefaults(defaults)
@@ -30,7 +32,6 @@ function HCT:OnInitialize()
         HCT_UIModule:ShowMainGUI()
     end)
     _G.DAO.UserDao:InitializeUser()
-    _G.DAO.CharacterDao:InitializeCharacter()
     self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window or /t to chat with your team.")
 end
 
