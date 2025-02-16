@@ -220,7 +220,7 @@ function HCT_DataModule:CheckProfessionAchievement(charKey, professionName, prof
     for _, ach in ipairs(HardcoreChallengeTracker_Data.achievements["Profession Mastery"] or {}) do
         local reqLevelStr, profName = ach.description:match("Reach level (%d+)%s+(.+)")
         local requiredLevel = reqLevelStr and tonumber(reqLevelStr)
-        if requiredLevel and professionLevel >= requiredLevel then
+        if requiredLevel and professionLevel >= requiredLevel and profName:lower() == professionName:lower() then
             self:CompleteAchievement(charKey, ach)
         end
     end
