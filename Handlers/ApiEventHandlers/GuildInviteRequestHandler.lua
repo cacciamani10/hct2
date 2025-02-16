@@ -10,6 +10,7 @@ _G.HCT_Handlers.GuildInviteRequestHandler = {
 
     GetHandlerName = function() return "GuildInviteRequestHandler" end,
 
+    -- what is this doing?
     HandleEvent = function(self, HCT, event, inviter, guildName)
         if not HCT then return end
         local targetGuild = HCT.db.profile.guildName

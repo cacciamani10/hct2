@@ -77,3 +77,13 @@ function _G.DAO.CharacterDao:MarkCharacterAsDead()
 
     db.users[battleTag].characters.alive[username] = nil;
 end
+
+function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
+        local username = UnitName("player")
+        local battleTag = HCT_DataModule:GetBattleTag()
+        local uuid = HCT.db.profile.characters.alive[username]
+
+        if uuid then
+            local character = HCT.db.profile.characters[uuid].level = newLevelNumber
+        end
+end

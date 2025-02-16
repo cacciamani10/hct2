@@ -8,31 +8,23 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
     
     HandleEvent = function(self, HCT, event, newLevel)
         if not HCT then return end
-        -- newLevel = tonumber(newLevel)
-        -- local characterName = UnitName("player")
-        -- local battleTag = HCT_DataModule:GetBattleTag()
-        -- local charKey =  characterName.. ":" .. battleTag
-        -- local charData = HCT.db.profile.characters[charKey]
+        level = tonumber(newLevel)
 
-        -- if charData then
-        --     local oldLevel = tonumber(charData.level) or (newLevel - 1)
-        --     local pointsAwarded = HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
-        --     charData.level = newLevel
+        _G.DAO.CharacterDao:UpdateCharacterLevel(level)
+            --local pointsAwarded = HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
 
-        --     HCT:Print("Level up! New level: " .. newLevel .. "!")
-
-        --     local ev = {
-        --         type = "CHARACTER",
-        --         battleTag = battleTag,
-        --         level = newLevel,
-        --         name = characterName,
-        --         class = select(2, UnitClass("player")),
-        --         race = select(2, UnitRace("player")),
-        --         faction = UnitFactionGroup("player"),
-        --         realm = GetRealmName(),
-        --         isDead = false,
-        --     }
-        --     HCT_Broadcaster:BroadcastEvent(ev)
-        -- end
+            -- local ev = {
+            --     type = "CHARACTER",
+            --     battleTag = battleTag,
+            --     level = newLevel,
+            --     name = characterName,
+            --     class = select(2, UnitClass("player")),
+            --     race = select(2, UnitRace("player")),
+            --     faction = UnitFactionGroup("player"),
+            --     realm = GetRealmName(),
+            --     isDead = false,
+            -- }
+            -- HCT_Broadcaster:BroadcastEvent(ev)
+            -- recalculate achievements?
     end
 }
