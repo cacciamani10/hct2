@@ -15,8 +15,10 @@ _G.HCT_Handlers.ChatMsgSkillHandler = {
         if HCT then
             local skillThresholds = { 75, 150, 225, 300 }
             local lowerText = text:lower():gsub("%.$", "")
+            local professionList = {"alchemy", "leatherworking", "blacksmithing", "enchanting", "engineering", "herbalism", "tailoring", "skinning", "mining", "fishing", "cooking", "first aid"}
             local skillName, skillLevel = string.match(lowerText, "your skill in%s+([%a ]+)%s+has increased to%s+(%d+)")
             if skillName and skillLevel then
+                if  not tContains(professionList, skillName) then return end -- Only check professions
                 local charKey = HCT_DataModule:GetCharacterKey()
                 local skillLevelNumber = tonumber(skillLevel)
                 if skillLevelNumber then
