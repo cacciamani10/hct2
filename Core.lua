@@ -15,7 +15,7 @@ local options = _G.DefaultData:GetOptions(HCT)
 -- Beware there be dragons here! This is the first time your addon is loaded, so you should be careful about what you do here.
 -- WOW classic functions like UnitIsGhost will not return the correct value in this function.
 function HCT:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTracker2DB", defaults, true)
+    self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTrackerDB", defaults, true)
     self.db:RegisterDefaults(defaults)
     -- if not self.db.profile.faction then self.db.profile.faction = HardcoreChallengeTracker_Data.faction end
     -- if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
@@ -23,17 +23,17 @@ function HCT:OnInitialize()
 
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTOptions", options)
-    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTOptions", "Hardcore Challenge Tracker 2")
+    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTOptions", "Hardcore Challenge Tracker")
     local profileOptions = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTProfiles", profileOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTProfiles", "Profiles", "Hardcore Challenge Tracker 2")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTProfiles", "Profiles", "Hardcore Challenge Tracker")
 
-    self:RegisterChatCommand("hct2", function(input)
+    self:RegisterChatCommand("hct", function(input)
         HCT_UIModule:ShowMainGUI()
     end)
     
     _G.DAO.UserDao:InitializeUser(HCT_DataModule:GetBattleTag())
-    self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window or /t to chat with your team.")
+    self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team.")
 end
 
 function HCT:OnEnable()

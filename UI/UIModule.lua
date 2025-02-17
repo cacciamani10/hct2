@@ -734,7 +734,7 @@ local function DrawRules(container)
 
     -- Overview section.
     local overviewText = [[
-Hardcore Challenge Tracker 2 is a World of Warcraft addon designed for a contest on WoW Classic Hardcore.
+Hardcore Challenge Tracker is a World of Warcraft addon designed for a contest on WoW Classic Hardcore.
 In this contest, players are split into two teams and earn points by:
 - Leveling up
 - Competing in team tug-of-war events

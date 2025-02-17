@@ -1,8 +1,8 @@
 ## Interface: 11506
-## Title: Hardcore Challenge Tracker 2
+## Title: Hardcore Challenge Tracker
 ## Author: Your Name
 ## Version: 0.0.1
-## SavedVariables: HardcoreChallengeTracker2DB
+## SavedVariables: HardcoreChallengeTrackerDB
 
 # Libraries and Environment Setup
 embeds.xml

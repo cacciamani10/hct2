@@ -13,7 +13,7 @@ _G.DefaultData.defaults = {
 
 function DefaultData:GetOptions(handler)
     return {
-        name = "Hardcore Challenge Tracker 2",
+        name = "Hardcore Challenge Tracker",
         handler = handler,
         type = "group",
         args = {
