@@ -41,14 +41,14 @@ function _G.DAO.CharacterDao:InitializeCharacter()
         db.characters = db.characters or {}
 
         local character = {
-            name      = username,
-            level     = level,
-            class     = class,
-            race      = race,
-            faction   = playerFaction,
-            realm     = playerRealm,
+            name           = username,
+            level          = level,
+            class          = class,
+            race           = race,
+            faction        = playerFaction,
+            realm          = playerRealm,
             deathTimestamp = nil,
-            achievements = {}
+            achievements   = {}
         }
 
         db.characters[uuid] = character
@@ -69,7 +69,7 @@ function _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
         -- TODO: request update from person who died, since you don't have the character
         return
     end
-    
+
     db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
     for _, uuid in ipairs(db.users[battleTag].characters.alive[username]) do
         db.characters[uuid].deathTimestamp = timestamp
@@ -81,17 +81,17 @@ end
 
 function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
     local username = UnitName("player")
-    local battleTag =  HCT_DataModule:GetBattleTag()
-    local uuid = GetDB().users[battleTag].characters.alive[username]
+    local battleTag = HCT_DataModule:GetBattleTag()
+    local uuid = GetDB().users[battleTag].characters.alive[username][1]
     GetDB().characters[uuid].level = level
 end
 
 function _G.DAO.CharacterDao:AddAchievement(achievementId)
     local username = UnitName("player")
-    local battleTag =  HCT_DataModule:GetBattleTag()
+    local battleTag = HCT_DataModule:GetBattleTag()
     local db = GetDB()
-    
-    local uuid = db.users[battleTag].characters.alive[username]
+
+    local uuid = db.users[battleTag].characters.alive[username][1]
 
     if db.characters[uuid].achievements[achievementId] then
         return
@@ -102,31 +102,31 @@ end
 
 function _G.DAO.CharacterDao:AddBounty(achievementId)
     local username = UnitName("player")
-    local battleTag =  HCT_DataModule:GetBattleTag()
+    local battleTag = HCT_DataModule:GetBattleTag()
     local db = GetDB()
-    
-    local uuid = db.users[battleTag].characters.alive[username]
 
-    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or 0
+    local uuid = db.users[battleTag].characters.alive[username][1]
+
+    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or
+        0
     db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = currentCount + 1 }
 end
-
 
 function _G.DAO.CharacterDao:UpdateCharacter(uuid, character)
     local db = GetDB()
 
-    if not db.users[character.battleTag] then 
+    if not db.users[character.battleTag] then
         _G.DAO.UserDao:InitializeUser(character.battleTag)
     end
 
-    if not db.users[character.battleTag].characters.alive[character.username] then 
+    if not db.users[character.battleTag].characters.alive[character.username] then
         self:CreateCharacter(character, uuid)
     end
 end
 
 function _G.DAO.CharacterDao:CreateCharacter(character, uuid)
     local db = GetDB()
-    if character.deathTimestamp and not db.users[character.battleTag].characters.alive[character.username] then 
+    if character.deathTimestamp and not db.users[character.battleTag].characters.alive[character.username] then
         db.users[character.battleTag].characters.alive[character.username] = {};
     end
 
@@ -141,12 +141,12 @@ end
 
 function _G.DAO.CharacterDao:GetCharacterBy_BattleTag_Username(battleTag, username)
     local db = GetDB()
-    return db.characters[db.users[battleTag].characters.alive[username]]
+    return db.characters[db.users[battleTag].characters.alive[username][1]]
 end
 
 function _G.DAO.CharacterDao:GetCharacter()
     local db = GetDB()
     local username = UnitName("player")
     local battleTag = HCT_DataModule:GetBattleTag()
-    return db.characters[db.users[battleTag].characters.alive[username]]
+    return db.characters[db.users[battleTag].characters.alive[username][1]]
 end
