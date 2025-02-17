@@ -20,7 +20,7 @@ end
 
 function _G.DAO.UserDao:InitializeUserTable(battleTag)
     local db = GetDB()
-    local team = HCT_DataModule:GetPlayerTeam(battleTag) or 1
+    local team = _G.Utils.GameUtils:GetPlayerTeam(battleTag) or 1
 
     if not db.users[battleTag] then
         db.users[battleTag] = {
@@ -49,4 +49,10 @@ function _G.DAO.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
      
     db.users[battleTag].characters.alive[username] = {}
     table.insert(db.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = lastUpdated })
+end
+
+function _G.DAO.UserDao:GetAllUsers()
+    local db = GetDB()
+
+    return db.users
 end

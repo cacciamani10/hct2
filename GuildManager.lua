@@ -15,7 +15,7 @@ function HCT_GuildManager:UpdateGuildNotes()
     local numGuildMembers = GetNumGuildMembers()
     for i = 1, numGuildMembers do
         local name, rank, rankIndex, level, class, zone, note, officernote, online, status = GetGuildRosterInfo(i)
-        local charKey = GetHCT().HCT_DataModule:GetCharKey(name)
+        local charKey = _G.Utils.GameUtils:GetCharKey(name)
         local battleTag = db.characters[charKey] and db.characters[charKey].battleTag or ""
         local team = db.characters[charKey] and db.characters[charKey].team or ""
         local isDead = db.characters[charKey] and db.characters[charKey].isDead or false
@@ -31,7 +31,7 @@ function HCT_GuildManager:HandleGuildDeath()
     if not GetHCT() then return end
     local db = GetDB()
     local characterName = UnitName("player")
-    local battleTag = GetHCT().HCT_DataModule:GetBattleTag()
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local charKey = characterName .. ":" .. battleTag
     local charData = db.characters[charKey]
 

@@ -7,12 +7,11 @@ local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 function HCT_ChatModule:SendTeamChatMessage(text)
     local characterName = UnitName("player")
     local _, classFileName = UnitClass("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
-    local team = HCT_DataModule:GetPlayerTeam(battleTag) or 0
-
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
+    local team = _G.Utils.GameUtils:GetPlayerTeam(battleTag) or 0
 
     local teamData = GetHCT().db.profile.teams[team] or { color = { r = 255, g = 255, b = 255 } }
-    local teamColor = HCT_DataModule.NormalizeColor(teamData.color)
+    local teamColor = _G.Utils.GameUtils.NormalizeColor(teamData.color)
     local teamColorCode = string.format("|cff%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
 
     local classColorStr = "ffffff"
@@ -35,6 +34,7 @@ function HCT_ChatModule:SendTeamChatMessage(text)
         text = text,
         timestamp = time(),
     }
+    
     local serialized = AceSerializer:Serialize("TEAMCHAT", payload)
     GetHCT():SendCommMessage(GetHCT().addonPrefix, serialized, "GUILD")
     DEFAULT_CHAT_FRAME:AddMessage(fullMessage)
@@ -66,10 +66,10 @@ function HCT_ChatModule:UnregisterChatCommands()
 end
 
 function HCT_ChatModule:ProcessTeamChatMessage(payload)
-    -- local localBattleTag = HCT_DataModule:GetBattleTag()
+    -- local localBattleTag = _G.Utils.GameUtils:GetBattleTag()
     -- local db = GetDB()
     -- if payload.sender == localBattleTag then return end
-    -- local localTeam = HCT_DataModule:GetPlayerTeam(localBattleTag)
+    -- local localTeam = _G.Utils.GameUtils:GetPlayerTeam(battleTag)
     -- if payload.team and localTeam == payload.team then
     --     local senderName = payload.character or payload.sender
     --     local senderClass = payload.class
@@ -79,7 +79,7 @@ function HCT_ChatModule:ProcessTeamChatMessage(payload)
     --         classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
     --     end
     --     if db.teams[payload.team] then
-    --         local teamColor = HCT_DataModule.NormalizeColor(db.teams[payload.team].color)
+    --         local teamColor = _G.Utils.GameUtils.NormalizeColor(db.teams[payload.team].color)
     --         teamColorStr = string.format("%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
     --     end
     --     classColorStr = string.gsub(classColorStr, "%s+", "")

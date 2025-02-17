@@ -31,7 +31,7 @@ local function CalculateCharacterDetails(charData)
     local details = {}
     
     -- Compute raw level points and then actual level points based on death.
-    local rawLevelPoints = HCT_DataModule:GetLevelPoints(charData.level, 0)
+    local rawLevelPoints = _G.Utils.GameUtils:GetLevelPoints(charData.level, 0)
     local penaltyFactor = charData.isDead and 0.5 or 1
     details.levelPoints = math.floor(rawLevelPoints * penaltyFactor)
     details.rawLevelPoints = rawLevelPoints
@@ -209,14 +209,14 @@ local function DrawTeamInfo(container)
     local team2Name = team2.name or "Team 2"
 
     local team1Color = team1.color or { r = 255, g = 0, b = 0 }
-    team1Color = HCT_DataModule.NormalizeColor(team1Color)
+    team1Color = _G.Utils.GameUtils.NormalizeColor(team1Color)
     local team2Color = team2.color or { r = 0, g = 255, b = 0 }
-    team2Color = HCT_DataModule.NormalizeColor(team2Color)
+    team2Color = _G.Utils.GameUtils.NormalizeColor(team2Color)
     local team1ColorCode = string.format("|cff%02x%02x%02x", team1Color.r, team1Color.g, team1Color.b)
     local team2ColorCode = string.format("|cff%02x%02x%02x", team2Color.r, team2Color.g, team2Color.b)
 
     -- Assume HCT_DataModule.calculatedData has been updated with player contributions.
-    local contestData = HCT_DataModule.calculatedData or {}
+    local contestData = _G.Utils.GameUtils.calculatedData or {}
 
     local team1Points = contestData["team1"] or 0
     local team2Points = contestData["team2"] or 0
@@ -304,7 +304,7 @@ local function UpdateAchievementsContent(contentContainer, mode)
     elseif mode == "complete" then
         -- In the complete mode, add a dropdown of all characters at the top.
         local characters = db.characters or {}
-        local currentCharKey = HCT_DataModule:GetCharacterKey()
+        local currentCharKey = _G.Utils.GameUtils:GetCharacterKey()
         -- Select your character at the start
         local selectedChar = currentCharKey or "all" -- default: show all
 
@@ -448,7 +448,7 @@ local function UpdateBountiesContent(contentContainer, mode)
     elseif mode == "complete" then
         -- Completed mode: add dropdown to select a character.
         local characters = db.characters or {}
-        local currentCharKey = HCT_DataModule:GetCharacterKey()
+        local currentCharKey = _G.Utils.GameUtils:GetCharacterKey()
         local selectedChar = "all" -- default: show all
 
         local dropdown = AceGUI:Create("Dropdown")
@@ -583,7 +583,7 @@ local function UpdateFeatsContent(contentContainer, mode)
     elseif mode == "complete" then
         -- Complete mode: add a dropdown of characters.
         local characters = db.characters or {}
-        local currentCharKey = HCT_DataModule:GetCharacterKey()
+        local currentCharKey = _G.Utils.GameUtils:GetCharacterKey()
         local selectedChar = "all"
 
         local dropdown = AceGUI:Create("Dropdown")
@@ -810,7 +810,7 @@ end
 function HCT_UIModule:ShowMainGUI()
     local guiFrame = AceGUI:Create("Frame")
     guiFrame:SetTitle("Hardcore Challenge Tracker")
-    HCT_DataModule:CalculateContestData()
+    _G.Utils.GameUtils:CalculateContestData()
     local statusText = "Neither team has scored yet."
     local db = GetDB()
     if db.teams[1].points and db.teams[2].points then
@@ -869,7 +869,7 @@ function HCT_UIModule:ShowMainGUI()
         elseif group == "teamChat" then
             DrawTeamChat(container)
             -- Get the users team from their battleTag
-            local team = HCT_DataModule:GetPlayerTeam(HCT_DataModule:GetBattleTag()) or ""
+            local team = _G.Utils.GameUtils:GetPlayerTeam(_G.Utils.GameUtils:GetBattleTag()) or ""
             guiFrame:SetStatusText(team .. " Chat")
         else
             local placeholder = AceGUI:Create("Label")

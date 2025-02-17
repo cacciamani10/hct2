@@ -20,7 +20,7 @@ _G.HCT_Handlers.ZoneChangedNewAreaHandler = {
             -- --HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " .. zone .. " - " .. subzone .. " - " .. mapName)
             -- local db = GetDB()
             -- db.localAchievementProgressData = db.localAchievementProgressData or {}
-            -- local charKey = HCT_DataModule:GetCharacterKey()
+            -- local charKey = _G.Utils.GameUtils:GetCharacterKey()
             -- db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
             -- db.localAchievementProgressData[charKey].zonesVisited = db.localAchievementProgressData[charKey].zonesVisited or {}
             -- db.localAchievementProgressData[charKey].zonesVisited[zone] = db.localAchievementProgressData[charKey].zonesVisited[zone] or {}

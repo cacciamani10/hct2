@@ -8,8 +8,8 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
     
     HandleEvent = function(self, HCT, event, newLevel)
         _G.DAO.CharacterDao:UpdateCharacterLevel(tonumber(newLevel))
-        _G.ACHIEVEMENTS.Achievement_Leveling.CheckLevelingAchievements()
-        local uuid = HCT.db.profile.users[HCT_DataModule:GetBattleTag()].characters.alive[UnitName("player")]
+        _G.ACHIEVEMENTS.Achievement_Leveling.CheckAchievement()
+        local uuid = HCT.db.profile.users[_G.Utils.GameUtils:GetBattleTag()].characters.alive[UnitName("player")]
         
         local event = {
             type = "CHARACTER",

@@ -19,7 +19,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         --_G.HCT_Env.GetAddon():Print("PlayerEnteringWorldHandler:HandleGhostState: " .. tostring(UnitIsGhost("player")))
         --     end
         -- if UnitIsGhost("player") then
-        --     local charKey = HCT_DataModule:GetCharacterKey()
+        --     local charKey = _G.Utils.GameUtils:GetCharacterKey()
         --     if not charKey then return end
         --     local charData = HCT.db.profile.characters[charKey]
         --     if charData then

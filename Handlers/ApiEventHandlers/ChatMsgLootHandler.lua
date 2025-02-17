@@ -28,7 +28,7 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
             local lootName, lootQuantityStr = string.match(cleanedText, "You receive loot: %[(.-)%]x?(%d*)")
             if lootName then
                 local lootQuantity = tonumber(lootQuantityStr) or 1 -- Default to 1 if no quantity is found
-                local charKey = HCT_DataModule:GetCharacterKey()
+                local charKey = _G.Utils.GameUtils:GetCharacterKey()
                 local charLevel = UnitLevel("player")
                 if clothNames[lootName] then
                     local minLevel, maxLevel = unpack(clothNames[lootName])

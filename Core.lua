@@ -40,7 +40,7 @@ function HCT:OnInitialize()
         HCT_UIModule:ShowMainGUI()
     end)
     
-    _G.DAO.UserDao:InitializeUser(HCT_DataModule:GetBattleTag())
+    _G.DAO.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())
     self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team.")
 end
 

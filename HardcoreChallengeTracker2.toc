@@ -16,17 +16,21 @@ Data/HardcoreChallengeTracker_Data.lua
 Data/HardcoreChallengeTracker_Teams.lua
 Data/DefaultData.lua
 
-# Data and Module Logic
-DataModule.lua
-UI/UIModule.lua
-ChatModule.lua
-
 #Utils
 Utils/TimeUtils.lua
+Utils/GameUtils.lua
+
+# Data and Module Logic
+UI/UIModule.lua
+ChatModule.lua
 
 #Dao
 Dao/CharacterDao.lua
 Dao/UserDao.lua
+
+# Service
+Service/AchievementService.lua
+Service/ScoringService.lua
 
 # Handlers
 Handlers/ApiEventHandlers/AddonCommHandler.lua
@@ -44,6 +48,7 @@ Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 Achievements/Achievement_Leveling.lua
 Achievements/Achievement_Professions.lua
 Achievements/Achievement_Bounties.lua
+Achievements/Achievement_Dungeons.lua
 
 # Main Core Initialization
 Core.lua

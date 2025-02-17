@@ -18,7 +18,7 @@ _G.HCT_Handlers.ChatMsgCombatXpGainHandler = {
             if player == playerName then
                 local xpGain = tonumber(text:match("(%d+) experience")) or 0
                 if xpGain > 0 then
-                    _G.ACHIEVEMENTS.Achievement_Bounties:CheckBountiesAchievements(801)
+                    _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(801)
                 end
             end
         end

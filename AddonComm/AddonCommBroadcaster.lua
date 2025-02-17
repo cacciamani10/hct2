@@ -20,7 +20,7 @@ _G.HCT_Broadcaster = {
     SyncRequest = function()
         local HCT = GetHCT()
         local db = GetDB()
-        local battleTag = HCT_DataModule:GetBattleTag()
+        local battleTag = _G.Utils.GameUtils:GetBattleTag()
         HCT:Print("sending sync request broadcast...")
     
         if not battleTag or not db.users[battleTag] then

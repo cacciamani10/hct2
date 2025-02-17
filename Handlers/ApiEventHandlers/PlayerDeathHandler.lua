@@ -26,7 +26,7 @@ _G.HCT_Handlers.PlayerDeathHandler = {
         C_Timer.After(0.5, function()
             if not UnitIsGhost("player") then
                 local timestamp = time()
-                local battleTag = HCT_DataModule:GetBattleTag()
+                local battleTag = _G.Utils.GameUtils:GetBattleTag()
                 local username = UnitName("player")
                 
                 _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)

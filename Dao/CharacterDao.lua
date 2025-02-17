@@ -15,7 +15,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
     local playerFaction = UnitFactionGroup("player")
     local playerRealm = GetRealmName()
     local username = UnitName("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
     if not battleTag then
         GetHCT():Print("No battle tag found.")
         return
@@ -54,6 +54,10 @@ function _G.DAO.CharacterDao:InitializeCharacter()
 
         db.characters[uuid] = character
 
+        if level > 1 then
+            -- TODO recaclcualte achievements
+        end
+
         local event = {
             type = "CHARACTER",
             uuid = uuid,
@@ -67,23 +71,20 @@ end
 function _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
     local db = GetDB()
 
-    if not db.users[battleTag].characters.alive[username] then
-        return
-    end
+    local entry = db.users[battleTag].characters.alive[username] and db.users[battleTag].characters.alive[username][1]
+    if not entry then return end
 
     db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
 
-    for _, entry in ipairs(db.users[battleTag].characters.alive[username]) do
-        db.characters[entry.uuid].deathTimestamp = timestamp
-        table.insert(db.users[battleTag].characters.dead[username], { uuid = entry.uuid, lastUpdated = timestamp })
-    end
+    db.characters[entry.uuid].deathTimestamp = timestamp
+    table.insert(db.users[battleTag].characters.dead[username], { uuid = entry.uuid, lastUpdated = timestamp })
 
     db.users[battleTag].characters.alive[username] = nil
 end
 
 function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
     local username = UnitName("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
 
     if not db.users[battleTag] or not db.users[battleTag].characters.alive[username] then
@@ -103,9 +104,10 @@ function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
     characterEntry.lastUpdated = time()
 end
 
+-- this needs to be renamed to something that implies that this achivement is granted once
 function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     local username = UnitName("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
 
     if not db.users[battleTag] or not db.users[battleTag].characters.alive[username] then
@@ -128,7 +130,6 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     end
 
     db.characters[uuid].achievements[achievementId] = { timestamp = lastUpdated }
-
     
     characterEntry.lastUpdated = lastUpdated
     local event = {
@@ -142,7 +143,7 @@ end
 
 function _G.DAO.CharacterDao:AddBounty(achievementId)
     local username = UnitName("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
 
     if not db.users[battleTag] or not db.users[battleTag].characters.alive[username] then
@@ -160,8 +161,7 @@ function _G.DAO.CharacterDao:AddBounty(achievementId)
 
     db.characters[uuid].achievements = db.characters[uuid].achievements or {}
 
-    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or
-    0
+    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or 0
 
     db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = currentCount + 1 }
 
@@ -238,8 +238,13 @@ end
 function _G.DAO.CharacterDao:GetCharacter()
     local db = GetDB()
     local username = UnitName("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
+    local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and
     db.users[battleTag].characters.alive[username][1]
     return entry and db.characters[entry.uuid]
+end
+
+function _G.DAO.CharacterDao:GetCharacters()
+    local db = GetDB()
+    return db.characters
 end
