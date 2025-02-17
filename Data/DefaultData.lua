@@ -5,8 +5,8 @@ _G.DefaultData.defaults = {
         users = {},
         characters = {},
         teams = {
-            [1] = HardcoreChallengeTracker2_Teams[1],
-            [2] = HardcoreChallengeTracker2_Teams[2],
+            [1] = HardcoreChallengeTracker_Teams[1],
+            [2] = HardcoreChallengeTracker_Teams[2],
         }
     }
 }

@@ -12,8 +12,8 @@ AddonEnv.lua
 AddonComm/AddonCommWhisper.lua
 AddonComm/AddonCommBroadcaster.lua
 AddonComm/AddonCommProcessor.lua
-Data/HardcoreChallengeTracker2_Data.lua
-Data/HardcoreChallengeTracker2_Teams.lua
+Data/HardcoreChallengeTracker_Data.lua
+Data/HardcoreChallengeTracker_Teams.lua
 Data/DefaultData.lua
 
 # Data and Module Logic

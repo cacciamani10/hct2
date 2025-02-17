@@ -1,6 +1,6 @@
--- HardcoreChallengeTracker2_Teams.lua
+-- HardcoreChallengeTracker_Teams.lua
 -- This file defines the default team settings.
-HardcoreChallengeTracker2_Teams = {
+HardcoreChallengeTracker_Teams = {
     [1] = {
         name = "Crimson Vanguards",
         color = { r = 255, g = 0, b = 0 },

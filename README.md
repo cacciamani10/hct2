@@ -83,8 +83,8 @@ The addon leverages [the Ace3 framework](https://www.wowace.com/projects/ace3/pa
   - When modifying event handling or data updates, ensure that changes are broadcast so that all team members maintain a synchronized state.
 
 ## Setup and Reload Tips
-- Clone the repo into C:\Program Files (x86)\World of Warcraft\_classic_era_\Interface\AddOns\HardcoreChallengeTracker2
-- Libs and Core.lua should be directly inside the HardcoreChallengeTracker2 folder.
+- Clone the repo into C:\Program Files (x86)\World of Warcraft\_classic_era_\Interface\AddOns\HardcoreChallengeTracker
+- Libs and Core.lua should be directly inside the HardcoreChallengeTracker folder.
 - Open the game and ensure the addon is enabled. Upon entering the world, the addon should say: "Hardcore Challenge Tracker loaded. Use /hct to open the UI window."
 - After pulling changes or doing some quick changes yourself, save your files and type "/reload" in-game. This will fully reload all your addons, including your new changes.
 - Use LLMs to verify Lua and Ace3 syntax, and for understanding error messages.
