@@ -20,11 +20,13 @@ function _G.DAO.CharacterDao:InitializeCharacter()
         return
     end
 
-    -- TODO ensure the character is created on the specific server and for a specific faction
-    -- if playerFaction ~= db.faction then
-    --     GetHCT():Print("This character is not eligible. Invalid faction: " .. playerFaction)
-    --     return
-    -- end
+    if playerFaction ~= HardcoreChallengeTracker_Data.faction then
+        return
+    end
+
+    if playerRealm ~= HardcoreChallengeTracker_Data.realm then
+        return
+    end
 
     if not db.users[battleTag].characters.alive[username] then
         local level = UnitLevel("player") or 1
