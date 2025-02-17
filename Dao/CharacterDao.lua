@@ -78,33 +78,31 @@ end
 function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
     local username = UnitName("player")
     local battleTag = HCT_DataModule:GetBattleTag()
-    local uuid = GetDB().characters.alive[username]
-
-    if uuid then
-        local character = GetDB().characters[uuid].level = newLevelNumber
-    end
+    local uuid = GetDB().users[battleTag].characters[username]
+    GetDB().characters[uuid].level = level
 end
 
 function _G.DAO.CharacterDao:UpdateCharacter(character)
     local uuid = character.uuid
+    local db = GetDB()
     -- remove attributes not stored on character
     character.type = nil
     character.uuid = nil
 
-    if not db.users[character.battleTag] then {
+    if not db.users[character.battleTag] then 
         _G.DAO.UserDao:InitializeUser(character.battleTag)
-    }
+    end
 
-    if not db.users[character.battleTag].characters.alive[character.username] then {
+    if not db.users[character.battleTag].characters.alive[character.username] then 
         self:CreateCharacter(character, uuid)
-    }
+    end
 
 end
 
 function _G.DAO.CharacterDao:CreateCharacter(character, uuid)
     local db = GetDB()
     if character.deathTimestamp and not db.users[character.battleTag].characters.alive[character.username] then 
-        db.users[battleTag].characters.alive[username] = {};
+        db.users[character.battleTag].characters.alive[character.username] = {};
     end
 
     table.insert(db.users[character.battleTag].characters.alive[character.username], uuid)
