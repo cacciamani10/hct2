@@ -54,6 +54,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     -- first login after character death, UnitIsDeadOrGhost will return true, UnitIsGhost will return false, UnitIsDead will return true
     -- second login after character death, UnitIsDeadOrGhost will return true, UnitIsGhost will return true, UnitIsDead will return false
     InitializeCharacter = function(HCT)
+        -- TODO handle someone deleting a live character and remaking it
         if not UnitIsDeadOrGhost("player") then
             _G.DAO.CharacterDao:InitializeCharacter()
         end
