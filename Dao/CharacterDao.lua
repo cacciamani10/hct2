@@ -66,7 +66,7 @@ function _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
     local db = GetDB()
 
     if not db.users[battleTag].characters.alive[username] then
-        -- TODO: request update from person who died
+        -- TODO: request update from person who died, since you don't have the character
         return
     end
     

@@ -70,22 +70,6 @@ function HCT_DataModule:GetPlayerTeam(player)
     return nil
 end
 
-local function AssignPlayerToTeam(player)
-    local teams = GetDB().teams
-    for _, team in ipairs(teams) do
-        for _, name in ipairs(team.battleTags) do
-            if name == player then
-                return
-            end
-        end
-    end
-    if #teams[1].battleTags > #teams[2].battleTags then
-        table.insert(teams[2].battleTags, player)
-    else
-        table.insert(teams[1].battleTags, player)
-    end
-end
-
 function HCT_DataModule:CompleteAchievement(charKey, achievement)
     if not charKey then
         GetHCT():Print("No character key provided.")
@@ -128,17 +112,7 @@ function HCT_DataModule:CheckLevelAchievements(charKey)
     end
 end
 
-function HCT_DataModule:InitializeUserData()
-    local db = GetDB()
-    local battleTag = HCT_DataModule:GetBattleTag()
-    -- Get Team
-    local team = HCT_DataModule:GetPlayerTeam(battleTag) or 1
-    db.users = db.users or {}
-    if not db.users[battleTag] then
-        db.users[battleTag] = { team = team, totalDeaths = 0, characterKeys = {} }
-    end
-    AssignPlayerToTeam(battleTag)
-end
+
 
 function HCT_DataModule:IsDungeonBoss(name)
     for _, boss in pairs(HardcoreChallengeTracker_Data.dungeonBosses) do
