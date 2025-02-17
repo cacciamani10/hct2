@@ -43,7 +43,7 @@ Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 # Achievements
 Achievements/Achievement_Leveling.lua
 Achievements/Achievement_Professions.lua
-Achievements/Achievement_Bountiess.lua
+Achievements/Achievement_Bounties.lua
 
 # Main Core Initialization
 Core.lua
