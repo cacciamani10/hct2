@@ -6,7 +6,7 @@ local HCT = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceCons
 local HCT_Broadcaster = _G.HCT_Broadcaster
 HCT_Env.InitializeAddon(HCT);
 HCT.teamChatLog = HCT.teamChatLog or {}
-HCT.addonPrefix = "HCT2Addon"
+HCT.addonPrefix = "HCTAddon"
 local defaults = _G.DefaultData.defaults
 local options = _G.DefaultData:GetOptions(HCT)
 
