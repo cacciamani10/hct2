@@ -52,6 +52,10 @@ function _G.DAO.CharacterDao:InitializeCharacter()
             achievements   = {}
         }
 
+        if type(character.achievements) ~= "table" then
+            character.achievements = {}
+        end
+
         db.characters[uuid] = character
 
         if level > 1 then
@@ -123,6 +127,11 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
 
     local uuid = characterEntry.uuid
     local lastUpdated = time()
+
+    if type(db.characters[uuid].achievements) ~= "table" then
+        db.characters[uuid].achievements = {}
+    end
+
     db.characters[uuid].achievements = db.characters[uuid].achievements or {}
 
     if db.characters[uuid].achievements[achievementId] then
@@ -138,7 +147,6 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
         lastUpdated = lastUpdated,
         character = db.characters[uuid]
     }
-    HCT_Broadcaster:BroadcastEvent(event)
 end
 
 function _G.DAO.CharacterDao:AddBounty(achievementId)
@@ -159,7 +167,9 @@ function _G.DAO.CharacterDao:AddBounty(achievementId)
 
     local uuid = characterEntry.uuid
 
-    db.characters[uuid].achievements = db.characters[uuid].achievements or {}
+    if type(db.characters[uuid].achievements) ~= "table" then
+        db.characters[uuid].achievements = {}
+    end
 
     local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or 0
 
@@ -247,4 +257,9 @@ end
 function _G.DAO.CharacterDao:GetCharacters()
     local db = GetDB()
     return db.characters
+end
+
+function _G.DAO.CharacterDao:GetUUID()
+    local db = GetDB()
+    return db.profile.users[_G.Utils.GameUtils:GetBattleTag()].characters.alive[UnitName("player")][1]
 end

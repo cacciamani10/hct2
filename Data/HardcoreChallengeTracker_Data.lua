@@ -12,6 +12,7 @@ local BOUNTY_END_ID = 899
 
 local achievements = {
     ["Level Checkpoints"] = {
+        { uniqueID = 1, name = "Level 2 Reached", description = "Reach level 2 on your character", points = 2 },
         { uniqueID = 1, name = "Level 10 Reached", description = "Reach level 10 on your character", points = 5 },
         { uniqueID = 2, name = "Level 20 Reached", description = "Reach level 20 on your character", points = 10 },
         { uniqueID = 3, name = "Level 30 Reached", description = "Reach level 30 on your character", points = 15 },

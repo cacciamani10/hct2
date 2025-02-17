@@ -8,6 +8,8 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
 
     HandleEvent = function(self, HCT, event, isLogin)
         if not HCT then return end
+        _G.DAO.CharacterDao:AddLevelingAchievement(999)
+        _G.DAO.CharacterDao:AddLevelingAchievement(998)
         self:InitializeCharacter()
         self:HandleNewCharacterLogin(HCT)
         self:HandleLogin(HCT, isLogin)

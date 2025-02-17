@@ -60,5 +60,3 @@ function _G.SERVICE.Scoring_Service:CalculateCharacterPoints(character)
 
     return total * penaltyFactor
 end
-
-
