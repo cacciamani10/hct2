@@ -51,7 +51,7 @@ function HCT_GuildManager:AutoRequestToJoinGuild()
             type = "GUILD_JOIN_REQUEST",
             requester = requester,
         }
-        HCT_Broadcaster:BroadcastEvent(ev)
+        -- HCT_Broadcaster:BroadcastEvent(ev)
     end
 end
 

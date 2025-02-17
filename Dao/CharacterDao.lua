@@ -39,7 +39,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
 
         db.characters = db.characters or {}
 
-        db.characters[uuid] = {
+        local ev = {
             name      = username,
             level     = level,
             class     = class,
@@ -50,28 +50,25 @@ function _G.DAO.CharacterDao:InitializeCharacter()
             achievements = {}
         }
 
-        -- local ev = {
-        --     name      = username,
-        --     level     = level,
-        --     class     = class,
-        --     race      = race,
-        --     faction   = playerFaction,
-        --     realm     = playerRealm,
-        --     deathTimestamp = nil,
-        --     achievements = {}
-        -- }
-        --HCT_Broadcaster:BroadcastEvent(ev)
+        db.characters[uuid] = ev
+
+        ev.uuid = uuid
+        ev.type = "CHARACTER"
+        HCT_Broadcaster:BroadcastEvent(ev)
     end
 end
 
-function _G.DAO.CharacterDao:MarkCharacterAsDead()
+function _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
     local db = GetDB()
-    local battleTag = HCT_DataModule:GetBattleTag()
-    local username = UnitName("player")
+
+    if not db.users[battleTag].characters.alive[username] then
+        -- TODO: request update from person who died
+        return
+    end
     
     db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
     for _, uuid in ipairs(db.users[battleTag].characters.alive[username]) do
-        db.characters[uuid].deathTimestamp = time()
+        db.characters[uuid].deathTimestamp = timestamp
         table.insert(db.users[battleTag].characters.dead[username], uuid)
     end
 
@@ -79,11 +76,37 @@ function _G.DAO.CharacterDao:MarkCharacterAsDead()
 end
 
 function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
-        local username = UnitName("player")
-        local battleTag = HCT_DataModule:GetBattleTag()
-        local uuid = HCT.db.profile.characters.alive[username]
+    local username = UnitName("player")
+    local battleTag = HCT_DataModule:GetBattleTag()
+    local uuid = GetDB().characters.alive[username]
 
-        if uuid then
-            local character = HCT.db.profile.characters[uuid].level = newLevelNumber
-        end
+    if uuid then
+        local character = GetDB().characters[uuid].level = newLevelNumber
+    end
+end
+
+function _G.DAO.CharacterDao:UpdateCharacter(character)
+    local uuid = character.uuid
+    -- remove attributes not stored on character
+    character.type = nil
+    character.uuid = nil
+
+    if not db.users[character.battleTag] then {
+        _G.DAO.UserDao:InitializeUser(character.battleTag)
+    }
+
+    if not db.users[character.battleTag].characters.alive[character.username] then {
+        self:CreateCharacter(character, uuid)
+    }
+
+end
+
+function _G.DAO.CharacterDao:CreateCharacter(character, uuid)
+    local db = GetDB()
+    if character.deathTimestamp and not db.users[character.battleTag].characters.alive[character.username] then 
+        db.users[battleTag].characters.alive[username] = {};
+    end
+
+    table.insert(db.users[character.battleTag].characters.alive[character.username], uuid)
+    db.characters[uuid] = character
 end

@@ -16,13 +16,12 @@ function AddonCommProcessor:ProcessEvent(ev)
     end
     local db = GetDB()
     if ev.type == "DEATH" then
-        local charKey = ev.charKey
-        if db.characters[charKey] then
-            db.characters[charKey].isDead = true
-            local name = ev.name or "Unknown"
-            local level = ev.level or "Unknown"
-            HCT:Print("|cffff0000" .. name .. " has died at level " .. level .. "|r")
-        end
+        local battleTag = ev.battleTag
+        local username = ev.username
+        local level = ev.level or "Unknown"
+        local timestamp = ev.timestamp
+        _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
+        HCT:Print("|cffff0000" .. name .. " has died at level " .. level .. "|r")
     elseif ev.type == "CHARACTER" then
         local charKey = ev.name .. ":" .. ev.battleTag
         if db.characters[charKey] then

@@ -25,7 +25,21 @@ _G.HCT_Handlers.PlayerDeathHandler = {
         -- character names must be unique realm wide regardless if its alive or dead
         C_Timer.After(0.5, function()
             if not UnitIsGhost("player") then
-                _G.DAO.CharacterDao:MarkCharacterAsDead()
+                local timestamp = time()
+                local battleTag = HCT_DataModule:GetBattleTag()
+                local username = UnitName("player")
+                _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
+                HCT:Print("You have died... but we go agane!")
+
+                local ev = {
+                    type = "DEATH",
+                    battletag = HCT_DataModule:GetBattleTag(),
+                    username = UnitName("player"),
+                    level = UnitLevel("player"),
+                    timestamp = timestamp
+                }
+                
+                HCT_Broadcaster:BroadcastEvent(ev)
             end
         end)
     end

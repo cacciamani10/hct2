@@ -31,7 +31,8 @@ function HCT:OnInitialize()
     self:RegisterChatCommand("hct2", function(input)
         HCT_UIModule:ShowMainGUI()
     end)
-    _G.DAO.UserDao:InitializeUser()
+    
+    _G.DAO.UserDao:InitializeUser(HCT_DataModule:GetBattleTag())
     self:Print("Hardcore Challenge Tracker 2 loaded. Use /hct2 to open the UI window or /t to chat with your team.")
 end
 

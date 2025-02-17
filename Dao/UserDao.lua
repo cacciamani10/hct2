@@ -9,9 +9,8 @@ end
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-function _G.DAO.UserDao:InitializeUser()
+function _G.DAO.UserDao:InitializeUser(battleTag)
     local db = GetDB()
-    local battleTag = HCT_DataModule:GetBattleTag()
     local team = HCT_DataModule:GetPlayerTeam(battleTag) or 1
 
     if not battleTag then
@@ -19,7 +18,6 @@ function _G.DAO.UserDao:InitializeUser()
         return
     end
 
-    GetHCT():Print("UsersDao.lua")
     if not db.users[battleTag] then
         db.users[battleTag] = {
             team = team,
@@ -37,4 +35,3 @@ function _G.DAO.UserDao:InitializeUser()
         user.characters.dead = user.characters.dead or {}
     end
 end
-

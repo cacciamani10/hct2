@@ -25,6 +25,7 @@ _G.HCT_Handlers.AddonCommHandler = {
 
             -- if msgType == "EVENT" then
             --     AddonCommProcessor:ProcessEvent(payload)
+            -- end
             -- elseif msgType == "DEATH" then
             --     AddonCommProcessor:ProcessEvent(payload)
             -- elseif msgType == "BULK_UPDATE" then

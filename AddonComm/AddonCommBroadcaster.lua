@@ -12,12 +12,9 @@ local function CountTable(t)
 end
 
 _G.HCT_Broadcaster = {
-    lastBroadcastTime = 0,
-    lastRequestTime = 0,
+
     BroadcastEvent = function(self, ev)
         -- local HCT = GetHCT()
-        -- local now = time()
-        -- self.lastBroadcastTime = now
         
         -- if not HCT then return end
         -- local serialized = AceSerializer:Serialize("EVENT", ev)

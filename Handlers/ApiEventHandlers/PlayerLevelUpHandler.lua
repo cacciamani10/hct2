@@ -11,20 +11,22 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
         level = tonumber(newLevel)
 
         _G.DAO.CharacterDao:UpdateCharacterLevel(level)
-            --local pointsAwarded = HCT_DataModule:GetLevelPoints(newLevel, oldLevel)
+        local username = UnitName("player")
+        local battleTag = HCT_DataModule:GetBattleTag()
+        local uuid = HCT.db.profile.users[battleTag].characters.alive[username]
 
-            -- local ev = {
-            --     type = "CHARACTER",
-            --     battleTag = battleTag,
-            --     level = newLevel,
-            --     name = characterName,
-            --     class = select(2, UnitClass("player")),
-            --     race = select(2, UnitRace("player")),
-            --     faction = UnitFactionGroup("player"),
-            --     realm = GetRealmName(),
-            --     isDead = false,
-            -- }
-            -- HCT_Broadcaster:BroadcastEvent(ev)
-            -- recalculate achievements?
+        local ev = {
+            type = "CHARACTER",
+            uuid = uuid
+            battleTag = battleTag,
+            level = newLevel,
+            name = username,
+            class = select(2, UnitClass("player")),
+            race = select(2, UnitRace("player")),
+            faction = UnitFactionGroup("player"),
+            realm = GetRealmName(),
+        }
+        HCT_Broadcaster:BroadcastEvent(ev)
+        -- recalculate achievements?
     end
 }
