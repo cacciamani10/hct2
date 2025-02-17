@@ -15,12 +15,20 @@ local options = _G.DefaultData:GetOptions(HCT)
 -- Beware there be dragons here! This is the first time your addon is loaded, so you should be careful about what you do here.
 -- WOW classic functions like UnitIsGhost will not return the correct value in this function.
 function HCT:OnInitialize()
+    local playerFaction = UnitFactionGroup("player")
+    local playerRealm = GetRealmName()
+
+    if playerFaction ~= HardcoreChallengeTracker_Data.faction then
+        _G["YourAddon"] = nil
+    end
+
+    if playerRealm ~= HardcoreChallengeTracker_Data.realm then
+        _G["YourAddon"] = nil
+    end
     self.db = LibStub("AceDB-3.0"):New("HardcoreChallengeTrackerDB", defaults, true)
     self.db:RegisterDefaults(defaults)
-    -- if not self.db.profile.faction then self.db.profile.faction = HardcoreChallengeTracker_Data.faction end
-    -- if not self.db.profile.realm then self.db.profile.realm = HardcoreChallengeTracker_Data.realm end
-    if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
+    if not self.db.profile.teams then self.db.profile.teams = defaults.profile.teams end
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("HCTOptions", options)
     self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTOptions", "Hardcore Challenge Tracker")
@@ -39,7 +47,7 @@ end
 function HCT:OnEnable()
     HCT:RegisterEvents()
     HCT_ChatModule:RegisterChatCommands()
-    -- TODO check all achievements
+    HCT_Broadcaster:SyncRequest()
 end
 
 function HCT:OnDisable()
@@ -62,9 +70,6 @@ function HCT:RegisterEvents()
             HCT:RegisterEvent(eventType, handlerName)
         end
     end
-
-    HCT_Broadcaster:RequestContestData()
-    HCT_Broadcaster:BroadcastBulkEvents()
 end
 
 function HCT:UnregisterEvents()

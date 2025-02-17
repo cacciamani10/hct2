@@ -31,7 +31,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
 
     HandleInitialLogin = function(event)
         if event.isInitialLogin then
-            HCT_Broadcaster:RequestContestData()
+            --HCT_Broadcaster:RequestContestData()
         end
     end,
 

@@ -17,33 +17,36 @@ _G.HCT_Broadcaster = {
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
     end,
 
-    RequestContestData = function()
-        local HCT = GetHCT()
-        local ev = {
-            type = "REQUEST",
-            payload = "request"
-        }
-        local serialized = AceSerializer:Serialize("REQUEST", ev)
-        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
-        --HCT:Print("Requesting data update...")
-    end,
-
-    BroadcastBulkEvents = function()
+    SyncRequest = function()
         local HCT = GetHCT()
         local db = GetDB()
-
-        local database = {
-            users = db.users or {},
-            characters = db.characters or {},
-        }
-
-        local serialized = AceSerializer:Serialize("BULK_UPDATE", database)
-        if not serialized or serialized == "" then
-            HCT:Print("Error: Serialized bulk data is empty!")
+        local battleTag = HCT_DataModule:GetBattleTag()
+    
+        if not battleTag or not db.users[battleTag] then
+            HCT:Print("Error: No user data found for request.")
             return
         end
-
+    
+        local userData = {
+            users = {
+                [battleTag] = db.users[battleTag]
+            },
+            characters = {}
+        }
+    
+        for _, entry in ipairs(db.users[battleTag].characters.alive or {}) do
+            userData.characters[entry.uuid] = db.characters[entry.uuid]
+        end
+        for _, entry in ipairs(db.users[battleTag].characters.dead or {}) do
+            userData.characters[entry.uuid] = db.characters[entry.uuid]
+        end
+    
+        local ev = {
+            type = "SYNC_REQUEST",
+            payload = userData
+        }
+    
+        local serialized = AceSerializer:Serialize("SYNC_REQUEST", ev)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
-        --HCT:Print("Bulk update complete.")
-    end
+    end,
 }

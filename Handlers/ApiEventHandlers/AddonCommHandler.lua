@@ -23,15 +23,14 @@ _G.HCT_Handlers.AddonCommHandler = {
                 return
             end
 
-            if msgType == "EVENT" then
+            if msgType == "EVENT" or msgType == "DEATH" then
                 AddonCommProcessor:ProcessEvent(payload)
-            elseif msgType == "DEATH" then
-                AddonCommProcessor:ProcessEvent(payload)
-            elseif msgType == "BULK_UPDATE" then
-                AddonCommProcessor:ProcessBulkUpdate(payload)
-                --HCT:Print("Bulk update received and processed from " .. sender)
-            elseif msgType == "REQUEST" then
-                AddonCommProcessor:RespondToRequest(payload)
+            elseif msgType == "SYNC_REQUEST" then
+                AddonCommProcessor:ProcessSyncRequest(payload, sender)
+            elseif msgType == "SYNC_UPDATE" then
+                AddonCommProcessor:ProcessSyncUpdate(payload, sender)
+            elseif msgType == "SYNC_FINAL" then
+                AddonCommProcessor:ProcessSyncFinal(payload, sender)
             elseif msgType == "TEAMCHAT" then
                 HCT_ChatModule:ProcessTeamChatMessage(payload)
             else

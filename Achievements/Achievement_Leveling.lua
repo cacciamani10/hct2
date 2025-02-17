@@ -12,7 +12,7 @@ function _G.ACHIEVEMENTS.Achievement_Leveling:CheckLevelingAchievements()
     for _, ach in ipairs(levelCheckpoints or {}) do
         local requiredLevel = tonumber(ach.name:match("Level (%d+) Reached"))
         if requiredLevel and character.level >= requiredLevel then
-            _G.DAO.CharacterDao:AddAchievement(ach.uniqueID)
+            _G.DAO.CharacterDao:AddLevelingAchievement(ach.uniqueID)
         end
     end
 end

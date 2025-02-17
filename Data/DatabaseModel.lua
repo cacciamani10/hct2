@@ -1,15 +1,27 @@
 MyAddonDB = {
     users = {
         ["Arsine#1917"] = {
+            lastUpdated = 394757349,
             team = 1,
             characters = {
                 alive = {
-                    ["MilfyMan"] = "uuid-1234-5678"
+                    ["MilfyMan"] = {
+                        {
+                            uuid = "uuid-1234-5678",
+                            lastUpdated = 394757349,
+                        }
+                    }
                 },
                 dead = {
                     ["MilfyMan"] = {
-                        "uuid-8765-4321",
-                        "uuid-5678-9101"
+                        {
+                            uuid = "uuid-1234-5678",
+                            lastUpdated = 394757349,
+                        },
+                        {
+                            uuid = "uuid-1234-5678",
+                            lastUpdated = 394757349,
+                        }
                     }
                 }
             }

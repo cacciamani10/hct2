@@ -16,12 +16,10 @@ function AddonCommProcessor:ProcessEvent(ev)
     end
     local db = GetDB()
     if ev.type == "DEATH" then
-        local battleTag = ev.battleTag
-        local username = ev.username
-        _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, ev.timestamp)
-        HCT:Print("|cffff0000" .. username .. " has died at level " .. ev.level .. "|r")
+        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
+        HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
     elseif ev.type == "CHARACTER" then
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character)
+        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
     -- elseif ev.type == "SPECIAL_KILL" then
     --     local mobName = ev.name or "Unknown Mob"
     --     local classification = ev.classification or "unknown classification"
@@ -39,72 +37,277 @@ function AddonCommProcessor:ProcessEvent(ev)
     end
 end
 
-function AddonCommProcessor:ProcessBulkUpdate(payload)
+-- I know this is gross, but chatgpt wrote this in 2 seconds
+function AddonCommProcessor:ProcessSyncRequest(payload, sender)
     local HCT = GetHCT()
+    if not HCT then return end
+
     local db = GetDB()
-    if not HCT then
-        print("HCT is not initialized.")
-        return
-    end
+    local senderBattleTag = sender
 
-    local myBattleTag = HCT_DataModule:GetBattleTag()
+    if not payload or not payload.users then return end
 
-    if not myBattleTag then
-        HCT:Print("My Battle Tag missing")
-        return
-    end
-
-    -- Users
     for battleTag, userData in pairs(payload.users) do
-        if battleTag ~= myBattleTag then
-            db.users[battleTag] = db.users[battleTag] or {}
-            db.users[battleTag].team = userData.team
-
-            db.users[battleTag].characters = db.users[battleTag].characters or { alive = {}, dead = {} }
-
-            for name, uuid in pairs(userData.characters.alive or {}) do
-                db.users[battleTag].characters.alive[name] = uuid
-            end
-
-            for name, uuidList in pairs(userData.characters.dead or {}) do
-                db.users[battleTag].characters.dead[name] = db.users[battleTag].characters.dead[name] or {}
-                for _, uuid in ipairs(uuidList) do
-                    table.insert(db.users[battleTag].characters.dead[name], uuid)
-                end
-            end
-        end
-    end
-
-    -- Characters
-    for uuid, charData in pairs(payload.characters) do
-        if not db.characters[uuid] then
-            db.characters[uuid] = charData
+        if not db.users[battleTag] then
+            db.users[battleTag] = userData
         else
-            local existingChar = db.characters[uuid]
+            db.users[battleTag].characters.alive = db.users[battleTag].characters.alive or {}
+            db.users[battleTag].characters.dead = db.users[battleTag].characters.dead or {}
 
-            existingChar.level = math.max(existingChar.level, charData.level)
+            for username, characterList in pairs(userData.characters.alive or {}) do
+                db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
 
-            if charData.deathTimestamp then
-                existingChar.deathTimestamp = charData.deathTimestamp
+                for _, characterEntry in ipairs(characterList) do
+                    local uuid = characterEntry.uuid
+                    if not db.characters[uuid] or characterEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
+                        db.characters[uuid] = payload.characters[uuid]
+                        table.insert(db.users[battleTag].characters.alive[username], characterEntry)
+                    end
+                end
             end
 
-            existingChar.achievements = existingChar.achievements or {}
-            for achId, achData in pairs(charData.achievements or {}) do
-                if not existingChar.achievements[achId] or achData.timestamp > existingChar.achievements[achId].timestamp then
-                    existingChar.achievements[achId] = achData
+            for username, characterList in pairs(userData.characters.dead or {}) do
+                db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
+
+                for _, characterEntry in ipairs(characterList) do
+                    local uuid = characterEntry.uuid
+                    if not db.characters[uuid] or characterEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
+                        db.characters[uuid] = payload.characters[uuid]
+                        table.insert(db.users[battleTag].characters.dead[username], characterEntry)
+                    end
                 end
             end
         end
     end
 
-    HCT:Print("Processed bulk update.")
+    -- Prepare updated data to send back to the sender
+    local updatePayload = {
+        users = {},
+        characters = {}
+    }
+
+    for battleTag, userData in pairs(db.users) do
+        if battleTag ~= senderBattleTag then
+            for username, charList in pairs(userData.characters.alive or {}) do
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not payload.characters[uuid] or (db.characters[uuid].lastUpdated or 0) > (payload.characters[uuid] and payload.characters[uuid].lastUpdated or 0) then
+                        updatePayload.characters[uuid] = db.characters[uuid]
+                    end
+                end
+            end
+
+            for username, charList in pairs(userData.characters.dead or {}) do
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not payload.characters[uuid] or (db.characters[uuid].lastUpdated or 0) > (payload.characters[uuid] and payload.characters[uuid].lastUpdated or 0) then
+                        updatePayload.characters[uuid] = db.characters[uuid]
+                    end
+                end
+            end
+        end
+    end
+
+    -- Send missing users and characters back
+    for uuid, charData in pairs(db.characters) do
+        if not payload.characters[uuid] then
+            updatePayload.characters[uuid] = charData
+        end
+    end
+
+    for battleTag, userData in pairs(db.users) do
+        if not payload.users[battleTag] then
+            updatePayload.users[battleTag] = userData
+        end
+    end
+
+    if next(updatePayload.characters) or next(updatePayload.users) then
+        local responseEvent = {
+            type = "SYNC_UPDATE",
+            payload = updatePayload
+        }
+        local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
+        HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+    end
 end
 
-function AddonCommProcessor:RespondToRequest(payload)
-    if not GetHCT() then
-        return
+function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
+    local HCT = GetHCT()
+    if not HCT then return end
+
+    local db = GetDB()
+    local senderBattleTag = sender -- Assuming sender is the battle tag
+
+    if not payload or not payload.users then return end
+
+    local updatePayload = {
+        users = {},
+        characters = {}
+    }
+    
+    local requestPayload = {
+        users = {},
+        characters = {}
+    }
+
+    -- Merge sender's users and characters into the database
+    for battleTag, userData in pairs(payload.users) do
+        if not db.users[battleTag] then
+            db.users[battleTag] = userData
+        else
+            db.users[battleTag].team = userData.team
+
+            db.users[battleTag].characters.alive = db.users[battleTag].characters.alive or {}
+            db.users[battleTag].characters.dead = db.users[battleTag].characters.dead or {}
+
+            for username, charList in pairs(userData.characters.alive or {}) do
+                db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
+
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
+                        db.characters[uuid] = payload.characters[uuid]
+                        table.insert(db.users[battleTag].characters.alive[username], charEntry)
+                    end
+                end
+            end
+
+            for username, charList in pairs(userData.characters.dead or {}) do
+                db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
+
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
+                        db.characters[uuid] = payload.characters[uuid]
+                        table.insert(db.users[battleTag].characters.dead[username], charEntry)
+                    end
+                end
+            end
+        end
     end
-    HCT_Broadcaster:BroadcastBulkEvents()
+
+    -- Prepare updates for the requester
+    for battleTag, userData in pairs(db.users) do
+        if battleTag ~= senderBattleTag then
+            for username, charList in pairs(userData.characters.alive or {}) do
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not payload.characters[uuid] or (db.characters[uuid].lastUpdated or 0) > (payload.characters[uuid] and payload.characters[uuid].lastUpdated or 0) then
+                        updatePayload.characters[uuid] = db.characters[uuid]
+                    end
+                end
+            end
+
+            for username, charList in pairs(userData.characters.dead or {}) do
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not payload.characters[uuid] or (db.characters[uuid].lastUpdated or 0) > (payload.characters[uuid] and payload.characters[uuid].lastUpdated or 0) then
+                        updatePayload.characters[uuid] = db.characters[uuid]
+                    end
+                end
+            end
+        end
+    end
+
+    -- Check what data the sender is missing
+    for uuid, charData in pairs(db.characters) do
+        if not payload.characters[uuid] then
+            updatePayload.characters[uuid] = charData
+        end
+    end
+
+    for battleTag, userData in pairs(db.users) do
+        if not payload.users[battleTag] then
+            updatePayload.users[battleTag] = userData
+        end
+    end
+
+    -- Prepare request for missing or outdated data from sender
+    for uuid, charData in pairs(payload.characters) do
+        if not db.characters[uuid] or (charData.lastUpdated or 0) > (db.characters[uuid].lastUpdated or 0) then
+            requestPayload.characters[uuid] = charData
+        end
+    end
+
+    for battleTag, userData in pairs(payload.users) do
+        if not db.users[battleTag] then
+            requestPayload.users[battleTag] = userData
+        end
+    end
+
+    -- Send updated data back to the requester
+    if next(updatePayload.characters) or next(updatePayload.users) then
+        local responseEvent = {
+            type = "SYNC_UPDATE",
+            payload = updatePayload
+        }
+        local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
+        HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+    end
+
+    -- Request missing data from the sender
+    if next(requestPayload.characters) or next(requestPayload.users) then
+        local requestEvent = {
+            type = "FINAL_SYNC",
+            payload = requestPayload
+        }
+        local serializedRequest = AceSerializer:Serialize("FINAL_SYNC", requestEvent)
+        HCT:SendCommMessage(HCT.addonPrefix, serializedRequest, "WHISPER", sender)
+    end
+end
+
+
+function AddonCommProcessor:ProcessSyncFinal(payload, sender)
+    local HCT = GetHCT()
+    if not HCT then return end
+
+    local db = GetDB()
+    local senderBattleTag = sender -- Assuming sender is the battle tag
+
+    if not payload or not payload.users then return end
+
+    -- Merge incoming data into the database
+    for battleTag, userData in pairs(payload.users) do
+        if not db.users[battleTag] then
+            db.users[battleTag] = userData
+        else
+            db.users[battleTag].team = userData.team
+            db.users[battleTag].characters.alive = db.users[battleTag].characters.alive or {}
+            db.users[battleTag].characters.dead = db.users[battleTag].characters.dead or {}
+
+            for username, charList in pairs(userData.characters.alive or {}) do
+                db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
+
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
+                        db.characters[uuid] = payload.characters[uuid]
+                        table.insert(db.users[battleTag].characters.alive[username], charEntry)
+                    end
+                end
+            end
+
+            for username, charList in pairs(userData.characters.dead or {}) do
+                db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
+
+                for _, charEntry in ipairs(charList) do
+                    local uuid = charEntry.uuid
+                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
+                        db.characters[uuid] = payload.characters[uuid]
+                        table.insert(db.users[battleTag].characters.dead[username], charEntry)
+                    end
+                end
+            end
+        end
+    end
+
+    -- Send Sync Complete Confirmation
+    local confirmationEvent = {
+        type = "SYNC_COMPLETE",
+        payload = { senderBattleTag = senderBattleTag }
+    }
+    local serialized = AceSerializer:Serialize("SYNC_COMPLETE", confirmationEvent)
+    HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
 end
 
 _G.AddonCommProcessor = AddonCommProcessor
