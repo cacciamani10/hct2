@@ -6,7 +6,7 @@ local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 _G.HCT_Broadcaster = {
     BroadcastEvent = function(self, ev)
         local HCT = GetHCT()
-        
+        HCT:Print("sending event broadcast...")
         if not HCT then return end
         local serialized = AceSerializer:Serialize("EVENT", ev)
         if not serialized or serialized == "" then
@@ -21,6 +21,7 @@ _G.HCT_Broadcaster = {
         local HCT = GetHCT()
         local db = GetDB()
         local battleTag = HCT_DataModule:GetBattleTag()
+        HCT:Print("sending sync request broadcast...")
     
         if not battleTag or not db.users[battleTag] then
             HCT:Print("Error: No user data found for request.")
