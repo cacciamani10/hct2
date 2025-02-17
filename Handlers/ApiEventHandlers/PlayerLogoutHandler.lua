@@ -8,12 +8,12 @@ _G.HCT_Handlers.PlayerLogoutHandler = {
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
 
-        -- local characterName = UnitName("player")
-        -- local ev = {
-        --     type = "PLAYER_LOGOUT",
-        --     characterName = characterName
-        -- }
+        local username = UnitName("player")
+        local ev = {
+            type = "PLAYER_LOGOUT",
+            characterName = username
+        }
 
-        -- HCT_Broadcaster:BroadcastEvent(ev)
+        HCT_Broadcaster:BroadcastEvent(ev)
     end
 }

@@ -28,6 +28,7 @@ _G.HCT_Handlers.PlayerDeathHandler = {
                 local timestamp = time()
                 local battleTag = HCT_DataModule:GetBattleTag()
                 local username = UnitName("player")
+                
                 _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
                 HCT:Print("You have died... but we go agane!")
 

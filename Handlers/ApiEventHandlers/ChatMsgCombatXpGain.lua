@@ -17,10 +17,9 @@ _G.HCT_Handlers.ChatMsgCombatXpGainHandler = {
 
             if player == playerName then
                 local xpGain = tonumber(text:match("(%d+) experience")) or 0
-                local db = GetDB()
-                -- local charKey = HCT_DataModule:GetCharacterKey()
-                -- db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
-                -- db.localAchievementProgressData[charKey].xpGainedKils = db.localAchievementProgressData[charKey].xpGainedKils + 1 or 1
+                if xpGain > 0 then
+                    _G.ACHIEVEMENTS.Achievement_Bounties:CheckBountiesAchievements(801)
+                end
             end
         end
     end

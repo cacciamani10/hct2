@@ -27,7 +27,6 @@ function _G.DAO.CharacterDao:InitializeCharacter()
     -- end
 
     if not db.users[battleTag].characters.alive[username] then
-        GetHCT():Print("CharacterDao:InitializeCharacter:Creating New Character: " .. username)
         local level = UnitLevel("player") or 1
         local class = select(2, UnitClass("player")) or "Unknown"
         local race = select(2, UnitRace("player")) or "Unknown"
@@ -39,7 +38,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
 
         db.characters = db.characters or {}
 
-        local ev = {
+        local character = {
             name      = username,
             level     = level,
             class     = class,
@@ -50,11 +49,14 @@ function _G.DAO.CharacterDao:InitializeCharacter()
             achievements = {}
         }
 
-        db.characters[uuid] = ev
+        db.characters[uuid] = character
 
-        ev.uuid = uuid
-        ev.type = "CHARACTER"
-        HCT_Broadcaster:BroadcastEvent(ev)
+        local event = {
+            type = "CHARACTER",
+            uuid = uuid,
+            character = character
+        }
+        HCT_Broadcaster:BroadcastEvent(event)
     end
 end
 
@@ -77,17 +79,39 @@ end
 
 function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
     local username = UnitName("player")
-    local battleTag = HCT_DataModule:GetBattleTag()
-    local uuid = GetDB().users[battleTag].characters[username]
+    local battleTag =  HCT_DataModule:GetBattleTag()
+    local uuid = GetDB().users[battleTag].characters.alive[username]
     GetDB().characters[uuid].level = level
 end
 
-function _G.DAO.CharacterDao:UpdateCharacter(character)
-    local uuid = character.uuid
+function _G.DAO.CharacterDao:AddAchievement(achievementId)
+    local username = UnitName("player")
+    local battleTag =  HCT_DataModule:GetBattleTag()
     local db = GetDB()
-    -- remove attributes not stored on character
-    character.type = nil
-    character.uuid = nil
+    
+    local uuid = db.users[battleTag].characters.alive[username]
+
+    if db.characters[uuid].achievements[achievementId] then
+        return
+    end
+
+    db.characters[uuid].achievements[achievementId] = { timestamp = time() }
+end
+
+function _G.DAO.CharacterDao:AddBounty(achievementId)
+    local username = UnitName("player")
+    local battleTag =  HCT_DataModule:GetBattleTag()
+    local db = GetDB()
+    
+    local uuid = db.users[battleTag].characters.alive[username]
+
+    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or 0
+    db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = currentCount + 1 }
+end
+
+
+function _G.DAO.CharacterDao:UpdateCharacter(uuid, character)
+    local db = GetDB()
 
     if not db.users[character.battleTag] then 
         _G.DAO.UserDao:InitializeUser(character.battleTag)
@@ -96,7 +120,6 @@ function _G.DAO.CharacterDao:UpdateCharacter(character)
     if not db.users[character.battleTag].characters.alive[character.username] then 
         self:CreateCharacter(character, uuid)
     end
-
 end
 
 function _G.DAO.CharacterDao:CreateCharacter(character, uuid)
@@ -107,4 +130,21 @@ function _G.DAO.CharacterDao:CreateCharacter(character, uuid)
 
     table.insert(db.users[character.battleTag].characters.alive[character.username], uuid)
     db.characters[uuid] = character
+end
+
+function _G.DAO.CharacterDao:GetCharacterBy_UUID(uuid)
+    local db = GetDB()
+    return db.characters[uuid]
+end
+
+function _G.DAO.CharacterDao:GetCharacterBy_BattleTag_Username(battleTag, username)
+    local db = GetDB()
+    return db.characters[db.users[battleTag].characters.alive[username]]
+end
+
+function _G.DAO.CharacterDao:GetCharacter()
+    local db = GetDB()
+    local username = UnitName("player")
+    local battleTag = HCT_DataModule:GetBattleTag()
+    return db.characters[db.users[battleTag].characters.alive[username]]
 end

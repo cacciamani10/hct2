@@ -26,59 +26,33 @@ _G.HCT_Broadcaster = {
         -- HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
     end,
 
-    RequestContestData = function(self)
-        -- local now = time()
-        -- if now - self.lastRequestTime < 180 then
-        --     local remaining = 180 - (now - self.lastRequestTime)
-        --     --GetHCT():Print("RequestContestData is on cooldown. Please wait " .. remaining .. " seconds.")
-        --     return
-        -- end
-        -- self.lastRequestTime = now
-
-        -- local HCT = GetHCT()
-        -- local ev = {
-        --     type = "REQUEST",
-        --     payload = "request"
-        -- }
-        -- local serialized = AceSerializer:Serialize("REQUEST", ev)
-        -- HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+    RequestContestData = function()
+        local HCT = GetHCT()
+        local ev = {
+            type = "REQUEST",
+            payload = "request"
+        }
+        local serialized = AceSerializer:Serialize("REQUEST", ev)
+        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
         --HCT:Print("Requesting data update...")
     end,
 
-    BroadcastBulkEvents = function(self)
-        -- local now = time()
-        -- if now - self.lastBroadcastTime < 180 then
-        --     local remaining = 180 - (now - self.lastBroadcastTime)
-        --     --GetHCT():Print("BroadcastEvent is on cooldown. Please wait " .. remaining .. " seconds.")
-        --     return
-        -- end
-        -- local HCT = GetHCT()
-        -- local db = GetDB()
-        -- if not HCT then return end
-        -- --HCT:Print("Broadcasting bulk events...")
+    BroadcastBulkEvents = function()
+        local HCT = GetHCT()
+        local db = GetDB()
 
-        -- local broadCastTable = {
-        --     users = db.users or {},
-        --     characters = db.characters or {},
-        --     completionLedger = db.completionLedger or {}
-        -- }
+        local database = {
+            users = db.users or {},
+            characters = db.characters or {},
+        }
 
-        -- local userCount = CountTable(broadCastTable.users)
-        -- local charCount = CountTable(broadCastTable.characters)
-        -- local ledgerCount = CountTable(broadCastTable.completionLedger)
-        -- local totalCount = userCount + charCount + ledgerCount
-        -- --HCT:Print("BULKED USERS " .. userCount .. ": BULKED CHARS " .. charCount .. ": BULKED LEDGER " .. ledgerCount .. ": TOTAL " .. totalCount)
+        local serialized = AceSerializer:Serialize("BULK_UPDATE", database)
+        if not serialized or serialized == "" then
+            HCT:Print("Error: Serialized bulk data is empty!")
+            return
+        end
 
-        -- -- Serialize the entire broadCastTable
-        -- local serialized = AceSerializer:Serialize("BULK_UPDATE", broadCastTable)
-        -- if not serialized or serialized == "" then
-        --     HCT:Print("Error: Serialized bulk data is empty!")
-        --     return
-        -- end
-
-        -- -- Send the serialized data
-        -- HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
-
-        -- --HCT:Print("Bulk update complete.")
+        HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
+        --HCT:Print("Bulk update complete.")
     end
 }

@@ -18,18 +18,10 @@ function AddonCommProcessor:ProcessEvent(ev)
     if ev.type == "DEATH" then
         local battleTag = ev.battleTag
         local username = ev.username
-        local level = ev.level or "Unknown"
-        local timestamp = ev.timestamp
-        _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
-        HCT:Print("|cffff0000" .. name .. " has died at level " .. level .. "|r")
+        _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, ev.timestamp)
+        HCT:Print("|cffff0000" .. username .. " has died at level " .. ev.level .. "|r")
     elseif ev.type == "CHARACTER" then
-        local charKey = ev.name .. ":" .. ev.battleTag
-        if db.characters[charKey] then
-            for k, v in pairs(ev) do
-                db.characters[charKey][k] = v
-            end
-            HCT:Print("Updated info for " .. charKey)
-        end
+        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character)
     -- elseif ev.type == "SPECIAL_KILL" then
     --     local mobName = ev.name or "Unknown Mob"
     --     local classification = ev.classification or "unknown classification"
@@ -49,80 +41,59 @@ end
 
 function AddonCommProcessor:ProcessBulkUpdate(payload)
     local HCT = GetHCT()
+    local db = GetDB()
     if not HCT then
         print("HCT is not initialized.")
         return
     end
 
     local myBattleTag = HCT_DataModule:GetBattleTag()
+
     if not myBattleTag then
         HCT:Print("My Battle Tag missing")
         return
     end
 
-    local db = HCT.db and HCT.db.profile
-    if not db then
-        HCT:Print("Database profile is missing.")
-        return
-    end
-    -- HCT:Print("Processing bulk update - saving to database.")
-    if not db.users then
-        db.users = {}
-    end
-    -- Merge users
-    for userKey, userInfo in pairs(payload.users or {}) do
-        -- HCT:Print("Attempting to process user table update userKey: "..userKey)
+    -- Users
+    for battleTag, userData in pairs(payload.users) do
+        if battleTag ~= myBattleTag then
+            db.users[battleTag] = db.users[battleTag] or {}
+            db.users[battleTag].team = userData.team
 
-        if myBattleTag == userKey then
-            -- HCT:Print("skipping user table update for userKey: "..userKey)
-        else
-            if not db.users[userKey] then
-                db.users[userKey] = userInfo
-            else
-                for k, v in pairs(userInfo) do
-                    db.users[userKey][k] = v
+            db.users[battleTag].characters = db.users[battleTag].characters or { alive = {}, dead = {} }
+
+            for name, uuid in pairs(userData.characters.alive or {}) do
+                db.users[battleTag].characters.alive[name] = uuid
+            end
+
+            for name, uuidList in pairs(userData.characters.dead or {}) do
+                db.users[battleTag].characters.dead[name] = db.users[battleTag].characters.dead[name] or {}
+                for _, uuid in ipairs(uuidList) do
+                    table.insert(db.users[battleTag].characters.dead[name], uuid)
                 end
             end
-            -- HCT:Print("processed user table update userKey "..userKey)
         end
     end
 
-    -- Merge characters
-    for charKey, charInfo in pairs(payload.characters or {}) do
-        -- HCT:Print("Attempting to process character table update charKey: "..charKey)
-        local battleTagToProcess = charKey:match(":(.*)")
-        if myBattleTag == battleTagToProcess then
-            -- HCT:Print("skipping character table update for charkey: "..charKey)
+    -- Characters
+    for uuid, charData in pairs(payload.characters) do
+        if not db.characters[uuid] then
+            db.characters[uuid] = charData
         else
-            if not db.characters[charKey] then
-                db.characters[charKey] = charInfo
-            else
-                for k, v in pairs(charInfo) do
-                    db.characters[charKey][k] = v
-                end
-            end
-            -- HCT:Print("processed character table update charKey "..charKey)
-        end
-    end
+            local existingChar = db.characters[uuid]
 
-    -- Merge completionLedger
-    for completionID, completionInfo in pairs(payload.completionLedger or {}) do
-        -- HCT:Print("Attempting to process completionLedger table update completionID: "..completionID)
-        local achievementID = tonumber(completionID:match(":(%d+)$")) or 0
-        local battleTagToProcess = completionID:match(":(.-):")
-        if battleTagToProcess == myBattleTag then
-            -- HCT:Print("skipping completionLedger table update for completionID: "..completionID)
-        else
-            if achievementID == 0 then
-                error("Invalid achievementID in completionID: " .. tostring(completionID))
-            elseif not db.completionLedger[completionID] then
-                db.completionLedger[completionID] = completionInfo
-            elseif achievementID >= 500 and achievementID <= 799 then
-                if completionInfo.timestamp < db.completionLedger[completionID].timestamp then
-                    db.completionLedger[completionID] = completionInfo
+            existingChar.level = math.max(existingChar.level, charData.level)
+
+            if charData.deathTimestamp then
+                existingChar.deathTimestamp = charData.deathTimestamp
+            end
+
+            existingChar.achievements = existingChar.achievements or {}
+            for achId, achData in pairs(charData.achievements or {}) do
+                if not existingChar.achievements[achId] or achData.timestamp > existingChar.achievements[achId].timestamp then
+                    existingChar.achievements[achId] = achData
                 end
             end
-            -- HCT:Print("processed completionLedger table update completionID "..completionID)
         end
     end
 

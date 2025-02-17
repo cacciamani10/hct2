@@ -40,5 +40,10 @@ Handlers/ApiEventHandlers/ChatMsgLootHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
 Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 
+# Achievements
+Achievements/Achievement_Leveling.lua
+Achievements/Achievement_Professions.lua
+Achievements/Achievement_Bountiess.lua
+
 # Main Core Initialization
 Core.lua
