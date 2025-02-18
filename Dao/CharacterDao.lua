@@ -126,22 +126,11 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     local uuid = characterEntry.uuid
     local lastUpdated = time()
 
-    if type(db.characters[uuid].achievements) ~= "table" or #db.characters[uuid].achievements > 0 then
-        db.characters[uuid].achievements = {}
-    end
-
-    achievementId = tonumber(achievementId)
-    if not achievementId then
-        print("Error: Invalid achievementId")
-        return
-    end
-
     if db.characters[uuid].achievements[achievementId] then
         return
     end
 
     db.characters[uuid].achievements[achievementId] = { timestamp = lastUpdated }
-    
     characterEntry.lastUpdated = lastUpdated
     local event = {
         type = "CHARACTER",
@@ -149,6 +138,8 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
         lastUpdated = lastUpdated,
         character = db.characters[uuid]
     }
+
+    _G.HCT_Broadcaster:BroadcastEvent(event)
 end
 
 function _G.DAO.CharacterDao:AddBounty(achievementId)
@@ -173,7 +164,8 @@ function _G.DAO.CharacterDao:AddBounty(achievementId)
         db.characters[uuid].achievements = {}
     end
 
-    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or 0
+    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or
+        0
 
     db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = currentCount + 1 }
 
@@ -189,7 +181,7 @@ function _G.DAO.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
 
     if character.deathTimestamp then
         db.users[character.battleTag].characters.dead[character.username] = db.users[character.battleTag].characters
-        .dead[character.username] or {}
+            .dead[character.username] or {}
 
         local found = false
         for _, entry in ipairs(db.users[character.battleTag].characters.dead[character.username]) do
@@ -208,7 +200,7 @@ function _G.DAO.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
         end
     else
         db.users[character.battleTag].characters.alive[character.username] = db.users[character.battleTag].characters
-        .alive[character.username] or {}
+            .alive[character.username] or {}
 
         local found = false
         for _, entry in ipairs(db.users[character.battleTag].characters.alive[character.username]) do
@@ -235,15 +227,15 @@ end
 
 function _G.DAO.CharacterDao:GetCharacterUUID_BattleTag_Username(battleTag, username)
     local db = GetDB()
-    local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and db.users[battleTag].characters.alive[username][1]
+    local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and
+        db.users[battleTag].characters.alive[username][1]
     return entry and entry.uuid or nil
 end
-
 
 function _G.DAO.CharacterDao:GetCharacterBy_BattleTag_Username(battleTag, username)
     local db = GetDB()
     local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and
-    db.users[battleTag].characters.alive[username][1]
+        db.users[battleTag].characters.alive[username][1]
     return entry and db.characters[entry.uuid] or nil
 end
 
@@ -252,7 +244,7 @@ function _G.DAO.CharacterDao:GetCharacter()
     local username = UnitName("player")
     local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and
-    db.users[battleTag].characters.alive[username][1]
+        db.users[battleTag].characters.alive[username][1]
     return entry and db.characters[entry.uuid]
 end
 

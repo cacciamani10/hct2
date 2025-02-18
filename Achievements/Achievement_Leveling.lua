@@ -4,8 +4,6 @@ end
 _G.ACHIEVEMENTS = _G.ACHIEVEMENTS or {}
 _G.ACHIEVEMENTS.Achievement_Leveling = _G.ACHIEVEMENTS.Achievement_Leveling or {}
 
-local function GetHCT() return _G.HCT_Env.GetAddon() end
-
 function _G.ACHIEVEMENTS.Achievement_Leveling:CheckAchievement()
     local character = _G.DAO.CharacterDao:GetCharacter()
 
@@ -14,7 +12,6 @@ function _G.ACHIEVEMENTS.Achievement_Leveling:CheckAchievement()
     for _, achievement in ipairs(levelCheckpoints or {}) do
         local requiredLevel = achievement.levelRequired
         if requiredLevel and character.level >= requiredLevel then
-            --_G.HCT_Env.GetAddon():Print(achievement.uniqueID)
             _G.DAO.CharacterDao:AddLevelingAchievement(achievement.uniqueID)
         end
     end

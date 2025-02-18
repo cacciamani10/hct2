@@ -10,15 +10,16 @@ local FEAT_END_ID = 799
 local BOUNTY_START_ID = 800
 local BOUNTY_END_ID = 899
 
+-- BEWARE: for some reaon if the first time you insert a key value pair in a table, and the key is 1, then the key will not be used and the value will be inserted. 
+-- this has to be some weird function (bug) of the language
 local achievements = {
     ["Level Checkpoints"] = {
-        { uniqueID = 1, name = "Level 2 Reached", description = "Reach level 2 on your character", points = 2, levelRequired = 2 },
-        { uniqueID = 1, name = "Level 10 Reached", description = "Reach level 10 on your character", points = 5, levelRequired = 10 },
+        { uniqueID = 6, name = "Level 10 Reached", description = "Reach level 10 on your character", points = 5, levelRequired = 10 },
         { uniqueID = 2, name = "Level 20 Reached", description = "Reach level 20 on your character", points = 10, levelRequired = 20 },
         { uniqueID = 3, name = "Level 30 Reached", description = "Reach level 30 on your character", points = 15, levelRequired = 30 },
         { uniqueID = 4, name = "Level 40 Reached", description = "Reach level 40 on your character", points = 20, levelRequired = 40 },
         { uniqueID = 5, name = "Level 50 Reached", description = "Reach level 50 on your character", points = 25, levelRequired = 50 },
-        { uniqueID = 6, name = "Level 60 Reached", description = "Reach level 60 on your character", points = 30, levelRequired = 60 },
+        { uniqueID = 1, name = "Level 60 Reached", description = "Reach level 60 on your character", points = 30, levelRequired = 60 },
     },
     ["Profession Mastery"] = {
         -- Crafting Professions are 1234 points
