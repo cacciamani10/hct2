@@ -261,5 +261,5 @@ end
 
 function _G.DAO.CharacterDao:GetUUID()
     local db = GetDB()
-    return db.profile.users[_G.Utils.GameUtils:GetBattleTag()].characters.alive[UnitName("player")][1]
+    return db.users[_G.Utils.GameUtils:GetBattleTag()].characters.alive[UnitName("player")][1]
 end
