@@ -115,24 +115,26 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     local db = GetDB()
 
     if not db.users[battleTag] or not db.users[battleTag].characters.alive[username] then
-        print("Error: No alive character found for", username)
         return
     end
 
     local characterEntry = db.users[battleTag].characters.alive[username][1]
     if not characterEntry then
-        print("Error: No character entry found for", username)
         return
     end
 
     local uuid = characterEntry.uuid
     local lastUpdated = time()
 
-    if type(db.characters[uuid].achievements) ~= "table" then
+    if type(db.characters[uuid].achievements) ~= "table" or #db.characters[uuid].achievements > 0 then
         db.characters[uuid].achievements = {}
     end
 
-    db.characters[uuid].achievements = db.characters[uuid].achievements or {}
+    achievementId = tonumber(achievementId)
+    if not achievementId then
+        print("Error: Invalid achievementId")
+        return
+    end
 
     if db.characters[uuid].achievements[achievementId] then
         return

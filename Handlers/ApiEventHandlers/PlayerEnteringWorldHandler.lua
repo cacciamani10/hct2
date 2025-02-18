@@ -1,5 +1,7 @@
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+
 _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     --PLAYER_ENTERING_WORLD is a Blizzard event that fires as the player transitions into the game world
     GetEventType = function() return "PLAYER_ENTERING_WORLD" end,
@@ -13,6 +15,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         self:HandleLogin(HCT, isLogin)
         self:HandleGhostState(HCT)
         self:HandleInitialLogin(event)
+        _G.SERVICE.Achievement_Service:RecalculateAchievements()
     end,
 
     HandleGhostState = function(HCT)
@@ -42,6 +45,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     end,
 
     -- if a character dies without earning exp this logic will execute
+    -- this might trigger if a character is a ghost on login..
     HandleNewCharacterLogin = function(HCT)
         local xp = UnitXP("player") 
         if xp == 0 then
