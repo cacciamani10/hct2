@@ -78,14 +78,14 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     local uuid = senderCharEntry.uuid
                     local senderTimestamp = senderCharEntry.lastUpdated
                     local localCharEntry = localUserData.characters.alive[username] and localUserData.characters.alive[username][1]
-                    local localTimestamp = db.characters[uuid] and db.characters[uuid].lastUpdated or 0
+                    local localTimestamp = localCharEntry and localCharEntry.lastUpdated or 0
 
                     if not localCharEntry or senderTimestamp > localTimestamp then
                         requestedCharacters.users[battleTag].characters.alive[username] = requestedCharacters.users[battleTag].characters.alive[username] or {}
                         table.insert(requestedCharacters.users[battleTag].characters.alive[username], { uuid = uuid })
                     elseif senderTimestamp < localTimestamp then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
-                        updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or localUserData
+                        table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = localTimestamp })
                     end
                 end
             end
@@ -118,14 +118,14 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     local uuid = senderCharEntry.uuid
                     local senderTimestamp = senderCharEntry.lastUpdated
                     local localCharEntry = localUserData.characters.dead[username] and localUserData.characters.dead[username][1]
-                    local localTimestamp = db.characters[uuid] and db.characters[uuid].lastUpdated or 0
+                    local localTimestamp = localCharEntry and localCharEntry.lastUpdated or 0
 
                     if not localCharEntry or senderTimestamp > localTimestamp then
                         requestedCharacters.users[battleTag].characters.dead[username] = requestedCharacters.users[battleTag].characters.dead[username] or {}
                         table.insert(requestedCharacters.users[battleTag].characters.dead[username], { uuid = uuid })
                     elseif senderTimestamp < localTimestamp then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
-                        updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or localUserData
+                        table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid, lastUpdated = localTimestamp })
                     end
                 end
             end
@@ -263,7 +263,7 @@ function AddonCommProcessor:UpdateLocalData(payload)
                         end
     
                         if not found then
-                            table.insert(db.users[battleTag].characters.alive[username], charEntry)
+                            table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = charEntry.uuid, lastUpdated = charEntry.lastUpdated })
                         end
                     end
                 end
@@ -285,7 +285,7 @@ function AddonCommProcessor:UpdateLocalData(payload)
                         end
     
                         if not found then
-                            table.insert(db.users[battleTag].characters.dead[username], charEntry)
+                            table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = charEntry.uuid, lastUpdated = charEntry.lastUpdated })
                         end
                     end
                 end
