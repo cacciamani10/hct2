@@ -152,10 +152,8 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
     end
 
         local responseEvent = {
-            payload = {
-                updatedCharacters = updatedCharacters,
-                requestedCharacters = requestedCharacters
-            }
+            updatedCharacters = updatedCharacters,
+            requestedCharacters = requestedCharacters
         }
         local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
@@ -214,13 +212,9 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     end
     
 
-    -- Send FINAL_SYNC response back to the sender
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
         local responseEvent = {
-            type = "FINAL_SYNC",
-            payload = {
-                updatedCharacters = updatedCharacters
-            }
+            updatedCharacters = updatedCharacters
         }
         local serialized = AceSerializer:Serialize("FINAL_SYNC", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
@@ -239,12 +233,15 @@ function AddonCommProcessor:UpdateLocalData(payload)
     
     if not payload then return end
 
-    -- Overwrite local data with updatedCharacters
     if payload.updatedCharacters and payload.updatedCharacters.characters then
+        print("I GETE HERE")
         for uuid, characterData in pairs(payload.updatedCharacters.characters) do
+            print("DUPATED CHARACTER@@@@@@@@")
             db.characters[uuid] = characterData
         end
     end
+
+    
 
     if payload.updatedCharacters and payload.updatedCharacters.users then
         for battleTag, userData in pairs(payload.updatedCharacters.users) do
@@ -252,8 +249,8 @@ function AddonCommProcessor:UpdateLocalData(payload)
                 -- Update or insert alive characters
                 for username, charList in pairs(userData.characters.alive or {}) do
                     db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
-    
                     for _, charEntry in ipairs(charList) do
+
                         local uuid = charEntry.uuid
                         local found = false
     
