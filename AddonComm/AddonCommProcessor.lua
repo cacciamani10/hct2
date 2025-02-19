@@ -41,7 +41,6 @@ end
 function AddonCommProcessor:ProcessSyncRequest(payload, sender)
     local HCT = GetHCT()
     local db = GetDB()
-    local senderBattleTag = sender
 
     if not payload or not payload.users then return end
 
@@ -52,31 +51,28 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
 
     local requestedCharacters = {
         users = {},
-        characters = {}
     }
 
     for battleTag, senderUserData in pairs(payload.users) do
         local localUserData = db.users[battleTag]
 
-        -- If the user doesn't exist in my DB, request all their data
+        requestedCharacters.users[battleTag] = {
+            characters = {
+                alive = {},
+                dead = {},
+            },
+        }
+
+        updatedCharacters.users[battleTag] = {
+            characters = {
+                alive = {},
+                dead = {},
+            },
+        }
+
         if not localUserData then
             requestedCharacters.users[battleTag] = senderUserData
-            for username, charList in pairs(senderUserData.characters.alive or {}) do
-                for _, charEntry in ipairs(charList) do
-                    if payload.characters[charEntry.uuid] then
-                        requestedCharacters.characters[charEntry.uuid] = payload.characters[charEntry.uuid]
-                    end
-                end
-            end
-            for username, charList in pairs(senderUserData.characters.dead or {}) do
-                for _, charEntry in ipairs(charList) do
-                    if payload.characters[charEntry.uuid] then
-                        requestedCharacters.characters[charEntry.uuid] = payload.characters[charEntry.uuid]
-                    end
-                end
-            end
         else
-            -- Compare timestamps for alive characters
             for username, charList in pairs(senderUserData.characters.alive or {}) do
                 for _, senderCharEntry in ipairs(charList) do
                     local uuid = senderCharEntry.uuid
@@ -85,10 +81,8 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     local localTimestamp = db.characters[uuid] and db.characters[uuid].lastUpdated or 0
 
                     if not localCharEntry or senderTimestamp > localTimestamp then
-                        if payload.characters[uuid] then
-                            requestedCharacters.characters[uuid] = payload.characters[uuid]
-                        end
-                        requestedCharacters.users[battleTag] = requestedCharacters.users[battleTag] or senderUserData
+                        requestedCharacters.users[battleTag].characters.alive[username] = requestedCharacters.users[battleTag].characters.alive[username] or {}
+                        table.insert(requestedCharacters.users[battleTag].characters.alive[username], { uuid = uuid })
                     elseif senderTimestamp < localTimestamp then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
                         updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or localUserData
@@ -96,7 +90,28 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                 end
             end
 
-            -- Compare timestamps for dead characters
+            for username, localCharList in pairs(localUserData.characters.alive or {}) do
+                for _, localCharEntry in ipairs(localCharList) do
+                    local uuid = localCharEntry.uuid
+            
+                    -- If sender does not have this character, add it to updatedCharacters
+                    local found = false
+                    for _, senderCharEntry in ipairs(senderUserData.characters.alive[username] or {}) do
+                        if senderCharEntry.uuid == uuid then
+                            found = true
+                            break
+                        end
+                    end
+            
+                    if not found then
+                        updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or { characters = { alive = {}, dead = {} } }
+                        updatedCharacters.characters[uuid] = db.characters[uuid]
+                        updatedCharacters.users[battleTag].characters.alive[username] = updatedCharacters.users[battleTag].characters.alive[username] or {}
+                        table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid })
+                    end
+                end
+            end
+
             for username, charList in pairs(senderUserData.characters.dead or {}) do
                 for _, senderCharEntry in ipairs(charList) do
                     local uuid = senderCharEntry.uuid
@@ -105,22 +120,37 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     local localTimestamp = db.characters[uuid] and db.characters[uuid].lastUpdated or 0
 
                     if not localCharEntry or senderTimestamp > localTimestamp then
-                        if payload.characters[uuid] then
-                            requestedCharacters.characters[uuid] = payload.characters[uuid]
-                        end
-                        requestedCharacters.users[battleTag] = requestedCharacters.users[battleTag] or senderUserData
+                        requestedCharacters.users[battleTag].characters.dead[username] = requestedCharacters.users[battleTag].characters.dead[username] or {}
+                        table.insert(requestedCharacters.users[battleTag].characters.dead[username], { uuid = uuid })
                     elseif senderTimestamp < localTimestamp then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
                         updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or localUserData
                     end
                 end
             end
+
+            for username, localCharList in pairs(localUserData.characters.dead or {}) do
+                for _, localCharEntry in ipairs(localCharList) do
+                    local uuid = localCharEntry.uuid
+            
+                    local found = false
+                    for _, senderCharEntry in ipairs(senderUserData.characters.dead[username] or {}) do
+                        if senderCharEntry.uuid == uuid then
+                            found = true
+                            break
+                        end
+                    end
+            
+                    if not found then
+                        updatedCharacters.characters[uuid] = db.characters[uuid]
+                        updatedCharacters.users[battleTag].characters.dead[username] = updatedCharacters.users[battleTag].characters.dead[username] or {}
+                        table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid })
+                    end
+                end
+            end
         end
     end
 
-    -- Only send a response if there are updates needed
-    if next(updatedCharacters.characters) or next(requestedCharacters.characters) then
-        self.printCounts(updatedCharacters, requestedCharacters)
         local responseEvent = {
             payload = {
                 updatedCharacters = updatedCharacters,
@@ -129,213 +159,72 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
         }
         local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
-    end
-end
-
-function AddonCommProcessor:printCounts(updatedCharacters, requestedCharacters)
-    local updatedAccounts = 0
-    local updatedCharacterCount = 0
-    for battleTag, userData in pairs(updatedCharacters.users) do
-        updatedAccounts = updatedAccounts + 1
-        local charCount = (userData.characters.alive and #userData.characters.alive or 0) + 
-                          (userData.characters.dead and #userData.characters.dead or 0)
-        updatedCharacterCount = updatedCharacterCount + charCount
-        print("Updated Account:", battleTag, "Characters:", charCount)
-    end
-
-    -- Count accounts and characters for requestedCharacters
-    local requestedAccounts = 0
-    local requestedCharacterCount = 0
-    for battleTag, userData in pairs(requestedCharacters.users) do
-        requestedAccounts = requestedAccounts + 1
-        local charCount = (userData.characters.alive and #userData.characters.alive or 0) + 
-                          (userData.characters.dead and #userData.characters.dead or 0)
-        requestedCharacterCount = requestedCharacterCount + charCount
-        print("Requested Account:", battleTag, "Characters:", charCount)
-    end
-
-    -- Print final counts
-    print("Total Updated Accounts:", updatedAccounts, "Total Updated Characters:", updatedCharacterCount)
-    print("Total Requested Accounts:", requestedAccounts, "Total Requested Characters:", requestedCharacterCount)
+        print("Processed REQUEST_SYNC")
 end
 
 function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     local HCT = GetHCT()
-    if not HCT then return end
-
     local db = GetDB()
-    local senderBattleTag = sender -- Assuming sender is the battle tag
-
-    if not payload or not payload.users then return end
-
-    local updatePayload = {
-        users = {},
-        characters = {}
-    }
     
-    local requestPayload = {
+    self:UpdateLocalData(payload)
+
+    -- Prepare updatedCharacters object for FINAL_SYNC (contains requested data from local db)
+    local updatedCharacters = {
         users = {},
         characters = {}
     }
 
-    -- Merge sender's users and characters into the database
-    for battleTag, userData in pairs(payload.users) do
-        if not db.users[battleTag] then
-            db.users[battleTag] = userData
-        else
-            db.users[battleTag].team = userData.team
-
-            db.users[battleTag].characters.alive = db.users[battleTag].characters.alive or {}
-            db.users[battleTag].characters.dead = db.users[battleTag].characters.dead or {}
-
-            for username, charList in pairs(userData.characters.alive or {}) do
-                db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
-
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
-                        db.characters[uuid] = payload.characters[uuid]
-                        table.insert(db.users[battleTag].characters.alive[username], charEntry)
-                    end
-                end
-            end
-
-            for username, charList in pairs(userData.characters.dead or {}) do
-                db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
-
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
-                        db.characters[uuid] = payload.characters[uuid]
-                        table.insert(db.users[battleTag].characters.dead[username], charEntry)
-                    end
-                end
+    if payload.requestedCharacters and payload.requestedCharacters.characters then
+        for uuid, _ in pairs(payload.requestedCharacters.characters) do
+            if db.characters[uuid] then
+                updatedCharacters.characters[uuid] = db.characters[uuid]
             end
         end
     end
 
-    -- Prepare updates for the requester
-    for battleTag, userData in pairs(db.users) do
-        if battleTag ~= senderBattleTag then
-            for username, charList in pairs(userData.characters.alive or {}) do
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    if not payload.characters[uuid] or (db.characters[uuid].lastUpdated or 0) > (payload.characters[uuid] and payload.characters[uuid].lastUpdated or 0) then
-                        updatePayload.characters[uuid] = db.characters[uuid]
-                    end
-                end
-            end
-
-            for username, charList in pairs(userData.characters.dead or {}) do
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    if not payload.characters[uuid] or (db.characters[uuid].lastUpdated or 0) > (payload.characters[uuid] and payload.characters[uuid].lastUpdated or 0) then
-                        updatePayload.characters[uuid] = db.characters[uuid]
-                    end
-                end
+    if payload.requestedCharacters and payload.requestedCharacters.users then
+        for battleTag, _ in pairs(payload.requestedCharacters.users) do
+            if db.users[battleTag] then
+                updatedCharacters.users[battleTag] = db.users[battleTag]
             end
         end
     end
 
-    -- Check what data the sender is missing
-    for uuid, charData in pairs(db.characters) do
-        if not payload.characters[uuid] then
-            updatePayload.characters[uuid] = charData
-        end
-    end
-
-    for battleTag, userData in pairs(db.users) do
-        if not payload.users[battleTag] then
-            updatePayload.users[battleTag] = userData
-        end
-    end
-
-    -- Prepare request for missing or outdated data from sender
-    for uuid, charData in pairs(payload.characters) do
-        if not db.characters[uuid] or (charData.lastUpdated or 0) > (db.characters[uuid].lastUpdated or 0) then
-            requestPayload.characters[uuid] = charData
-        end
-    end
-
-    for battleTag, userData in pairs(payload.users) do
-        if not db.users[battleTag] then
-            requestPayload.users[battleTag] = userData
-        end
-    end
-
-    -- Send updated data back to the requester
-    if next(updatePayload.characters) or next(updatePayload.users) then
+    -- Send FINAL_SYNC response back to the sender
+    if next(updatedCharacters.characters) or next(updatedCharacters.users) then
         local responseEvent = {
-            type = "SYNC_UPDATE",
-            payload = updatePayload
+            payload = {
+                updatedCharacters = updatedCharacters
+            }
         }
-        local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
+        local serialized = AceSerializer:Serialize("FINAL_SYNC", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
-    end
-
-    -- Request missing data from the sender
-    if next(requestPayload.characters) or next(requestPayload.users) then
-        local requestEvent = {
-            type = "FINAL_SYNC",
-            payload = requestPayload
-        }
-        local serializedRequest = AceSerializer:Serialize("FINAL_SYNC", requestEvent)
-        HCT:SendCommMessage(HCT.addonPrefix, serializedRequest, "WHISPER", sender)
+        print("Processed UPDATE_SYNC")
     end
 end
 
-
 function AddonCommProcessor:ProcessSyncFinal(payload, sender)
-    local HCT = GetHCT()
-    if not HCT then return end
+    self:UpdateLocalData(payload)
+    print("Processed FINAL_SYNC")
+end
 
+function AddonCommProcessor:UpdateLocalData(payload)
     local db = GetDB()
-    local senderBattleTag = sender -- Assuming sender is the battle tag
+    
+    if not payload then return end
 
-    if not payload or not payload.users then return end
-
-    -- Merge incoming data into the database
-    for battleTag, userData in pairs(payload.users) do
-        if not db.users[battleTag] then
-            db.users[battleTag] = userData
-        else
-            db.users[battleTag].team = userData.team
-            db.users[battleTag].characters.alive = db.users[battleTag].characters.alive or {}
-            db.users[battleTag].characters.dead = db.users[battleTag].characters.dead or {}
-
-            for username, charList in pairs(userData.characters.alive or {}) do
-                db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
-
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
-                        db.characters[uuid] = payload.characters[uuid]
-                        table.insert(db.users[battleTag].characters.alive[username], charEntry)
-                    end
-                end
-            end
-
-            for username, charList in pairs(userData.characters.dead or {}) do
-                db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
-
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    if not db.characters[uuid] or charEntry.lastUpdated > (db.characters[uuid].lastUpdated or 0) then
-                        db.characters[uuid] = payload.characters[uuid]
-                        table.insert(db.users[battleTag].characters.dead[username], charEntry)
-                    end
-                end
-            end
+    -- Overwrite local data with updatedCharacters
+    if payload.updatedCharacters and payload.updatedCharacters.characters then
+        for uuid, characterData in pairs(payload.updatedCharacters.characters) do
+            db.characters[uuid] = characterData
         end
     end
 
-    -- Send Sync Complete Confirmation
-    local confirmationEvent = {
-        type = "SYNC_COMPLETE",
-        payload = { senderBattleTag = senderBattleTag }
-    }
-    local serialized = AceSerializer:Serialize("SYNC_COMPLETE", confirmationEvent)
-    HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+    if payload.updatedCharacters and payload.updatedCharacters.users then
+        for battleTag, userData in pairs(payload.updatedCharacters.users) do
+            db.users[battleTag] = userData
+        end
+    end
 end
 
 _G.AddonCommProcessor = AddonCommProcessor
