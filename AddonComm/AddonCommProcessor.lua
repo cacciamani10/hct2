@@ -178,31 +178,41 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     if payload.requestedCharacters and payload.requestedCharacters.users then
         for battleTag, _ in pairs(payload.requestedCharacters.users) do
             if db.users[battleTag] then
-                -- Add user data
-                updatedCharacters.users[battleTag] = db.users[battleTag]
-
+                -- Ensure user entry exists in updatedCharacters
+                updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or { characters = { alive = {}, dead = {} } }
+                updatedCharacters.users[battleTag].lastUpdated = db.users[battleTag].lastUpdated
+    
                 -- Send all alive characters for the user
                 for username, charList in pairs(db.users[battleTag].characters.alive or {}) do
+                    updatedCharacters.users[battleTag].characters.alive[username] = updatedCharacters.users[battleTag].characters.alive[username] or {}
+    
                     for _, charEntry in ipairs(charList) do
                         local uuid = charEntry.uuid
+                        local lastUpdated = charEntry.lastUpdated
                         if db.characters[uuid] then
                             updatedCharacters.characters[uuid] = db.characters[uuid]
+                            table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = lastUpdated })
                         end
                     end
                 end
-
+    
                 -- Send all dead characters for the user
                 for username, charList in pairs(db.users[battleTag].characters.dead or {}) do
+                    updatedCharacters.users[battleTag].characters.dead[username] = updatedCharacters.users[battleTag].characters.dead[username] or {}
+    
                     for _, charEntry in ipairs(charList) do
                         local uuid = charEntry.uuid
+                        local lastUpdated = charEntry.lastUpdated
                         if db.characters[uuid] then
                             updatedCharacters.characters[uuid] = db.characters[uuid]
+                            table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid, lastUpdated = lastUpdated })
                         end
                     end
                 end
             end
         end
     end
+    
 
     -- Send FINAL_SYNC response back to the sender
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
@@ -238,9 +248,57 @@ function AddonCommProcessor:UpdateLocalData(payload)
 
     if payload.updatedCharacters and payload.updatedCharacters.users then
         for battleTag, userData in pairs(payload.updatedCharacters.users) do
-            db.users[battleTag] = userData
+            if db.users[battleTag] then
+                -- Update or insert alive characters
+                for username, charList in pairs(userData.characters.alive or {}) do
+                    db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
+    
+                    for _, charEntry in ipairs(charList) do
+                        local uuid = charEntry.uuid
+                        local found = false
+    
+                        for _, existingEntry in ipairs(db.users[battleTag].characters.alive[username]) do
+                            if existingEntry.uuid == uuid then
+                                existingEntry.lastUpdated = charEntry.lastUpdated -- Update timestamp
+                                found = true
+                                break
+                            end
+                        end
+    
+                        if not found then
+                            table.insert(db.users[battleTag].characters.alive[username], charEntry)
+                        end
+                    end
+                end
+    
+                -- Update or insert dead characters
+                for username, charList in pairs(userData.characters.dead or {}) do
+                    db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
+    
+                    for _, charEntry in ipairs(charList) do
+                        local uuid = charEntry.uuid
+                        local found = false
+    
+                        for _, existingEntry in ipairs(db.users[battleTag].characters.dead[username]) do
+                            if existingEntry.uuid == uuid then
+                                existingEntry.lastUpdated = charEntry.lastUpdated -- Update timestamp
+                                found = true
+                                break
+                            end
+                        end
+    
+                        if not found then
+                            table.insert(db.users[battleTag].characters.dead[username], charEntry)
+                        end
+                    end
+                end
+            else
+                -- User doesn't exist, overwrite entire entry
+                db.users[battleTag] = userData
+            end
         end
     end
+    
 end
 
 _G.AddonCommProcessor = AddonCommProcessor
