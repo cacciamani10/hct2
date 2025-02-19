@@ -93,6 +93,7 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
             for username, localCharList in pairs(localUserData.characters.alive or {}) do
                 for _, localCharEntry in ipairs(localCharList) do
                     local uuid = localCharEntry.uuid
+                    local lastUpdated = localCharEntry.lastUpdated
             
                     -- If sender does not have this character, add it to updatedCharacters
                     local found = false
@@ -107,7 +108,7 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                         updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or { characters = { alive = {}, dead = {} } }
                         updatedCharacters.characters[uuid] = db.characters[uuid]
                         updatedCharacters.users[battleTag].characters.alive[username] = updatedCharacters.users[battleTag].characters.alive[username] or {}
-                        table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid })
+                        table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = lastUpdated })
                     end
                 end
             end
@@ -132,6 +133,7 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
             for username, localCharList in pairs(localUserData.characters.dead or {}) do
                 for _, localCharEntry in ipairs(localCharList) do
                     local uuid = localCharEntry.uuid
+                    local lastUpdated = localCharEntry.lastUpdated
             
                     local found = false
                     for _, senderCharEntry in ipairs(senderUserData.characters.dead[username] or {}) do
@@ -144,7 +146,7 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     if not found then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
                         updatedCharacters.users[battleTag].characters.dead[username] = updatedCharacters.users[battleTag].characters.dead[username] or {}
-                        table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid })
+                        table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid, lastUpdated = lastUpdated })
                     end
                 end
             end
