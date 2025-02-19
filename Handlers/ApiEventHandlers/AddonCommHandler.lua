@@ -26,17 +26,11 @@ _G.HCT_Handlers.AddonCommHandler = {
             if msgType == "EVENT" then
                 AddonCommProcessor:ProcessEvent(payload)
             elseif msgType == "SYNC_REQUEST" then
-                HCT:Print("Processing Sync Request")
                 AddonCommProcessor:ProcessSyncRequest(payload, sender)
-                HCT:Print("Completed Sync Request")
             elseif msgType == "SYNC_UPDATE" then
-                HCT:Print("Processing Sync Update")
                 AddonCommProcessor:ProcessSyncUpdate(payload, sender)
-                HCT:Print("Completed Sync Update")
             elseif msgType == "SYNC_FINAL" then
-                HCT:Print("Processing Sync Final")
                 AddonCommProcessor:ProcessSyncFinal(payload, sender)
-                HCT:Print("Completed Sync Final")
             elseif msgType == "TEAMCHAT" then
                 HCT_ChatModule:ProcessTeamChatMessage(payload)
             else

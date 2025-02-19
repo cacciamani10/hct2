@@ -218,16 +218,16 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
         local responseEvent = {
             updatedCharacters = updatedCharacters
         }
-        local serialized = AceSerializer:Serialize("FINAL_SYNC", responseEvent)
+        local serialized = AceSerializer:Serialize("SYNC_FINAL", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
-        print("Processed SYNC_UPDATE and sent FINAL_SYNC to", sender)
+        print("Processed SYNC_UPDATE and sent SYNC_FINAL to", sender)
     end
 end
 
 
 function AddonCommProcessor:ProcessSyncFinal(payload, sender)
     self:UpdateLocalData(payload)
-    print("Processed FINAL_SYNC")
+    print("Processed SYNC_FINAL")
 end
 
 function AddonCommProcessor:UpdateLocalData(payload)
@@ -236,9 +236,7 @@ function AddonCommProcessor:UpdateLocalData(payload)
     if not payload then return end
 
     if payload.updatedCharacters and payload.updatedCharacters.characters then
-        print("I GETE HERE")
         for uuid, characterData in pairs(payload.updatedCharacters.characters) do
-            print("DUPATED CHARACTER@@@@@@@@")
             db.characters[uuid] = characterData
         end
     end
