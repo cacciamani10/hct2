@@ -1,12 +1,12 @@
 -- Core.lua
-local addonName = ...
+local addonName = "HCT"
 local HCT_Env = _G.HCT_Env
 local HCT = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0",
     "AceSerializer-3.0", "AceComm-3.0")
 local HCT_Broadcaster = _G.HCT_Broadcaster
 HCT_Env.InitializeAddon(HCT);
 HCT.teamChatLog = HCT.teamChatLog or {}
-HCT.addonPrefix = "HCTAddon"
+HCT.addonPrefix = addonName
 local defaults = _G.DefaultData.defaults
 local options = _G.DefaultData:GetOptions(HCT)
 
@@ -41,7 +41,7 @@ function HCT:OnInitialize()
     end)
     
     _G.DAO.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())
-    self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team.")
+    self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team."..addonName)
 end
 
 function HCT:OnEnable()
