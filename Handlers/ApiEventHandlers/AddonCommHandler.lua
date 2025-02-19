@@ -23,10 +23,8 @@ _G.HCT_Handlers.AddonCommHandler = {
                 return
             end
 
-            if msgType == "EVENT" or msgType == "DEATH" then
-                HCT:Print("Processing Death Event")
+            if msgType == "EVENT" then
                 AddonCommProcessor:ProcessEvent(payload)
-                HCT:Print("Completed Death Event")
             elseif msgType == "SYNC_REQUEST" then
                 HCT:Print("Processing Sync Request")
                 AddonCommProcessor:ProcessSyncRequest(payload, sender)
