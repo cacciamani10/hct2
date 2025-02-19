@@ -174,18 +174,32 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
         characters = {}
     }
 
-    if payload.requestedCharacters and payload.requestedCharacters.characters then
-        for uuid, _ in pairs(payload.requestedCharacters.characters) do
-            if db.characters[uuid] then
-                updatedCharacters.characters[uuid] = db.characters[uuid]
-            end
-        end
-    end
-
+    -- Loop through requested users and send all associated character data
     if payload.requestedCharacters and payload.requestedCharacters.users then
         for battleTag, _ in pairs(payload.requestedCharacters.users) do
             if db.users[battleTag] then
+                -- Add user data
                 updatedCharacters.users[battleTag] = db.users[battleTag]
+
+                -- Send all alive characters for the user
+                for username, charList in pairs(db.users[battleTag].characters.alive or {}) do
+                    for _, charEntry in ipairs(charList) do
+                        local uuid = charEntry.uuid
+                        if db.characters[uuid] then
+                            updatedCharacters.characters[uuid] = db.characters[uuid]
+                        end
+                    end
+                end
+
+                -- Send all dead characters for the user
+                for username, charList in pairs(db.users[battleTag].characters.dead or {}) do
+                    for _, charEntry in ipairs(charList) do
+                        local uuid = charEntry.uuid
+                        if db.characters[uuid] then
+                            updatedCharacters.characters[uuid] = db.characters[uuid]
+                        end
+                    end
+                end
             end
         end
     end
@@ -193,15 +207,17 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     -- Send FINAL_SYNC response back to the sender
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
         local responseEvent = {
+            type = "FINAL_SYNC",
             payload = {
                 updatedCharacters = updatedCharacters
             }
         }
         local serialized = AceSerializer:Serialize("FINAL_SYNC", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
-        print("Processed UPDATE_SYNC")
+        print("Processed SYNC_UPDATE and sent FINAL_SYNC to", sender)
     end
 end
+
 
 function AddonCommProcessor:ProcessSyncFinal(payload, sender)
     self:UpdateLocalData(payload)
