@@ -14,6 +14,11 @@ function _G.Utils.GameUtils:GetBattleTag()
     return info and info:match("^(%S+#%S+)") or "unknown"
 end
 
+function _G.Utils.GameUtils:GetUsername()
+    local name = UnitName("player")
+    return name
+end
+
 function _G.Utils.GameUtils:GetCharacterKey()
     local name = UnitName("player") .. ":" .. _G.Utils.GameUtils:GetBattleTag()
     return name or "unknown"

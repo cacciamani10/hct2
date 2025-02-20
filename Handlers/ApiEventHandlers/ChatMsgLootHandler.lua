@@ -22,9 +22,7 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                 ["Runecloth"] = { 45, 60 },
                 ["Felcloth"] = { 55, 60 }
             }
-            -- Remove hidden formatting codes
             local cleanedText = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|H.-|h", ""):gsub("|h|r", ""):gsub("%.$", "")
-            -- Use string.match to capture the loot name and quantity.
             local lootName, lootQuantityStr = string.match(cleanedText, "You receive loot: %[(.-)%]x?(%d*)")
             if lootName then
                 local lootQuantity = tonumber(lootQuantityStr) or 1 -- Default to 1 if no quantity is found
@@ -34,9 +32,7 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                     local minLevel, maxLevel = unpack(clothNames[lootName])
                     if charLevel >= minLevel and charLevel <= maxLevel then
                         local db = GetDB()
-                        --db.localAchievementProgressData[charKey] = db.localAchievementProgressData[charKey] or {}
-                        --db.localAchievementProgressData[charKey].clothCount = (GetDB().localAchievementProgressData[charKey].clothCount or 0) +
-                        --lootQuantity
+                        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(800)
                         return
                     end
                 end

@@ -18,8 +18,16 @@ _G.HCT_Handlers.SpecialMobHandler = {
                 HCT:Print("SpecialMobHandler: Dungeon Boss Killed: " .. destName)
                 _G.ACHIEVEMENTS.Achievement_Dungeons:CheckAchievement(destName)
             end
-        end
-    end,
+        elseif subEvent == "UNIT_DIED" then
+                -- Optionally, you can add filters here to ensure this is a mob death
+                -- For example, checking if destName exists and if the GUID indicates a creature
+                if destGUID:find("Creature") then
+                    if destName and destGUID then
+                        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(801)
+                    end
+                end
+            end
+        end,
 
     IsDungeonBoss = function(name)
         for _, boss in pairs(HardcoreChallengeTracker_Data.dungeonBosses) do
@@ -28,31 +36,3 @@ _G.HCT_Handlers.SpecialMobHandler = {
         return false
     end
 }
-
-
--- elseif subEvent == "UNIT_DIED" then
-        --     local unitType, npcID = strsplit("-", destGUID)
-        --     local classification = UnitClassification(destName) or "normal" -- Default to normal if nil
-
-        --     local validClassifications = {
-        --         --normal = "Normal Mob",
-        --         elite = "Elite Mob",
-        --         rare = "Rare Mob",
-        --         rareelite = "Rare Elite Mob",
-        --         worldboss = "World Boss"
-        --     }
-
-        --     if validClassifications[classification] then
-        --         local characterName = UnitName("player")
-                
-        --         local ev = {
-        --             type = "SPECIAL_KILL",
-        --             name = destName,
-        --             classification = classification,
-        --             characterName = characterName,
-        --             timestamp = time()
-        --         }
-                
-        --         -- Broadcast the event
-        --         HCT_Broadcaster:BroadcastEvent(ev)
-        --     end
