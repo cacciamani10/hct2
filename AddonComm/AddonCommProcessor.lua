@@ -181,8 +181,6 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     local HCT = GetHCT()
     local db = GetDB()
 
-    self:UpdateLocalData(payload)
-
     -- Prepare updatedCharacters object for FINAL_SYNC (contains requested data from local db)
     local updatedCharacters = {
         users = {},
@@ -232,6 +230,7 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
             end
         end
     end
+    self:UpdateLocalData(payload)
     print("SYNC_UPDATE Printing playload.requestedCharacters")
     PrintTable(payload.requestedCharacters)
     print("SYNC_UPDATE Printing playload.updatedCharacters")
@@ -243,7 +242,7 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
             updatedCharacters = updatedCharacters
         }
         local serialized = AceSerializer:Serialize("SYNC_FINAL", responseEvent)
-        --HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+        HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
         print("Processed SYNC_UPDATE and sent SYNC_FINAL to", sender)
     end
     PrintTable(updatedCharacters)
@@ -304,6 +303,7 @@ function AddonCommProcessor:UpdateLocalData(payload)
                     end
 
                     if not found then
+                        db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
                         table.insert(db.users[battleTag].characters.alive[username],
                             { uuid = uuid, lastUpdated = lastUpdated })
                     end
@@ -312,21 +312,22 @@ function AddonCommProcessor:UpdateLocalData(payload)
 
             for username, charList in pairs(userData.characters.dead or {}) do
                 db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
-
                 for _, charEntry in ipairs(charList) do
                     local uuid = charEntry.uuid
                     local lastUpdated = charEntry.lastUpdated
                     local found = false
-
-                    for _, existingEntry in ipairs(db.users[battleTag].characters.dead[username]) do
-                        if existingEntry.uuid == uuid then
-                            existingEntry.lastUpdated = charEntry.lastUpdated     -- Update timestamp
-                            found = true
-                            break
+                    if db.users[battleTag].characters.dead[username] then
+                        for _, existingEntry in ipairs(db.users[battleTag].characters.dead[username]) do
+                            if existingEntry.uuid == uuid then
+                                existingEntry.lastUpdated = charEntry.lastUpdated -- Update timestamp
+                                found = true
+                                break
+                            end
                         end
                     end
 
                     if not found then
+                        db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
                         table.insert(db.users[battleTag].characters.dead[username],
                             { uuid = uuid, lastUpdated = lastUpdated })
                     end
