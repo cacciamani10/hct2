@@ -15,8 +15,8 @@ function HCT_ChatModule:SendTeamChatMessage(text)
     local teamColorCode = string.format("|cff%02x%02x%02x", teamColor.r, teamColor.g, teamColor.b)
 
     local classColorStr = "ffffff"
-    if classFileName and RAID_CLASS_COLORS[classFileName] then
-        classColorStr = RAID_CLASS_COLORS[classFileName].colorStr or "ffffff"
+    if classFileName and _G.UI.SharedConstants.RAID_CLASS_COLORS[classFileName] then
+        classColorStr = _G.UI.SharedConstants.RAID_CLASS_COLORS[classFileName].colorStr or "ffffff"
     end
     classColorStr = string.gsub(classColorStr, "%s+", "")
     classColorStr = string.sub(classColorStr, 1, 6)
@@ -75,8 +75,8 @@ function HCT_ChatModule:ProcessTeamChatMessage(payload)
     --     local senderClass = payload.class
     --     local classColorStr = "ffffff"
     --     local teamColorStr = "ffffff"
-    --     if senderClass and RAID_CLASS_COLORS[senderClass] then
-    --         classColorStr = RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
+    --     if senderClass and _G.UI.SharedConstants.RAID_CLASS_COLORS[senderClass] then
+    --         classColorStr = _G.UI.SharedConstants.RAID_CLASS_COLORS[senderClass].colorStr or "ffffff"
     --     end
     --     if db.teams[payload.team] then
     --         local teamColor = _G.Utils.GameUtils.NormalizeColor(db.teams[payload.team].color)
