@@ -247,6 +247,12 @@ function AddonCommProcessor:UpdateLocalData(payload)
     if payload.updatedCharacters and payload.updatedCharacters.users then
         for battleTag, userData in pairs(payload.updatedCharacters.users) do
             for username, charList in pairs(userData.characters.alive or {}) do
+                db.users[battleTag] = {
+                    characters = {
+                        alive = {},
+                        dead = {},
+                    },
+                }
                 db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
                 for _, charEntry in ipairs(charList) do
                     local uuid = charEntry.uuid
@@ -255,7 +261,7 @@ function AddonCommProcessor:UpdateLocalData(payload)
                     if db.users[battleTag].characters.alive[username] then
                         for _, existingEntry in ipairs(db.users[battleTag].characters.alive[username]) do
                             if existingEntry.uuid == uuid then
-                                existingEntry.lastUpdated = charEntry.lastUpdated -- Update timestamp
+                                existingEntry.lastUpdated = charEntry.lastUpdated
                                 found = true
                                 break
                             end
