@@ -162,32 +162,23 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
         end
     end
 
-    print("REQUEST_SYNC Printing playload.requestedCharacters")
-    PrintTable(payload.requestedCharacters)
-    print("REQUEST_SYNC Printing playload.updatedCharacters")
-    PrintTable(payload.updatedCharacters)
-
-
     local responseEvent = {
         updatedCharacters = updatedCharacters,
         requestedCharacters = requestedCharacters
     }
     local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
     HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
-    print("Processed REQUEST_SYNC")
 end
 
 function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     local HCT = GetHCT()
     local db = GetDB()
 
-    -- Prepare updatedCharacters object for FINAL_SYNC (contains requested data from local db)
     local updatedCharacters = {
         users = {},
         characters = {}
     }
 
-    -- Loop through requested users and send all associated character data
     if payload.requestedCharacters and payload.requestedCharacters.users then
         for battleTag, _ in pairs(payload.requestedCharacters.users) do
             if db.users[battleTag] then
@@ -196,7 +187,6 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
                 { characters = { alive = {}, dead = {} } }
                 updatedCharacters.users[battleTag].lastUpdated = db.users[battleTag].lastUpdated
 
-                -- Send all alive characters for the user
                 for username, charList in pairs(db.users[battleTag].characters.alive or {}) do
                     updatedCharacters.users[battleTag].characters.alive[username] = updatedCharacters.users[battleTag]
                     .characters.alive[username] or {}
@@ -212,7 +202,6 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
                     end
                 end
 
-                -- Send all dead characters for the user
                 for username, charList in pairs(db.users[battleTag].characters.dead or {}) do
                     updatedCharacters.users[battleTag].characters.dead[username] = updatedCharacters.users[battleTag]
                     .characters.dead[username] or {}
@@ -231,12 +220,6 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
         end
     end
     self:UpdateLocalData(payload)
-    print("SYNC_UPDATE Printing playload.requestedCharacters")
-    PrintTable(payload.requestedCharacters)
-    print("SYNC_UPDATE Printing playload.updatedCharacters")
-    PrintTable(payload.updatedCharacters)
-    print("SYNC_UPDATE Printing updatedCharacters to send back to user")
-    PrintTable(updatedCharacters)
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
         local responseEvent = {
             updatedCharacters = updatedCharacters
@@ -245,32 +228,10 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
         print("Processed SYNC_UPDATE and sent SYNC_FINAL to", sender)
     end
-    PrintTable(updatedCharacters)
-    print("Processed SYNC_UPDATE", sender)
 end
 
 function AddonCommProcessor:ProcessSyncFinal(payload, sender)
-    print("SYNC_FINAL Printing playload.updatedCharacters")
-    PrintTable(payload.updatedCharacters)
     self:UpdateLocalData(payload)
-    print("Processed SYNC_FINAL")
-end
-
-function PrintTable(tbl, indent)
-    if not tbl then
-        print("Error: table is nil")
-        return
-    end
-    indent = indent or 0
-    local formatting = string.rep("  ", indent)
-    for k, v in pairs(tbl) do
-        if type(v) == "table" then
-            print(formatting .. tostring(k) .. ":")
-            PrintTable(v, indent + 1)
-        else
-            print(formatting .. tostring(k) .. ": " .. tostring(v))
-        end
-    end
 end
 
 function AddonCommProcessor:UpdateLocalData(payload)
@@ -319,7 +280,7 @@ function AddonCommProcessor:UpdateLocalData(payload)
                     if db.users[battleTag].characters.dead[username] then
                         for _, existingEntry in ipairs(db.users[battleTag].characters.dead[username]) do
                             if existingEntry.uuid == uuid then
-                                existingEntry.lastUpdated = charEntry.lastUpdated -- Update timestamp
+                                existingEntry.lastUpdated = charEntry.lastUpdated
                                 found = true
                                 break
                             end
