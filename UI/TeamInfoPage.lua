@@ -27,7 +27,7 @@ function _G.UI.TeamInfoPage:DrawTeamInfo(container)
     local team2ColorCode = string.format("|cff%02x%02x%02x", team2Color.r, team2Color.g, team2Color.b)
 
     -- Assume HCT_DataModule.calculatedData has been updated with player contributions.
-    local contestData = _G.Utils.GameUtils.calculatedData or {}
+    local contestData = _G.SERVICE.Scoring_Service:CalculateContestData() or {}
 
     local team1Points = contestData["team1"] or 0
     local team2Points = contestData["team2"] or 0
