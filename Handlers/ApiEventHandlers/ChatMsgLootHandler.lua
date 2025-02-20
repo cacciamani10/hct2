@@ -13,7 +13,6 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
 
     HandleEvent = function(self, HCT, eventName, text)
         if HCT then
-            -- linen cloth is eligible from 1-20, wool cloth 16-30
             local clothNames = {
                 ["Linen Cloth"] = { 1, 20 },
                 ["Wool Cloth"] = { 13, 30 },

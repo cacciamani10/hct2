@@ -19,8 +19,7 @@ _G.HCT_Handlers.SpecialMobHandler = {
                 _G.ACHIEVEMENTS.Achievement_Dungeons:CheckAchievement(destName)
             end
         elseif subEvent == "UNIT_DIED" then
-                -- Optionally, you can add filters here to ensure this is a mob death
-                -- For example, checking if destName exists and if the GUID indicates a creature
+                -- TODO make sure these are only the current players kills
                 if destGUID:find("Creature") then
                     if destName and destGUID then
                         _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(801)

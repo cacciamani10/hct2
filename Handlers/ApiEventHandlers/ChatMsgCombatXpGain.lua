@@ -17,7 +17,7 @@ _G.HCT_Handlers.ChatMsgCombatXpGainHandler = {
         if player == playerName then
             local xpGain = tonumber(text:match("(%d+) experience")) or 0
             if xpGain > 0 then
-                -- I don't think this works at all
+                print("hey")
                 --_G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(801)
             end
         end

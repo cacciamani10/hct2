@@ -9,6 +9,5 @@ _G.HCT_Handlers.DuelToTheDeathRequestedHandler = {
         -- payload = playerName
         local playerName = event.payload.playerName
         HCT:Print("Duel to the death requested by " .. playerName)
-        HCT:Print("Duel to the death requeste handled.")
     end
 }
