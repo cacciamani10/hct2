@@ -37,7 +37,7 @@ function HCT:OnInitialize()
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTProfiles", "Profiles", "Hardcore Challenge Tracker")
 
     self:RegisterChatCommand("hct", function(input)
-        HCT_UIModule:ShowMainGUI()
+        _G.UI.UIMain:ShowMainGUI()
     end)
     
     _G.DAO.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())

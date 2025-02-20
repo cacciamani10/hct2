@@ -1,5 +1,10 @@
--- UIMain.lua
-HCT_UIModule = HCT_UIModule or {}
+if not _G.UI then
+    _G.UI = {}
+end
+
+if not _G.UI.UIMain then
+    _G.UI.UIMain = {}
+end
 local AceGUI = LibStub("AceGUI-3.0")
 
 local function GetHCT() 
@@ -10,7 +15,7 @@ local function GetDB()
     return _G.HCT_Env.GetAddon().db.profile 
 end
 
-function HCT_UIModule:ShowMainGUI()
+function _G.UI.UIMain:ShowMainGUI()
     local guiFrame = AceGUI:Create("Frame")
     guiFrame:SetTitle("Hardcore Challenge Tracker")
     
@@ -53,29 +58,29 @@ function HCT_UIModule:ShowMainGUI()
     tabGroup:SetCallback("OnGroupSelected", function(container, event, group)
         container:ReleaseChildren()
         if group == "teamInfo" then
-            _G.UI.TeamInfo:DrawTeamInfo(container)
+            _G.UI.TeamInfoPage:DrawTeamInfo(container)
             guiFrame:SetStatusText(statusText)
         elseif group == "characters" then
-            HCT_CharactersPage:DrawCharactersPage(container)
+            _G.UI.CharactersPage:DrawCharactersPage(container)
             guiFrame:SetStatusText("Characters are listed by team.")
         elseif group == "achievements" then
-            HCT_AchievementsPage:DrawAchievementsPage(container)
+            _G.UI.AchievementsPage:DrawAchievementsPage(container)
             guiFrame:SetStatusText("Achievements are earnable once per character.")
         elseif group == "bounties" then
-            HCT_BountiesPage:DrawBountiesPage(container)
+            _G.UI.BountiesPage:DrawBountiesPage(container)
             guiFrame:SetStatusText("Bounties are earnable an unlimited amount of times.")
         elseif group == "feats" then
-            HCT_FeatsPage:DrawFeatsPage(container)
+            _G.UI.FeatsPage:DrawFeatsPage(container)
             guiFrame:SetStatusText("Feats are earnable only once in the contest.")
         elseif group == "tugOfWar" then
-            HCT_TugOfWar:DrawTugOfWar(container)
+            _G.UI.TugOfWarPage:DrawTugOfWar(container)
             guiFrame:SetStatusText("Coming in Phase 2!")
         elseif group == "teamChat" then
-            HCT_TeamChat:DrawTeamChat(container)
+            _G.UI.TeamChatPage:DrawTeamChat(container)
             local team = _G.Utils.GameUtils:GetPlayerTeam(_G.Utils.GameUtils:GetBattleTag()) or ""
             guiFrame:SetStatusText(team .. " Chat")
         elseif group == "rules" then
-            HCT_Rules:DrawRules(container)
+            _G.UI.RulesPage:DrawRules(container)
             guiFrame:SetStatusText("Rules of the contest.")
         else
             local placeholder = AceGUI:Create("Label")

@@ -15,14 +15,23 @@ AddonComm/AddonCommProcessor.lua
 Data/HardcoreChallengeTracker_Data.lua
 Data/HardcoreChallengeTracker_Teams.lua
 Data/DefaultData.lua
+ChatModule.lua
 
 #Utils
 Utils/TimeUtils.lua
 Utils/GameUtils.lua
 
 # Data and Module Logic
-UI/UIModule.lua
-ChatModule.lua
+UI/UIMain.lua
+UI/AchievementsPage.lua
+UI/BountiesPage.lua
+UI/CharactersPage.lua
+UI/FeatsPage.lua
+UI/RulesPage.lua
+UI/SharedConstants.lua
+UI/TeamChatPage.lua
+UI/TeamInfoPage.lua
+UI/TugOfWarPage.lua
 
 #Dao
 Dao/CharacterDao.lua

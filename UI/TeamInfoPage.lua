@@ -62,7 +62,7 @@ function _G.UI.TeamInfoPage:DrawTeamInfo(container)
 end
 
 
-function FormatPlayersList(players, contestData)
+function _G.UI.TeamInfoPage:FormatPlayersList(players, contestData)
     if not players or #players == 0 then
         return "None"
     end
