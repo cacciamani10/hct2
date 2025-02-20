@@ -46,6 +46,7 @@ end
 
 function HCT:OnEnable()
     HCT:RegisterEvents()
+    HCT:StartAllMonitors()
     HCT_ChatModule:RegisterChatCommands()
     HCT_Broadcaster:SyncRequest()
 end
@@ -53,6 +54,14 @@ end
 function HCT:OnDisable()
     self:UnregisterEvents()
     HCT_ChatModule:UnregisterChatCommands()
+end
+
+function HCT:StartAllMonitors()
+    for _, monitor in pairs(_G.Monitors) do
+        if monitor.StartMonitor then
+            monitor:StartMonitor()
+        end
+    end
 end
 
 function HCT:RegisterEvents()

@@ -43,16 +43,19 @@ Service/ScoringService.lua
 
 # Handlers
 Handlers/ApiEventHandlers/AddonCommHandler.lua
-Handlers/ApiEventHandlers/PlayerDeathHandler.lua
-Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
-Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
-Handlers/ApiEventHandlers/PlayerEnteringWorldHandler.lua
-Handlers/ApiEventHandlers/PlayerLogoutHandler.lua
-Handlers/ApiEventHandlers/ChatMsgSkillHandler.lua
+Handlers/ApiEventHandlers/ChatMsgCombatXpGainHandler.lua
 Handlers/ApiEventHandlers/ChatMsgLootHandler.lua
+Handlers/ApiEventHandlers/ChatMsgSkillHandler.lua
+Handlers/ApiEventHandlers/DuelToTheDeathHandler.lua
+Handlers/ApiEventHandlers/GuildInviteRequestHandler.lua
+Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
+Handlers/ApiEventHandlers/PlayerDeathHandler.lua
+Handlers/ApiEventHandlers/PlayerEnteringWorldHandler.lua
+Handlers/ApiEventHandlers/PlayerLevelUpHandler.lua
+Handlers/ApiEventHandlers/PlayerLogoutHandler.lua
+Handlers/ApiEventHandlers/QuestCompletionHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
 Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
-Handlers/ApiEventHandlers/ChatMsgCombatXpGainHandler
 
 # Achievements
 Achievements/Achievement_Leveling.lua

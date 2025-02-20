@@ -142,7 +142,7 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     _G.HCT_Broadcaster:BroadcastEvent(event)
 end
 
-function _G.DAO.CharacterDao:AddBounty(achievementId)
+function _G.DAO.CharacterDao:AddBounty(achievementId, count)
     local username = UnitName("player")
     local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
@@ -164,10 +164,13 @@ function _G.DAO.CharacterDao:AddBounty(achievementId)
         db.characters[uuid].achievements = {}
     end
 
-    local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or
-        0
-
-    db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = currentCount + 1 }
+    if not count then
+        local currentCount = (db.characters[uuid].achievements[achievementId] and db.characters[uuid].achievements[achievementId].count) or
+            0
+        db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = currentCount + 1 }
+    else
+        db.characters[uuid].achievements[achievementId] = { timestamp = time(), count = count }
+    end
 
     characterEntry.lastUpdated = time()
 end

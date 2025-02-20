@@ -22,7 +22,7 @@ _G.HCT_Handlers.SpecialMobHandler = {
                 -- TODO make sure these are only the current players kills
                 if destGUID:find("Creature") then
                     if destName and destGUID then
-                        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(801)
+                        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(801, nil)
                     end
                 end
             end
