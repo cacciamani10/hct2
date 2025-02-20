@@ -20,7 +20,6 @@ _G.HCT_Broadcaster = {
     SyncRequest = function()
         local HCT = GetHCT()
         local db = GetDB()
-        HCT:Print("sending sync request broadcast...")
     
         if not db.users then
             HCT:Print("Error: No users found in the database.")

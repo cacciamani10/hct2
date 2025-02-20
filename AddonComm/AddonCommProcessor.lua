@@ -226,7 +226,6 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
         }
         local serialized = AceSerializer:Serialize("SYNC_FINAL", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
-        print("Processed SYNC_UPDATE and sent SYNC_FINAL to", sender)
     end
 end
 
