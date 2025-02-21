@@ -22,10 +22,11 @@ Utils/TimeUtils.lua
 Utils/GameUtils.lua
 
 # Data and Module Logic
+UI/AdminPage.lua
 UI/UIMain.lua
-UI/Achievements/AchievementsPage.lua
-UI/Achievements/AllAchievements.lua
-UI/Achievements/CompletedAchievements.lua
+UI/AchievementsPage/AchievementsPage.lua
+UI/AchievementsPage/AllAchievements.lua
+UI/AchievementsPage/CompletedAchievements.lua
 UI/BountiesPage.lua
 UI/CharactersPage.lua
 UI/FeatsPage.lua

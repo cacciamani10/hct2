@@ -53,6 +53,7 @@ function _G.UI.UIMain:ShowMainGUI()
         { text = "Tug of War",   value = "tugOfWar" },
         { text = "Team Chat",    value = "teamChat" },
         { text = "Rules",        value = "rules" },
+        { text = "Admin",        value = "admin" },
     })
 
     tabGroup:SetCallback("OnGroupSelected", function(container, event, group)
@@ -82,6 +83,9 @@ function _G.UI.UIMain:ShowMainGUI()
         elseif group == "rules" then
             _G.UI.RulesPage:DrawRules(container)
             guiFrame:SetStatusText("Rules of the contest.")
+        elseif group == "admin" then
+            _G.UI.AdminPage:DrawAdminPage(container)
+            guiFrame:SetStatusText("Admin page.")
         else
             local placeholder = AceGUI:Create("Label")
             placeholder:SetFullWidth(true)
