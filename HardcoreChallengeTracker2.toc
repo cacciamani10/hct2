@@ -58,6 +58,7 @@ Handlers/ApiEventHandlers/QuestCompletionHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
 Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
 Handlers/ApiEventHandlers/ChatMsgCombatMiscInfoHandler.lua
+Handlers/ApiEventHandlers/ChatMsgSystemHandler.lua
 
 # Monitors
 Monitors/GuildInviteMonitor.lua
