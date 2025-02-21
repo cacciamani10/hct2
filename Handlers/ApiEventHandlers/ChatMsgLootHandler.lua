@@ -31,8 +31,8 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                     local minLevel, maxLevel = unpack(clothNames[lootName])
                     if charLevel >= minLevel and charLevel <= maxLevel then
                         local db = GetDB()
-                        -- TODO count how many cloth recieved
-                        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(800, nil)
+                        -- TODO verify this works
+                        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(800, lootQuantityStr)
                         return
                     end
                 end

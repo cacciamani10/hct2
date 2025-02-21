@@ -6,6 +6,7 @@ _G.HCT_Handlers.PlayerLogoutHandler = {
     GetHandlerName = function() return "PlayerLogoutHandler" end,
 
     HandleEvent = function(self, HCT, event)
+        -- to try to only broadcast when a player actually logs out instead of also when they reload
         -- TODO try to use a trick where you register a chat command to a function to flip a flag to true
         -- then in here check the flag, set it to false, then return
         local event = {
