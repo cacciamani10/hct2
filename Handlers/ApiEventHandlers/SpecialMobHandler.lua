@@ -18,6 +18,7 @@ _G.HCT_Handlers.SpecialMobHandler = {
         if subEvent == "PARTY_KILL" then
             if self:IsDungeonBoss(destName) then
                 HCT:Print("SpecialMobHandler: Dungeon Boss Killed: " .. destName)
+                _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(804)
                 _G.ACHIEVEMENTS.Achievement_Dungeons:CheckAchievement(destName)
             end
             -- this keeps a running total creature kill count

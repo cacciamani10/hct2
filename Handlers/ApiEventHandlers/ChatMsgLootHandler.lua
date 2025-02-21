@@ -19,6 +19,18 @@ local function ProcessNeedRoll(text, HCT)
     end
 end
 
+local function CheckRecievedRareLoot(text, HCT)
+    local lootName, lootQuantityStr = string.match(text, "You receive loot: %[(.-)%]x?(%d*)")
+    if lootName then
+        local lootQuantity = tonumber(lootQuantityStr) or 1
+        -- Check if the item is rare or better by looking for its color codes.
+        if lootName:find("|cff0070dd") or lootName:find("|cffa335ee") or lootName:find("|cffff8000") then
+            HCT:Print("Rare or better item looted: " .. lootName)
+            _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(803, lootQuantity)
+        end
+    end
+end
+
 _G.HCT_Handlers.ChatMsgLootHandler = {
     GetEventType = function()
         return "CHAT_MSG_LOOT"
@@ -55,5 +67,6 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
         end
 
         ProcessNeedRoll(text, HCT)
+        CheckRecievedRareLoot(text, HCT)
     end
 }

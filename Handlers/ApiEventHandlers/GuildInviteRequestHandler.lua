@@ -13,11 +13,12 @@ _G.HCT_Handlers.GuildInviteRequestHandler = {
     -- what is this doing?
     HandleEvent = function(self, HCT, event, inviter, guildName)
         if not HCT then return end
-        local targetGuild = HCT.db.profile.guildName
+        local targetGuild = "WELL MET"
         if guildName == targetGuild then
             HCT:Print("Guild invite request from " .. inviter .. " to join " .. guildName .. " accepted.")
             AcceptGuild()
         else
+            -- this works
             HCT:Print("Guild invite request from " .. inviter .. " to join " .. guildName .. " declined.")
             DeclineGuild()
         end

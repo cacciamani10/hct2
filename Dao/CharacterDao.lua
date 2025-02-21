@@ -177,6 +177,10 @@ end
 
 function _G.DAO.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
     local db = GetDB()
+    db.users[character.battleTag] = db.users[character.battleTag] or {}
+    db.users[character.battleTag].characters = db.users[character.battleTag].characters or {}
+    db.users[character.battleTag].characters.alive = db.users[character.battleTag].characters.alive or {}
+    db.users[character.battleTag].characters.dead = db.users[character.battleTag].characters.dead or {}
 
     if not db.users[character.battleTag] then
         _G.DAO.UserDao:InitializeUser(character.battleTag)

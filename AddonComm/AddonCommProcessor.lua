@@ -16,8 +16,8 @@ function AddonCommProcessor:ProcessEvent(ev)
     end
     local db = GetDB()
     if ev.type == "DEATH" then
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
         HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
+        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
     elseif ev.type == "CHARACTER" then
         _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
         -- elseif ev.type == "SPECIAL_KILL" then
