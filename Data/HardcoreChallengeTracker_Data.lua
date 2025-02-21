@@ -122,8 +122,8 @@ local feats = {
     { uniqueID = 517, name = "Shadow Orb",            description = "Receive the shadow orb while level 38 or below (Warlock Only).",                                         points = 7 },
     { uniqueID = 518, name = "Loot Hoarder",  description = "Win a need roll by 1",                                                                                   points = 2 },
     { uniqueID = 519, name = "Unworthy Roller",       description = "Lose a need roll by 1",                                                                                  points = 2 },
-    { uniqueID = 520, name = "I Have A Mage Alt",     description = "Roll 100 on a need roll.",                                                                               points = 2 },
-    { uniqueID = 521, name = "Roll Under Pressure",   description = "Roll 1 on a need roll.",                                                                                 points = 2 },
+    { uniqueID = 520, name = "I Have A Mage Alt",     description = "Roll 100 on a need roll.",         { uniqueID = 521, name = "Roll Under Pressure",   description = "Roll 1 on a need roll.",                                                                                 points = 2 },                                                                      points = 2 },
+    
 }
 
 local bounties = {
