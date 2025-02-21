@@ -20,7 +20,7 @@ function _G.ACHIEVEMENTS.Achievement_Professions:CheckAchievements()
     local character = _G.DAO.CharacterDao:GetCharacter()
     if not character then return end
 
-    local professionLevels = self:GetProfessionLevels()
+    local professionLevels = _G.ACHIEVEMENTS.Achievement_Professions:GetProfessionLevels()
 
     for _, achDef in ipairs(HardcoreChallengeTracker_Data.achievements["Profession Mastery"] or {}) do
         local reqLevelStr, profName = achDef.description:match("Reach level (%d+)%s+(.+)")

@@ -127,17 +127,17 @@ local feats = {
 }
 
 local bounties = {
-    { uniqueID = 800, name = "Cloth Collector",                description = "Every 100 Cloth",                                              points = 1 },
-    { uniqueID = 801, name = "Headhunter",                     description = "Every 250 enemy killed",                                       points = 1 },
-    { uniqueID = 802, name = "Death Defier",                   description = "Escape near death from an enemy 5 times (20% health or less)", points = 1 }, -- Add a check to see if recently in combat they took some big hits or were attacked by several enemies rather than self damage
-    { uniqueID = 803, name = "Treasure Hunter",                description = "Every 5 rare or better items looted",                          points = 2 },
-    { uniqueID = 804, name = "Deungeoneer",                    description = "Every 3 dungeons cleared",                                     points = 1 },
-    { uniqueID = 805, name = "Team-work makes the dream-work", description = "Complete a dungeon with a full team of guild memebers",        points = 1 },
-    { uniqueID = 806, name = "GrAy-okay",                      description = "Every 500 grey mobs killed",                                   points = 1 },
-    { uniqueID = 807, name = "Dedicated Quester",              description = "Every 25 unique quests completed",                             points = 1 },
-    { uniqueID = 808, name = "Exalted Hero",                   description = "Reach Exalted reputation with a faction",                      points = 2 },
-    { uniqueID = 809, name = "Treasure Hunter",                description = "Open 5 treasure chests in the world",                          points = 1 },
-    -- Add more bounties
+    { uniqueID = 800, name = "Cloth Collector",                description = "Every 100 Cloth",                                              points = 1, required = 100 },
+    { uniqueID = 801, name = "Headhunter",                     description = "Every 250 enemy killed",                                       points = 1, required = 250 },
+    { uniqueID = 802, name = "Death Defier",                   description = "Escape near death from an enemy 5 times (20% health or less)", points = 1, required = 5 },
+    { uniqueID = 803, name = "Treasure Hunter",                description = "Every 5 rare or better items looted",                          points = 2, required = 5 },
+    { uniqueID = 804, name = "Deungeoneer",                    description = "Every 3 dungeons cleared",                                     points = 1, required = 3 },
+    { uniqueID = 805, name = "Team-work makes the dream-work", description = "Complete a dungeon with a full team of guild memebers",        points = 1, required = 1 },
+    { uniqueID = 806, name = "GrAy-okay",                      description = "Every 500 grey mobs killed",                                   points = 1, required = 500 },
+    { uniqueID = 807, name = "Dedicated Quester",              description = "Every 25 unique quests completed",                             points = 1, required = 25 },
+    { uniqueID = 808, name = "Exalted Hero",                   description = "Reach Exalted reputation with a faction",                      points = 2, required = 1 },
+    { uniqueID = 809, name = "Treasure Hunter",                description = "Open 5 treasure chests in the world",                          points = 1, required = 5 },
+    -- Add more bounties as needed.
 }
 
 local tugOfWarEvents = {

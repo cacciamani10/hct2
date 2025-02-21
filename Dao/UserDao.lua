@@ -53,6 +53,5 @@ end
 
 function _G.DAO.UserDao:GetAllUsers()
     local db = GetDB()
-
     return db.users
 end

@@ -6,7 +6,6 @@ if not _G.Utils.GameUtils then
     _G.Utils.GameUtils = {}
 end
 
-local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 function _G.Utils.GameUtils:GetBattleTag()
@@ -41,5 +40,27 @@ function _G.Utils.GameUtils.NormalizeColor(color)
         return { r = math.floor(color.r * 255), g = math.floor(color.g * 255), b = math.floor(color.b * 255) }
     else
         return color
+    end
+end
+
+function _G.Utils.GameUtils:PrintTable(tbl, indent, done)
+    if not tbl then
+        print("Error: table is nil")
+        return
+    end
+
+    indent = indent or 0
+    done = done or {}
+
+    local formatting = string.rep("  ", indent)
+    for k, v in pairs(tbl) do
+        local key = tostring(k)
+        if type(v) == "table" and not done[v] then
+            done[v] = true
+            print(formatting .. key .. ":")
+            self:PrintTable(v, indent + 1, done)
+        else
+            print(formatting .. key .. ": " .. tostring(v))
+        end
     end
 end

@@ -23,7 +23,9 @@ Utils/GameUtils.lua
 
 # Data and Module Logic
 UI/UIMain.lua
-UI/AchievementsPage.lua
+UI/Achievements/AchievementsPage.lua
+UI/Achievements/AllAchievements.lua
+UI/Achievements/CompletedAchievements.lua
 UI/BountiesPage.lua
 UI/CharactersPage.lua
 UI/FeatsPage.lua
@@ -43,10 +45,8 @@ Service/ScoringService.lua
 
 # Handlers
 Handlers/ApiEventHandlers/AddonCommHandler.lua
-Handlers/ApiEventHandlers/ChatMsgCombatXpGainHandler.lua
 Handlers/ApiEventHandlers/ChatMsgLootHandler.lua
 Handlers/ApiEventHandlers/ChatMsgSkillHandler.lua
-Handlers/ApiEventHandlers/DuelToTheDeathHandler.lua
 Handlers/ApiEventHandlers/GuildInviteRequestHandler.lua
 Handlers/ApiEventHandlers/GuildRosterUpdateHandler.lua
 Handlers/ApiEventHandlers/PlayerDeathHandler.lua
@@ -56,6 +56,9 @@ Handlers/ApiEventHandlers/PlayerLogoutHandler.lua
 Handlers/ApiEventHandlers/QuestCompletionHandler.lua
 Handlers/ApiEventHandlers/SpecialMobHandler.lua
 Handlers/ApiEventHandlers/ZoneChangedNewAreaHandler.lua
+
+# Monitors
+Monitors/GuildInviteMonitor.lua
 
 # Achievements
 Achievements/Achievement_Leveling.lua

@@ -10,45 +10,6 @@ local AceGUI = LibStub("AceGUI-3.0")
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-function _G.UI.FeatsPage:DrawFeatsPage(container)
-    container:ReleaseChildren()
-
-    local viewMode = "all" -- default mode
-    local contentContainer = AceGUI:Create("ScrollFrame")
-    contentContainer:SetLayout("Flow")
-    contentContainer:SetFullWidth(true)
-    contentContainer:SetFullHeight(true)
-    container:AddChild(contentContainer)
-
-    local buttonGroup = AceGUI:Create("SimpleGroup")
-    buttonGroup:SetLayout("Flow")
-    buttonGroup:SetFullWidth(true)
-    container:AddChild(buttonGroup)
-
-    local btnAll = AceGUI:Create("Button")
-    btnAll:SetText("All")
-    btnAll:SetCallback("OnClick", function()
-        viewMode = "all"
-        self:UpdateFeatsContent(contentContainer, viewMode)
-    end)
-    buttonGroup:AddChild(btnAll)
-
-    local btnComplete = AceGUI:Create("Button")
-    btnComplete:SetText("Complete")
-    btnComplete:SetCallback("OnClick", function()
-        viewMode = "complete"
-        self:UpdateFeatsContent(contentContainer, viewMode)
-    end)
-    buttonGroup:AddChild(btnComplete)
-
-    local heading = AceGUI:Create("Heading")
-    heading:SetText(viewMode .. " feats")
-    heading:SetFullWidth(true)
-    contentContainer:AddChild(heading)
-
-    self:UpdateFeatsContent(contentContainer, viewMode)
-end
-
 function UpdateFeatsContent(contentContainer, mode)
     contentContainer:ReleaseChildren()
     local db = GetDB()
@@ -142,4 +103,43 @@ function UpdateFeatsContent(contentContainer, mode)
 
         UpdateCompletedFeats()
     end
+end
+
+function _G.UI.FeatsPage:DrawFeatsPage(container)
+    container:ReleaseChildren()
+
+    local viewMode = "all" -- default mode
+    local contentContainer = AceGUI:Create("ScrollFrame")
+    contentContainer:SetLayout("Flow")
+    contentContainer:SetFullWidth(true)
+    contentContainer:SetFullHeight(true)
+    container:AddChild(contentContainer)
+
+    local buttonGroup = AceGUI:Create("SimpleGroup")
+    buttonGroup:SetLayout("Flow")
+    buttonGroup:SetFullWidth(true)
+    container:AddChild(buttonGroup)
+
+    local btnAll = AceGUI:Create("Button")
+    btnAll:SetText("All")
+    btnAll:SetCallback("OnClick", function()
+        viewMode = "all"
+        UpdateFeatsContent(contentContainer, viewMode)
+    end)
+    buttonGroup:AddChild(btnAll)
+
+    local btnComplete = AceGUI:Create("Button")
+    btnComplete:SetText("Complete")
+    btnComplete:SetCallback("OnClick", function()
+        viewMode = "complete"
+        UpdateFeatsContent(contentContainer, viewMode)
+    end)
+    buttonGroup:AddChild(btnComplete)
+
+    local heading = AceGUI:Create("Heading")
+    heading:SetText(viewMode .. " feats")
+    heading:SetFullWidth(true)
+    contentContainer:AddChild(heading)
+
+    UpdateFeatsContent(contentContainer, viewMode)
 end
