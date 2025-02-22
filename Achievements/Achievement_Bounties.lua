@@ -23,7 +23,9 @@ function _G.ACHIEVEMENTS.Achievement_Bounties:GetTotalPoints(character)
 
     for _, achievement in ipairs(bountyAchievements) do
         if character.achievements[achievement.uniqueID] then
-            totalPoints = totalPoints + ((achievement.points * tonumber(character.achievements[achievement.uniqueID].count))  or 0)
+            local bountyCount = tonumber(character.achievements[achievement.uniqueID].count) or 0
+            local metNumber = math.floor(bountyCount/achievement.required)
+            totalPoints = totalPoints + ((achievement.points * metNumber) or 0)
         end
     end
 
