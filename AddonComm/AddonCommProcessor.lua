@@ -89,6 +89,8 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     elseif senderTimestamp < localTimestamp then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
                         table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = localTimestamp })
+                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
+                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
                     end
                 end
             end
@@ -115,6 +117,8 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                         [battleTag].characters.alive[username] or {}
                         table.insert(updatedCharacters.users[battleTag].characters.alive[username],
                             { uuid = uuid, lastUpdated = lastUpdated })
+                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
+                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
                     end
                 end
             end
@@ -134,6 +138,8 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                     elseif senderTimestamp < localTimestamp then
                         updatedCharacters.characters[uuid] = db.characters[uuid]
                         table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid, lastUpdated = localTimestamp })
+                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
+                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
                     end
                 end
             end
@@ -157,6 +163,8 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
                         [battleTag].characters.dead[username] or {}
                         table.insert(updatedCharacters.users[battleTag].characters.dead[username],
                             { uuid = uuid, lastUpdated = lastUpdated })
+                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
+                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
                     end
                 end
             end
@@ -201,6 +209,8 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
                             updatedCharacters.characters[uuid] = db.characters[uuid]
                             table.insert(updatedCharacters.users[battleTag].characters.alive[username],
                                 { uuid = uuid, lastUpdated = lastUpdated })
+                            updatedCharacters.users[battleTag].team = db.users[battleTag].team 
+                            updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
                         end
                     end
                 end
@@ -216,6 +226,8 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
                             updatedCharacters.characters[uuid] = db.characters[uuid]
                             table.insert(updatedCharacters.users[battleTag].characters.dead[username],
                                 { uuid = uuid, lastUpdated = lastUpdated })
+                                updatedCharacters.users[battleTag].team = db.users[battleTag].team 
+                                updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
                         end
                     end
                 end
@@ -254,12 +266,20 @@ function AddonCommProcessor:UpdateLocalData(payload)
     if payload.updatedCharacters and payload.updatedCharacters.users then
         for battleTag, userData in pairs(payload.updatedCharacters.users) do
             for username, charList in pairs(userData.characters.alive or {}) do
-                db.users[battleTag] = {
-                    characters = {
-                        alive = {},
-                        dead = {},
-                    },
-                }
+                if not db.users[battleTag].team then
+                    db.users[battleTag].team = userData.team
+                end
+                if not db.users[battleTag].timestamp then
+                    db.users[battleTag].timestamp = userData.timestamp
+                end
+                if not db.users[battleTag] then
+                    db.users[battleTag] = {
+                        characters = {
+                            alive = {},
+                            dead = {},
+                        },
+                    }
+                end
                 db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
                 for _, charEntry in ipairs(charList) do
                     local uuid = charEntry.uuid
