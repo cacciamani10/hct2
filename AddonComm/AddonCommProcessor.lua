@@ -39,6 +39,7 @@ end
 
 -- I know this is gross, but chatgpt wrote this in 2 seconds
 function AddonCommProcessor:ProcessSyncRequest(payload, sender)
+    print("Processing Sync_request")
     local HCT = GetHCT()
     local db = GetDB()
 
@@ -168,9 +169,11 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
     }
     local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
     HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+    print("Processed Sync_request and sending sync udpate")
 end
 
 function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
+    print("Processing Sync_update")
     local HCT = GetHCT()
     local db = GetDB()
 
@@ -220,17 +223,21 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
         end
     end
     self:UpdateLocalData(payload)
+    print("Procesed Sync_update")
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
         local responseEvent = {
             updatedCharacters = updatedCharacters
         }
+        print("sending Sync_final")
         local serialized = AceSerializer:Serialize("SYNC_FINAL", responseEvent)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
     end
 end
 
 function AddonCommProcessor:ProcessSyncFinal(payload, sender)
+    print("processing Sync_final")
     self:UpdateLocalData(payload)
+    print("processed Sync_final")
 end
 
 function AddonCommProcessor:UpdateLocalData(payload)

@@ -29,7 +29,8 @@ _G.HCT_Broadcaster = {
         local ev = {
             users = db.users
         }
-    
+
+        HCT:Print("sending sync request...")
         local serialized = AceSerializer:Serialize("SYNC_REQUEST", ev)
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "GUILD")
     end
