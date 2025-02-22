@@ -60,7 +60,7 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                 if charLevel >= minLevel and charLevel <= maxLevel then
                     local db = GetDB()
                     -- TODO verify this works
-                    _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(800, lootQuantityStr)
+                    _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(800, lootQuantity)
                     return
                 end
             end
