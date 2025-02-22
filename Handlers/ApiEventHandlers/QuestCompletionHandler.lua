@@ -4,12 +4,18 @@ _G.HCT_Handlers.QuestCompletionHandler = {
     GetEventType = function() return "QUEST_TURNED_IN" end,
     GetHandlerName = function() return "QuestCompletionHandler" end,
 
-    HandleEvent = function(self, HCT, event, questID)
-        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(807, nil)
+    HandleEvent = function(self, HCT, event, questID, turnedInBy)
+        local playerName = UnitName("player")
+
+        if turnedInBy ~= playerName then
+            return
+        end
+
+        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(807)
 
         local eventData = {
             type = "QUEST_TURNED_IN",
-            characterName = UnitName("player"),
+            characterName = playerName,
             questID = questID,
             totalCompleted = count
         }
