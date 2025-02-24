@@ -11,7 +11,9 @@ function _G.ACHIEVEMENTS.Achievement_Professions:CheckAchievement(professionName
         local reqLevelStr, profName = ach.description:match("Reach level (%d+)%s+(.+)")
         local requiredLevel = reqLevelStr and tonumber(reqLevelStr)
         if requiredLevel and professionLevel >= requiredLevel and profName:lower() == professionName:lower() then
+            GetHCT():Print("Profession Mastery achievement triggered for " .. professionName .. " at level " .. professionLevel)
             _G.DAO.CharacterDao:AddLevelingAchievement(ach.uniqueID)
+            return
         end
     end
 end
