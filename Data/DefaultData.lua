@@ -2,6 +2,9 @@ _G.DefaultData = {}
 
 _G.DefaultData.defaults = {
     profile = {
+        minimap = {
+            hide = false,
+        },
         users = {},
         characters = {},
         teams = {

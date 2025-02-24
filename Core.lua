@@ -3,6 +3,24 @@ local addonName = "HCT"
 local HCT_Env = _G.HCT_Env
 local HCT = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0",
     "AceSerializer-3.0", "AceComm-3.0")
+local HCT_LDB = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
+    type = "data source",
+    text = addonName,
+    icon = "Interface\\Icons\\spell_holy_painsupression",
+    OnTooltipShow = function(tooltip)
+        tooltip:AddLine(addonName)
+        tooltip:AddLine("Left-click to toggle the main UI")
+        tooltip:AddLine("Right-click to toggle the main UI")
+    end,
+    OnClick = function(_, button)
+        if button == "LeftButton" then
+            _G.UI.UIMain:ToggleMainGUI()
+        elseif button == "RightButton" then
+            _G.UI.UIMain:ToggleMainGUI()
+        end
+    end,
+})
+local icon = LibStub("LibDBIcon-1.0")
 local HCT_Broadcaster = _G.HCT_Broadcaster
 HCT_Env.InitializeAddon(HCT);
 HCT.teamChatLog = HCT.teamChatLog or {}
@@ -37,8 +55,9 @@ function HCT:OnInitialize()
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HCTProfiles", "Profiles", "Hardcore Challenge Tracker")
 
     self:RegisterChatCommand("hct", function(input)
-        _G.UI.UIMain:ShowMainGUI()
+        _G.UI.UIMain:ToggleMainGUI()
     end)
+    icon:Register(addonName, HCT_LDB, self.db.profile.minimap)
     
     _G.DAO.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())
     self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team."..addonName)

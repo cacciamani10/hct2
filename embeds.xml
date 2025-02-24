@@ -3,9 +3,10 @@
     
     <!-- Load LibStub first -->
     <Script file="Libs/LibStub/LibStub.lua"/>
-    
     <!-- Load CallbackHandler-1.0 (dependency) -->
     <Include file="Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml"/>
+    <!-- Load LibDataBroker-1.1 -->
+    <Script file="Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua"/>
     
     <!-- Load AceAddon and other Ace3 libraries -->
     <Include file="Libs/AceAddon-3.0/AceAddon-3.0.xml"/>
