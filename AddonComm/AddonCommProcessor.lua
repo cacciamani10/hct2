@@ -19,7 +19,15 @@ function AddonCommProcessor:ProcessEvent(ev)
         HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
         _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
     elseif ev.type == "CHARACTER" then
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
+        if ev.subtype == "LEVEL_UP" then
+            HCT:Print(ev.character.username .. " has leveled up to level " .. ev.character.level)
+        elseif ev.subtype == "DEAD" then
+            HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
+        elseif ev.subtype == "NEW" then
+            HCT:Print("Adding new character: " .. ev.character.username)
+        
+        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.lastUpdated)
+        end
         -- elseif ev.type == "SPECIAL_KILL" then
         --     local mobName = ev.name or "Unknown Mob"
         --     local classification = ev.classification or "unknown classification"

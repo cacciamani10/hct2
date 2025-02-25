@@ -13,6 +13,7 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
         
         local event = {
             type = "CHARACTER",
+            subtype = "LEVEL_UP",
             uuid = uuid,
             character = _G.DAO.CharacterDao:GetCharacter()
         }

@@ -64,6 +64,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
 
         local event = {
             type = "CHARACTER",
+            subtype = "NEW",
             uuid = uuid,
             lastUpdated = lastUpdated,
             character = character
@@ -134,6 +135,7 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     characterEntry.lastUpdated = lastUpdated
     local event = {
         type = "CHARACTER",
+        subtype = "DEAD",
         uuid = uuid,
         lastUpdated = lastUpdated,
         character = db.characters[uuid]
