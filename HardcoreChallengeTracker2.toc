@@ -17,6 +17,9 @@ Data/DefaultData.lua
 Utils/TimeUtils.lua
 Utils/GameUtils.lua
 
+#Enums
+EventType.lua
+
 # Data and Module Logic
 UI/AdminPage.lua
 UI/UIMain.lua
