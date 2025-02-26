@@ -16,7 +16,7 @@ local function UpdateBountiesContent(contentContainer, mode)
 
     if mode == "all" then
         -- List all available bounties.
-        for _, bounty in ipairs(HardcoreChallengeTracker_Data.achievements[Bounties]) do
+        for _, bounty in ipairs(HardcoreChallengeTracker_Data.achievements["Bounties"]) do
             local label = AceGUI:Create("Label")
             label:SetFullWidth(true)
             local description = bounty.description or "No description available"

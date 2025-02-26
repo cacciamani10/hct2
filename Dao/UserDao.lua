@@ -51,7 +51,7 @@ function _G.Dao.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
     table.insert(db.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = lastUpdated })
 end
 
-function _G.Dao.UserDao:GetAllUsers()
+function _G.Dao.UserDao:GetUsers()
     local db = GetDB()
     return db.users
 end

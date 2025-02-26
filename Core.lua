@@ -20,7 +20,7 @@ local HCT_LDB = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
         end
     end,
 })
-local icon = LibStub("LibDBIcon-1.0")
+--local icon = LibStub("LibDBIcon-1.0")
 HCT_Env.InitializeAddon(HCT);
 HCT.teamChatLog = HCT.teamChatLog or {}
 HCT.addonPrefix = addonName
@@ -56,7 +56,7 @@ function HCT:OnInitialize()
     self:RegisterChatCommand("hct", function(input)
         _G.UI.UIMain:ToggleMainGUI()
     end)
-    icon:Register(addonName, HCT_LDB, self.db.profile.minimap)
+    --icon:Register(addonName, HCT_LDB, self.db.profile.minimap)
     
     _G.Dao.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())
     self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team."..addonName)
@@ -65,12 +65,11 @@ end
 function HCT:OnEnable()
     HCT:RegisterEvents()
     HCT:StartMonitors()
-    HCT_ChatModule:RegisterChatCommands()
+    _G.Service.Chat_Service:RegisterChatCommands()
 end
 
 function HCT:OnDisable()
     self:UnregisterEvents()
-    HCT_ChatModule:UnregisterChatCommands()
 end
 
 function HCT:StartMonitors()

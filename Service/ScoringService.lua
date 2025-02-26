@@ -42,7 +42,7 @@ end
 
 function _G.Service.Scoring_Service:CalculateContestData()
     local contestData = { team1 = 0, team2 = 0 }
-    local users = _G.Dao.UserDao:GetAllUsers()
+    local users = _G.Dao.UserDao:GetUsers()
     local characters = _G.Dao.CharacterDao:GetCharacters()
 
     for battleTag, userData in pairs(users) do

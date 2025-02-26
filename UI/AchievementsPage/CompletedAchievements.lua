@@ -90,7 +90,7 @@ function _G.UI.CompletedAchievements:DrawCompletedAchievements(contentContainer)
 
     function UpdateCompletedAchievements()
         achievementsContainer:ReleaseChildren()
-        local users = _G.Dao.UserDao:GetAllUsers() or {}
+        local users = _G.Dao.UserDao:GetUsers() or {}
         local characters = _G.Dao.CharacterDao:GetCharacters() or {}
         local achievements = {}
 
