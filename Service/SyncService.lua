@@ -7,6 +7,7 @@ _G.Service = _G.Service or {}
 _G.Service.Sync_Service = _G.Service.Sync_Service or {}
 
 -- I know this is gross, but chatgpt wrote this in 2 seconds
+-- TODO refactor the hell out of this
 function _G.Service.Sync_Service:ProcessSyncRequest(payload, sender)
     print("Processing Sync_request")
     local HCT = GetHCT()
