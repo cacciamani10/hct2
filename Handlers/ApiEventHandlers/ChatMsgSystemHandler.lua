@@ -9,10 +9,6 @@ _G.HCT_Handlers.ChatMsgSystemHandler = {
         return "CHAT_MSG_SYSTEM"
     end,
 
-    GetHandlerName = function()
-        return "ChatMsgSystemHandler"
-    end,
-
     HandleEvent = function(self, HCT, eventName, text)
         if text and text:find("You create:") then
             if text:find("|cff0070dd") then

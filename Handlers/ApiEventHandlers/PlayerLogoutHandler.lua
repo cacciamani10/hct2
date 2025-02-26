@@ -3,7 +3,6 @@ _G.HCT_Handlers = _G.HCT_Handlers or {}
 _G.HCT_Handlers.PlayerLogoutHandler = {
     
     GetEventType = function() return "PLAYER_LOGOUT" end,
-    GetHandlerName = function() return "PlayerLogoutHandler" end,
 
     HandleEvent = function(self, HCT, event)
         -- to try to only broadcast when a player actually logs out instead of also when they reload

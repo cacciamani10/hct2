@@ -7,8 +7,6 @@ _G.HCT_Handlers.ZoneChangedNewAreaHandler = {
 
     GetEventType = function() return "ZONE_CHANGED_NEW_AREA" end,
 
-    GetHandlerName = function() return "ZoneChangedNewAreaHandler" end,
-
     HandleEvent = function(self, HCT, event)
         if not HCT then return end
         C_Timer.After(0.5, function()

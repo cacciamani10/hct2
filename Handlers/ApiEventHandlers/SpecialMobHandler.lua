@@ -7,10 +7,6 @@ _G.HCT_Handlers.SpecialMobHandler = {
         return "COMBAT_LOG_EVENT_UNFILTERED"
     end,
 
-    GetHandlerName = function()
-        return "SpecialMobHandler"
-    end,
-
     HandleEvent = function(self, HCT, event)
         local playerGUID = UnitGUID("player")
         local _, subEvent, _, sourceGUID, sourceName, _, _, destGUID, destName = CombatLogGetCurrentEventInfo()

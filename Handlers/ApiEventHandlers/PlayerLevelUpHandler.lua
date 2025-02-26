@@ -2,7 +2,6 @@ _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.PlayerLevelUpHandler = {
     GetEventType = function() return "PLAYER_LEVEL_UP" end,
-    GetHandlerName = function() return "PlayerLevelUpHandler" end,
     
     HandleEvent = function(self, HCT, event, newLevel)
         _G.Dao.CharacterDao:UpdateCharacterLevel(tonumber(newLevel))

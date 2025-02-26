@@ -8,10 +8,6 @@ _G.HCT_Handlers.PlayerDeathHandler = {
         return "PLAYER_DEAD"
     end,
 
-    GetHandlerName = function()
-        return "PlayerDeathHandler"
-    end,
-
     -- alive character has just died: UnitIsDeadOrGhost will return true, UnitIsGhost will return false, UnitIsDead will return true
     -- first login on dead character: UnitIsDeadOrGhost will return true, UnitIsGhost will return false, UnitIsDead will return true
     -- alive character has just died with .5second delay: UnitIsDeadOrGhost will return true, UnitIsGhost will return false, UnitIsDead will return true

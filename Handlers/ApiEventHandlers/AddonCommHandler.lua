@@ -6,10 +6,6 @@ _G.HCT_Handlers.AddonCommHandler = {
         return _G.HCT_Env.GetAddon().addonPrefix
     end,
 
-    GetHandlerName = function()
-        return "AddonCommHandler"
-    end,
-
     HandleEvent = function(self, HCT, prefix, message, distribution, sender)
         if not HCT then return end
         if prefix == HCT.addonPrefix then

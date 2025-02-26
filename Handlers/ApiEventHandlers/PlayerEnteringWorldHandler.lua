@@ -6,8 +6,6 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     --PLAYER_ENTERING_WORLD is a Blizzard event that fires as the player transitions into the game world
     GetEventType = function() return "PLAYER_ENTERING_WORLD" end,
 
-    GetHandlerName = function() return "PlayerEnteringWorldHandler" end,
-
     HandleEvent = function(self, HCT, event, isLogin)
         if not HCT then return end
         self:InitializeCharacter()

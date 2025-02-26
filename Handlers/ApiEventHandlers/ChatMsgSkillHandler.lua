@@ -5,10 +5,6 @@ _G.HCT_Handlers.ChatMsgSkillHandler = {
         return "CHAT_MSG_SKILL"
     end,
 
-    GetHandlerName = function()
-        return "ChatMsgSkillHandler"
-    end,
-
     HandleEvent = function(self, HCT, eventName, text, playerName, languageName, channelName, playerName2, specialFlags,
                            zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile,
                            isSubtitle, hideSenderInLetterbox, supressRaidIcons)

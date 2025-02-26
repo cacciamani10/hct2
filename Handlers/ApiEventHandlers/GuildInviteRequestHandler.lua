@@ -8,8 +8,6 @@ _G.HCT_Handlers.GuildInviteRequestHandler = {
     
     GetEventType = function() return "GUILD_INVITE_REQUEST" end,
 
-    GetHandlerName = function() return "GuildInviteRequestHandler" end,
-
     -- what is this doing?
     HandleEvent = function(self, HCT, event, inviter, guildName)
         if not HCT then return end

@@ -5,10 +5,6 @@ _G.HCT_Handlers.GuildRosterUpdateHandler = {
         return "GUILD_ROSTER_UPDATE"
     end,
 
-    GetHandlerName = function()
-        return "GuildRosterUpdateHandler"
-    end,
-
     HandleEvent = function(self, HCT, event, isUpdated)
         if HCT then
             if isUpdated then 

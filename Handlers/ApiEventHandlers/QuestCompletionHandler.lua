@@ -2,7 +2,6 @@ _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.QuestCompletionHandler = {
     GetEventType = function() return "QUEST_TURNED_IN" end,
-    GetHandlerName = function() return "QuestCompletionHandler" end,
 
     HandleEvent = function(self, HCT, event, questID, turnedInBy)
         local playerName = UnitName("player")

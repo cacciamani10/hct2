@@ -81,9 +81,8 @@ function HCT:StartMonitors()
 end
 
 function HCT:RegisterEvents()
-    for _, handler in pairs(_G.HCT_Handlers) do
+    for handlerName, handler in pairs(_G.HCT_Handlers) do
         local eventType = handler:GetEventType()
-        local handlerName = handler:GetHandlerName()
 
         HCT[handlerName] = function(_, ...)
             handler:HandleEvent(HCT, ...)

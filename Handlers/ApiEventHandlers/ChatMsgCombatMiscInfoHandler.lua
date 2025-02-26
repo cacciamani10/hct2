@@ -5,10 +5,6 @@ _G.HCT_Handlers.ChatMsgCombatMiscInfoHandler = {
         return "CHAT_MSG_COMBAT_MISC_INFO"
     end,
 
-    GetHandlerName = function()
-        return "ChatMsgCombatMiscInfoHandler"
-    end,
-
     HandleEvent = function(self, HCT, eventName, text)
         local playerName = UnitName("player")
         local playerLevel = UnitLevel("player")

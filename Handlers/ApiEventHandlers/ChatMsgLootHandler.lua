@@ -36,10 +36,6 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
         return "CHAT_MSG_LOOT"
     end,
 
-    GetHandlerName = function()
-        return "ChatMsgLootHandler"
-    end,
-
     HandleEvent = function(self, HCT, eventName, text)
         local clothNames = {
             ["Linen Cloth"] = { 1, 20 },
