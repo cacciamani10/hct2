@@ -14,6 +14,7 @@ end
 function _G.Service.Achievement_Service:RecalculateAchievements()
     _G.Service.Achievement_Service:CheckCharacterLevelAchievement()
     _G.Service.Achievement_Service:CheckProfessionAchievements()
+    -- TODO only check this if the user doenst have the achievement yet
     checkQuestAchievements()
 end
 

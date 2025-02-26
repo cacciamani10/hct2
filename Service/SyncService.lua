@@ -224,7 +224,8 @@ function _G.Service.Sync_Service:UpdateLocalData(payload)
     local db = GetDB()
 
     if not payload then return end
-
+    -- TODO insert while looping through characters. correlate with existing alive characters 
+    -- (if someone deleted their saved variables...)
     if payload.updatedCharacters and payload.updatedCharacters.characters then
         for uuid, characterData in pairs(payload.updatedCharacters.characters) do
             db.characters[uuid] = characterData
