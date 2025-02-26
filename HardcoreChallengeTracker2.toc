@@ -64,12 +64,5 @@ Handlers/ApiEventHandlers/ChatMsgSystemHandler.lua
 # Monitors
 Monitors/GuildInviteMonitor.lua
 
-# Achievements
-Achievements/Achievement_Leveling.lua
-Achievements/Achievement_Professions.lua
-Achievements/Achievement_Bounties.lua
-Achievements/Achievement_Dungeons.lua
-Achievements/Achievement_Feats.lua
-
 # Main Core Initialization
 Core.lua
