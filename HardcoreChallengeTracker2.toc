@@ -12,7 +12,6 @@ AddonEnv.lua
 Data/HardcoreChallengeTracker_Data.lua
 Data/HardcoreChallengeTracker_Teams.lua
 Data/DefaultData.lua
-ChatModule.lua
 
 #Utils
 Utils/TimeUtils.lua
