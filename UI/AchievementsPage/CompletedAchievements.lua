@@ -10,7 +10,7 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 
 local function DrawDropDown(contentContainer, onChangeCallback)
-    local characters = _G.DAO.CharacterDao:GetCharacters()
+    local characters = _G.Dao.CharacterDao:GetCharacters()
     local dropdown = AceGUI:Create("Dropdown")
     dropdown:SetLabel("Select Character")
     dropdown:SetFullWidth(true)
@@ -58,6 +58,10 @@ function _G.UI.CompletedAchievements:DrawCompletedAchievements(contentContainer)
                             for _, ach in ipairs(achList) do
                                 if ach.uniqueID == achievementId then
                                     local basePoints = ach.points
+                                    if cat == "Bounties" then
+                                        basePoints = math.floor((achievementData.count * ach.points) / ach.required) or 0
+                                    end
+
                                     if charData.timestamp then
                                         basePoints = math.floor(basePoints / 2)
                                     end
@@ -68,23 +72,6 @@ function _G.UI.CompletedAchievements:DrawCompletedAchievements(contentContainer)
                                 end
                             end
                             if achievement then break end
-                        end
-
-                        if not achievement then
-                            for _, ach in ipairs(HardcoreChallengeTracker_Data.bounties) do
-                                if ach.uniqueID == achievementId then
-                                    local basePoints = math.floor((achievementData.count * ach.points) / ach.required) or
-                                    0
-                                    if charData.timestamp then
-                                        basePoints = math.floor(basePoints / 2)
-                                    end
-                                    points = basePoints
-                                    achievement = ach.name
-                                    category = "Bounty"
-                                    break
-                                end
-                                if achievement then break end
-                            end
                         end
 
                         table.insert(achievements, {
@@ -103,8 +90,8 @@ function _G.UI.CompletedAchievements:DrawCompletedAchievements(contentContainer)
 
     function UpdateCompletedAchievements()
         achievementsContainer:ReleaseChildren()
-        local users = _G.DAO.UserDao:GetAllUsers() or {}
-        local characters = _G.DAO.CharacterDao:GetCharacters() or {}
+        local users = _G.Dao.UserDao:GetAllUsers() or {}
+        local characters = _G.Dao.CharacterDao:GetCharacters() or {}
         local achievements = {}
 
         for battleTag, userData in pairs(users) do

@@ -19,7 +19,7 @@ _G.HCT_Handlers.ZoneChangedNewAreaHandler = {
             local mapName = mapInfo and mapInfo.name or "Unknown"
             --HCT:Print("ZoneChangedNewAreaHandler: Entered new area: " .. zone .. " - " .. subzone .. " - " .. mapName)
             local db = GetDB()
-            local uuid = _G.DAO.CharacterDao:GetUUID()
+            local uuid = _G.Dao.CharacterDao:GetUUID()
             db.localAchievementProgressData = db.localAchievementProgressData or {}
             db.localAchievementProgressData[uuid] = db.localAchievementProgressData[uuid] or {}
             db.localAchievementProgressData[uuid].zonesVisited = db.localAchievementProgressData[uuid].zonesVisited or {}

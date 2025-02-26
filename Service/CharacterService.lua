@@ -15,7 +15,7 @@ function _G.Service.Character_Service:ProcessEvent(ev)
     local db = GetDB()
     if ev.type == "DEATH" then
         HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
+        _G.Dao.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
     elseif ev.type == _G.EventType.CHARACTER then
         if ev.subtype == "LEVEL_UP" then
             HCT:Print(ev.character.username .. " has leveled up to level " .. ev.character.level)
@@ -24,7 +24,7 @@ function _G.Service.Character_Service:ProcessEvent(ev)
         elseif ev.subtype == "NEW" then
             HCT:Print("Adding new character: " .. ev.character.username)
         
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.lastUpdated)
+        _G.Dao.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.lastUpdated)
         end
         -- elseif ev.type == "SPECIAL_KILL" then
         --     local mobName = ev.name or "Unknown Mob"

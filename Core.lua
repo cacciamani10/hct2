@@ -58,7 +58,7 @@ function HCT:OnInitialize()
     end)
     icon:Register(addonName, HCT_LDB, self.db.profile.minimap)
     
-    _G.DAO.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())
+    _G.Dao.UserDao:InitializeUser(_G.Utils.GameUtils:GetBattleTag())
     self:Print("Hardcore Challenge Tracker loaded. Use /hct to open the UI window or /t to chat with your team."..addonName)
 end
 

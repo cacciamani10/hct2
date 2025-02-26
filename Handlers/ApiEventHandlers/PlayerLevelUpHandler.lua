@@ -5,15 +5,15 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
     GetHandlerName = function() return "PlayerLevelUpHandler" end,
     
     HandleEvent = function(self, HCT, event, newLevel)
-        _G.DAO.CharacterDao:UpdateCharacterLevel(tonumber(newLevel))
-        _G.ACHIEVEMENTS.Achievement_Leveling.CheckAchievement()
-        local uuid = _G.DAO.CharacterDao:GetUUID()
+        _G.Dao.CharacterDao:UpdateCharacterLevel(tonumber(newLevel))
+        _G.Service.Achievement_Service.CheckCharacterLevelAchievement()
+        local uuid = _G.Dao.CharacterDao:GetUUID()
         
         local event = {
             type = _G.EventType.CHARACTER,
             subtype = "LEVEL_UP",
             uuid = uuid,
-            character = _G.DAO.CharacterDao:GetCharacter()
+            character = _G.Dao.CharacterDao:GetCharacter()
         }
 
         _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)

@@ -1,16 +1,16 @@
-if not _G.DAO then
-    _G.DAO = {}
+if not _G.Dao then
+    _G.Dao = {}
 end
 
-if not _G.DAO.CharacterDao then
-    _G.DAO.CharacterDao = {}
+if not _G.Dao.CharacterDao then
+    _G.Dao.CharacterDao = {}
 end
 
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 -- this class needs some thought. Its harder to organize things cleanly when updating characters while peer to peer syncing asynchronously
-function _G.DAO.CharacterDao:InitializeCharacter()
+function _G.Dao.CharacterDao:InitializeCharacter()
     local db = GetDB()
     local playerFaction = UnitFactionGroup("player")
     local playerRealm = GetRealmName()
@@ -37,7 +37,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
         local uuid = _G.Utils.TimeUtils.CreateTimeBasedUUID()
 
         local lastUpdated = time()
-        _G.DAO.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
+        _G.Dao.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
 
         db.characters = db.characters or {}
 
@@ -73,7 +73,7 @@ function _G.DAO.CharacterDao:InitializeCharacter()
     end
 end
 
-function _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
+function _G.Dao.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
     local db = GetDB()
 
     local entry = db.users[battleTag].characters.alive[username] and db.users[battleTag].characters.alive[username][1]
@@ -87,7 +87,7 @@ function _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
     db.users[battleTag].characters.alive[username] = nil
 end
 
-function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
+function _G.Dao.CharacterDao:UpdateCharacterLevel(level)
     local username = UnitName("player")
     local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
@@ -110,7 +110,7 @@ function _G.DAO.CharacterDao:UpdateCharacterLevel(level)
 end
 
 -- this needs to be renamed to something that implies that this achivement is granted once
-function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
+function _G.Dao.CharacterDao:AddLevelingAchievement(achievementId)
     local username = UnitName("player")
     local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
@@ -144,7 +144,7 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
 end
 
-function _G.DAO.CharacterDao:AddBounty(achievementId, count)
+function _G.Dao.CharacterDao:AddBounty(achievementId, count)
     local username = UnitName("player")
     local battleTag = _G.Utils.GameUtils:GetBattleTag()
     local db = GetDB()
@@ -177,7 +177,7 @@ function _G.DAO.CharacterDao:AddBounty(achievementId, count)
     characterEntry.lastUpdated = time()
 end
 
-function _G.DAO.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
+function _G.Dao.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
     local db = GetDB()
     db.users[character.battleTag] = db.users[character.battleTag] or {}
     db.users[character.battleTag].characters = db.users[character.battleTag].characters or {}
@@ -185,7 +185,7 @@ function _G.DAO.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
     db.users[character.battleTag].characters.dead = db.users[character.battleTag].characters.dead or {}
 
     if not db.users[character.battleTag] then
-        _G.DAO.UserDao:InitializeUser(character.battleTag)
+        _G.Dao.UserDao:InitializeUser(character.battleTag)
     end
 
     if character.deathTimestamp then
@@ -230,25 +230,25 @@ function _G.DAO.CharacterDao:UpdateCharacter(uuid, character, lastUpdated)
     db.characters[uuid] = character
 end
 
-function _G.DAO.CharacterDao:GetCharacterBy_UUID(uuid)
+function _G.Dao.CharacterDao:GetCharacterBy_UUID(uuid)
     return GetDB().characters[uuid]
 end
 
-function _G.DAO.CharacterDao:GetCharacterUUID_BattleTag_Username(battleTag, username)
+function _G.Dao.CharacterDao:GetCharacterUUID_BattleTag_Username(battleTag, username)
     local db = GetDB()
     local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and
         db.users[battleTag].characters.alive[username][1]
     return entry and entry.uuid or nil
 end
 
-function _G.DAO.CharacterDao:GetCharacterBy_BattleTag_Username(battleTag, username)
+function _G.Dao.CharacterDao:GetCharacterBy_BattleTag_Username(battleTag, username)
     local db = GetDB()
     local entry = db.users[battleTag] and db.users[battleTag].characters.alive[username] and
         db.users[battleTag].characters.alive[username][1]
     return entry and db.characters[entry.uuid] or nil
 end
 
-function _G.DAO.CharacterDao:GetCharacter()
+function _G.Dao.CharacterDao:GetCharacter()
     local db = GetDB()
     local username = UnitName("player")
     local battleTag = _G.Utils.GameUtils:GetBattleTag()
@@ -257,12 +257,12 @@ function _G.DAO.CharacterDao:GetCharacter()
     return entry and db.characters[entry.uuid]
 end
 
-function _G.DAO.CharacterDao:GetCharacters()
+function _G.Dao.CharacterDao:GetCharacters()
     local db = GetDB()
     return db.characters
 end
 
-function _G.DAO.CharacterDao:GetUUID()
+function _G.Dao.CharacterDao:GetUUID()
     local db = GetDB()
     return db.users[_G.Utils.GameUtils:GetBattleTag()].characters.alive[UnitName("player")][1]
 end

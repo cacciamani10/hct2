@@ -9,17 +9,41 @@ function _G.Service.Scoring_Service:CalculateCharacterPoints(character)
         bounties = 0,
         dungeons = 0
     }
-    points.leveling = _G.ACHIEVEMENTS.Achievement_Leveling:GetTotalPoints(character) or 0
-    points.professions = _G.ACHIEVEMENTS.Achievement_Professions:GetTotalPoints(character) or 0
-    points.bounties = _G.ACHIEVEMENTS.Achievement_Bounties:GetTotalPoints(character) or 0
-    points.dungeons = _G.ACHIEVEMENTS.Achievement_Dungeons:GetTotalPoints(character) or 0
+    points.leveling = _G.Service.Scoring_Service:GetPoints(character, "Level Checkpoints") or 0
+    points.professions = _G.Service.Scoring_Service:GetPoints(character, "Profession Mastery") or 0
+    points.dungeons = _G.Service.Scoring_Service:GetPoints(character, "Dungeon Clears") or 0
+    points.bounties = _G.Service.Scoring_Service:GetPoints(character, "Bounties") or 0
+    points.feats = _G.Service.Scoring_Service:GetPoints(character, "Feats") or 0
     return points
+end
+
+function _G.Service.Scoring_Service:GetPoints(character, achievementType)
+    local achievements = HardcoreChallengeTracker_Data.achievements[achievementType]
+    if not achievements or not character.achievements then
+        return 0
+    end
+
+    local totalPoints = 0
+
+    for _, achievement in ipairs(achievements) do
+        if character.achievements[achievement.uniqueID] then
+            if (achievementType == "bounties") then
+                local bountyCount = tonumber(character.achievements[achievement.uniqueID].count) or 0
+                local metNumber = math.floor(bountyCount/achievement.required)
+                totalPoints = totalPoints + ((achievement.points * metNumber) or 0)
+            else
+                totalPoints = totalPoints + (achievement.points or 0)
+            end
+        end
+    end
+
+    return totalPoints
 end
 
 function _G.Service.Scoring_Service:CalculateContestData()
     local contestData = { team1 = 0, team2 = 0 }
-    local users = _G.DAO.UserDao:GetAllUsers()
-    local characters = _G.DAO.CharacterDao:GetCharacters()
+    local users = _G.Dao.UserDao:GetAllUsers()
+    local characters = _G.Dao.CharacterDao:GetCharacters()
 
     for battleTag, userData in pairs(users) do
         local userPoints = 0

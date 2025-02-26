@@ -11,7 +11,7 @@ _G.HCT_Handlers.QuestCompletionHandler = {
             return
         end
 
-        _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(807)
+        _G.Dao.CharacterDao:AddBounty(807, 1)
 
         local event = {
             type = _G.EventType.CHARACTER,

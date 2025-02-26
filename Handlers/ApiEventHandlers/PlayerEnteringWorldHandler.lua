@@ -41,7 +41,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     HandleLogin = function(HCT, isLogin)
         if isLogin then
             local message = {
-                users = _G.DAO.UserDao:GetUsers()
+                users = _G.Dao.UserDao:GetUsers()
             }
             _G.Service.Event_Service:BroadcastEvent("SYNC_REQUEST", message)
         end
@@ -63,7 +63,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
     InitializeCharacter = function(HCT)
         -- TODO handle someone deleting a live character and remaking it
         if not UnitIsDeadOrGhost("player") then
-            _G.DAO.CharacterDao:InitializeCharacter()
+            _G.Dao.CharacterDao:InitializeCharacter()
         end
     end
 }

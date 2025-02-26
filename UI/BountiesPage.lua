@@ -16,7 +16,7 @@ local function UpdateBountiesContent(contentContainer, mode)
 
     if mode == "all" then
         -- List all available bounties.
-        for _, bounty in ipairs(HardcoreChallengeTracker_Data.bounties) do
+        for _, bounty in ipairs(HardcoreChallengeTracker_Data.achievements[Bounties]) do
             local label = AceGUI:Create("Label")
             label:SetFullWidth(true)
             local description = bounty.description or "No description available"
@@ -63,7 +63,7 @@ local function UpdateBountiesContent(contentContainer, mode)
                     if selectedChar == "all" or charKey == selectedChar then
                         local bountyName, points = nil, 0
                         -- Look up the bounty with matching uniqueID.
-                        for _, bounty in ipairs(HardcoreChallengeTracker_Data.bounties) do
+                        for _, bounty in ipairs(HardcoreChallengeTracker_Data.achievements[Bounties]) do
                             if tostring(bounty.uniqueID) == achievementID then
                                 bountyName = bounty.name
                                 points = bounty.points or 0

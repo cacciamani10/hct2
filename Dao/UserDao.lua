@@ -1,15 +1,15 @@
-if not _G.DAO then
-    _G.DAO = {}
+if not _G.Dao then
+    _G.Dao = {}
 end
 
-if not _G.DAO.UserDao then
-    _G.DAO.UserDao = {}
+if not _G.Dao.UserDao then
+    _G.Dao.UserDao = {}
 end
 
 local function GetHCT() return _G.HCT_Env.GetAddon() end
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-function _G.DAO.UserDao:InitializeUser(battleTag)
+function _G.Dao.UserDao:InitializeUser(battleTag)
     if not battleTag then
         GetHCT():Print("InitializeUser failed: No battle tag found.")
         return
@@ -18,7 +18,7 @@ function _G.DAO.UserDao:InitializeUser(battleTag)
     self:InitializeUserTable(battleTag)
 end
 
-function _G.DAO.UserDao:InitializeUserTable(battleTag)
+function _G.Dao.UserDao:InitializeUserTable(battleTag)
     local db = GetDB()
     local team = _G.Utils.GameUtils:GetPlayerTeam(battleTag) or 1
 
@@ -40,7 +40,7 @@ function _G.DAO.UserDao:InitializeUserTable(battleTag)
     end
 end
 
-function _G.DAO.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
+function _G.Dao.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
     local db = GetDB()
 
     if not db.users[battleTag] then
@@ -51,7 +51,7 @@ function _G.DAO.UserDao:AddCharacterUUID(battleTag, username, uuid, lastUpdated)
     table.insert(db.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = lastUpdated })
 end
 
-function _G.DAO.UserDao:GetAllUsers()
+function _G.Dao.UserDao:GetAllUsers()
     local db = GetDB()
     return db.users
 end

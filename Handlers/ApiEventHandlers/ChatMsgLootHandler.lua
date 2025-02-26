@@ -12,9 +12,9 @@ local function ProcessNeedRoll(text, HCT)
         local rollValue = tonumber(rollStr)
         if rollValue == 1 then
             HCT:Print("Roll Under Pressure achievement triggered!")
-            _G.ACHIEVEMENTS.Achievement_Feats:CheckAchievement(521)
+            _G.Dao.CharacterDao:AddLevelingAchievement(521)
         elseif rollValue == 100 then
-            _G.ACHIEVEMENTS.Achievement_Feats:CheckAchievement(520)
+            _G.Dao.CharacterDao:AddLevelingAchievement(520)
         end
     end
 end
@@ -26,7 +26,7 @@ local function CheckRecievedRareLoot(text, HCT)
         -- Check if the item is rare or better by looking for its color codes.
         if lootName:find("|cff0070dd") or lootName:find("|cffa335ee") or lootName:find("|cffff8000") then
             HCT:Print("Rare or better item looted: " .. lootName)
-            _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(803, lootQuantity)
+            _G.Dao.CharacterDao:AddBounty(803, loot)
         end
     end
 end
@@ -60,7 +60,7 @@ _G.HCT_Handlers.ChatMsgLootHandler = {
                 if charLevel >= minLevel and charLevel <= maxLevel then
                     local db = GetDB()
                     -- TODO verify this works
-                    _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(800, lootQuantity)
+                    _G.Dao.CharacterDao:AddBounty(800, loot)
                     return
                 end
             end

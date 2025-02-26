@@ -16,7 +16,7 @@ function UpdateFeatsContent(contentContainer, mode)
 
     if mode == "all" then
         -- List all available feats.
-        for _, feat in ipairs(HardcoreChallengeTracker_Data.feats) do
+        for _, feat in ipairs(HardcoreChallengeTracker_Data.achievements["Feats"]) do
             local label = AceGUI:Create("Label")
             label:SetFullWidth(true)
             local description = feat.description or "No description available"
@@ -62,7 +62,7 @@ function UpdateFeatsContent(contentContainer, mode)
                 if charKey and achievementID then
                     if selectedChar == "all" or charKey == selectedChar then
                         local featName, points = nil, 0
-                        for _, feat in ipairs(HardcoreChallengeTracker_Data.feats) do
+                        for _, feat in ipairs(HardcoreChallengeTracker_Data.achievements["Feats"]) do
                             if tostring(feat.uniqueID) == achievementID then
                                 featName = feat.name
                                 points = feat.points or 0

@@ -27,14 +27,14 @@ _G.HCT_Handlers.PlayerDeathHandler = {
                 local battleTag = _G.Utils.GameUtils:GetBattleTag()
                 local username = UnitName("player")
                 
-                _G.DAO.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
+                _G.Dao.CharacterDao:MarkCharacterAsDead(battleTag, username, timestamp)
                 HCT:Print("You have died... but we go agane!")
 
                 local event = {
                     type = _G.EventType.DEATH,
-                    uuid = _G.DAO.CharacterDao:GetCharacterUUID_BattleTag_Username(battleTag, username),
+                    uuid = _G.Dao.CharacterDao:GetCharacterUUID_BattleTag_Username(battleTag, username),
                     lastUpdated = timestamp,
-                    character = _G.DAO.CharacterDao:GetCharacter()
+                    character = _G.Dao.CharacterDao:GetCharacter()
                 }
                 
                 _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)

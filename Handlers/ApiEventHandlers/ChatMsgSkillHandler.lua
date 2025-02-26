@@ -23,7 +23,7 @@ _G.HCT_Handlers.ChatMsgSkillHandler = {
                 if tContains(skillThresholds, skillLevelNumber) then
                     HCT:Print("Skill threshold detected. Checking achievement for " ..
                     skillName .. " to " .. skillLevel)
-                    _G.ACHIEVEMENTS.Achievement_Professions:CheckAchievement(skillName, skillLevelNumber)
+                    _G.Service.Achievement_Service:CheckProfessionAchievement(skillName, skillLevelNumber)
                 end
             end
         end
