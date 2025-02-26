@@ -1,11 +1,8 @@
-if type(_G.SERVICE) ~= "table" then
-    _G.SERVICE = {}
-end
-_G.SERVICE = _G.SERVICE or {}
-_G.SERVICE.Scoring_Service = _G.SERVICE.Scoring_Service or {}
+_G.Service = _G.Service or {}
+_G.Service.Scoring_Service = _G.Service.Scoring_Service or {}
 
 
-function _G.SERVICE.Scoring_Service:CalculateCharacterPoints(character)
+function _G.Service.Scoring_Service:CalculateCharacterPoints(character)
     local points = {
         leveling = 0,
         professions = 0,
@@ -19,7 +16,7 @@ function _G.SERVICE.Scoring_Service:CalculateCharacterPoints(character)
     return points
 end
 
-function _G.SERVICE.Scoring_Service:CalculateContestData()
+function _G.Service.Scoring_Service:CalculateContestData()
     local contestData = { team1 = 0, team2 = 0 }
     local users = _G.DAO.UserDao:GetAllUsers()
     local characters = _G.DAO.CharacterDao:GetCharacters()

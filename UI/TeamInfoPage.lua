@@ -26,7 +26,7 @@ function _G.UI.TeamInfoPage:DrawTeamInfo(container)
     local team1ColorCode = string.format("|cff%02x%02x%02x", team1Color.r, team1Color.g, team1Color.b)
     local team2ColorCode = string.format("|cff%02x%02x%02x", team2Color.r, team2Color.g, team2Color.b)
 
-    local contestData = _G.SERVICE.Scoring_Service:CalculateContestData() or {}
+    local contestData = _G.Service.Scoring_Service:CalculateContestData() or {}
 
     local team1Points = contestData["team1"] or 0
     local team2Points = contestData["team2"] or 0

@@ -1,5 +1,5 @@
-_G.SERVICE = _G.SERVICE or {}
-_G.SERVICE.Achievement_Service = _G.SERVICE.Achievement_Service or {}
+_G.Service = _G.Service or {}
+_G.Service.Achievement_Service = _G.Service.Achievement_Service or {}
 
 local function checkQuestAchievements() 
     local completedQuests = GetQuestsCompleted()
@@ -12,7 +12,7 @@ local function checkQuestAchievements()
     _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(807, count)
 end
 
-function _G.SERVICE.Achievement_Service:RecalculateAchievements()
+function _G.Service.Achievement_Service:RecalculateAchievements()
     _G.ACHIEVEMENTS.Achievement_Leveling.CheckAchievement()
     _G.ACHIEVEMENTS.Achievement_Professions.CheckAchievements()
     checkQuestAchievements()

@@ -25,7 +25,7 @@ function _G.UI.UIMain:ToggleMainGUI()
         guiFrame:SetHeight(600)
         guiFrame:SetTitle("Hardcore Challenge Tracker")
         -- Calculate initial contest data.
-        --_G.SERVICE.Scoring_Service:CalculateContestData()
+        --_G.Service.Scoring_Service:CalculateContestData()
         local statusText = "Neither team has scored yet."
         local db = GetDB()
         if db.teams[1].points and db.teams[2].points then

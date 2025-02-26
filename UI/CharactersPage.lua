@@ -12,7 +12,7 @@ local function GetDB()
 end
 
 local function CalculateCharacterDetails(character)
-    return _G.SERVICE.Scoring_Service:CalculateCharacterPoints(character)
+    return _G.Service.Scoring_Service:CalculateCharacterPoints(character)
 end
 
 function _G.UI.CharactersPage:DrawCharactersPage(container)

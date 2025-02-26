@@ -15,7 +15,7 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
         self:HandleLogin(HCT, isLogin)
         self:HandleGhostState(HCT)
         self:HandleInitialLogin(event)
-        _G.SERVICE.Achievement_Service:RecalculateAchievements()
+        _G.Service.Achievement_Service:RecalculateAchievements()
     end,
 
     HandleGhostState = function(HCT)
