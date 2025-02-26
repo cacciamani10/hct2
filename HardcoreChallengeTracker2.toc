@@ -40,7 +40,7 @@ Dao/UserDao.lua
 Service/AchievementService.lua
 Service/ScoringService.lua
 Service/SyncService.lua
-Service/CommService.lua
+Service/EventService.lua
 Service/CharacterService.lua
 Service/ChatService.lua
 
