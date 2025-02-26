@@ -42,6 +42,8 @@ Service/AchievementService.lua
 Service/ScoringService.lua
 Service/SyncService.lua
 Service/CommService.lua
+Service/CharacterService.lua
+Service/ChatService.lua
 
 # Handlers
 Handlers/ApiEventHandlers/AddonCommHandler.lua
