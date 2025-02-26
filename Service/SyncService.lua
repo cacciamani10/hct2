@@ -1,52 +1,13 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
-local AddonCommProcessor = {}
-local HCT_Broadcaster = _G.HCT_Broadcaster
-local function GetHCT()
-    return _G.HCT_Env.GetAddon()
-end
-local function GetDB()
-    return _G.HCT_Env.GetAddon().db.profile
-end
 
-function AddonCommProcessor:ProcessEvent(ev)
-    local HCT = GetHCT()
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
-    if not HCT then
-        return
-    end
-    local db = GetDB()
-    if ev.type == "DEATH" then
-        HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.timestamp)
-    elseif ev.type == "CHARACTER" then
-        if ev.subtype == "LEVEL_UP" then
-            HCT:Print(ev.character.username .. " has leveled up to level " .. ev.character.level)
-        elseif ev.subtype == "DEAD" then
-            HCT:Print("|cffff0000" .. ev.character.username .. " has died at level " .. ev.character.level .. "|r")
-        elseif ev.subtype == "NEW" then
-            HCT:Print("Adding new character: " .. ev.character.username)
-        
-        _G.DAO.CharacterDao:UpdateCharacter(ev.uuid, ev.character, ev.lastUpdated)
-        end
-        -- elseif ev.type == "SPECIAL_KILL" then
-        --     local mobName = ev.name or "Unknown Mob"
-        --     local classification = ev.classification or "unknown classification"
-        --     local characterName = ev.characterName or "Unknown Player"
-        --     HCT:Print(characterName .. " killed a " .. classification .. ": " .. mobName)
-    elseif ev.type == "PLAYER_LOGOUT" then
-        local characterName = ev.characterName or "Unknown Player"
-        HCT:Print(characterName .. " logged out")
-    elseif ev.type == "GUILD_JOIN_REQUEST" then
-        local requester = ev.requester or "Unknown Player"
-        HCT:Print(requester .. " requested to join the guild")
-        HCT_GuildManager:HandleGuildInviteRequest(ev.type, requester)
-    else
-        HCT:Print("Process Event: Unknown event type: " .. tostring(ev.type))
-    end
-end
+_G.Service = _G.Service or {}
+_G.Service.Sync_Service = _G.Service.Sync_Service or {}
 
 -- I know this is gross, but chatgpt wrote this in 2 seconds
-function AddonCommProcessor:ProcessSyncRequest(payload, sender)
+function _G.Service.Sync_Service:ProcessSyncRequest(payload, sender)
     print("Processing Sync_request")
     local HCT = GetHCT()
     local db = GetDB()
@@ -179,16 +140,16 @@ function AddonCommProcessor:ProcessSyncRequest(payload, sender)
         end
     end
 
-    local responseEvent = {
+    local message = {
         updatedCharacters = updatedCharacters,
         requestedCharacters = requestedCharacters
     }
-    local serialized = AceSerializer:Serialize("SYNC_UPDATE", responseEvent)
-    HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+
+    _G.Service.Event_Service:WhisperEvent("SYNC_UPDATE", AceSerializer:Serialize("SYNC_UPDATE", message), sender)
     print("Processed Sync_request and sending sync udpate")
 end
 
-function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
+function _G.Service.Sync_Service:ProcessSyncUpdate(payload, sender)
     print("Processing Sync_update")
     local HCT = GetHCT()
     local db = GetDB()
@@ -245,22 +206,21 @@ function AddonCommProcessor:ProcessSyncUpdate(payload, sender)
     self:UpdateLocalData(payload)
     print("Procesed Sync_update")
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
-        local responseEvent = {
+        local message = {
             updatedCharacters = updatedCharacters
         }
         print("sending Sync_final")
-        local serialized = AceSerializer:Serialize("SYNC_FINAL", responseEvent)
-        HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", sender)
+        _G.Service.Event_Service:WhisperEvent("SYNC_UPDATE", AceSerializer:Serialize("SYNC_FINAL", message), sender)
     end
 end
 
-function AddonCommProcessor:ProcessSyncFinal(payload, sender)
+function _G.Service.Sync_Service:ProcessSyncFinal(payload, sender)
     print("processing Sync_final")
     self:UpdateLocalData(payload)
     print("processed Sync_final")
 end
 
-function AddonCommProcessor:UpdateLocalData(payload)
+function _G.Service.Sync_Service:UpdateLocalData(payload)
     local db = GetDB()
 
     if not payload then return end
@@ -336,5 +296,3 @@ function AddonCommProcessor:UpdateLocalData(payload)
         end
     end
 end
-
-_G.AddonCommProcessor = AddonCommProcessor

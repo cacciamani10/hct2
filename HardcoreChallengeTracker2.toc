@@ -9,9 +9,6 @@ embeds.xml
 AddonEnv.lua
 
 # Core Systems
-AddonComm/AddonCommWhisper.lua
-AddonComm/AddonCommBroadcaster.lua
-AddonComm/AddonCommProcessor.lua
 Data/HardcoreChallengeTracker_Data.lua
 Data/HardcoreChallengeTracker_Teams.lua
 Data/DefaultData.lua
@@ -43,6 +40,8 @@ Dao/UserDao.lua
 # Service
 Service/AchievementService.lua
 Service/ScoringService.lua
+Service/SyncService.lua
+Service/CommService.lua
 
 # Handlers
 Handlers/ApiEventHandlers/AddonCommHandler.lua

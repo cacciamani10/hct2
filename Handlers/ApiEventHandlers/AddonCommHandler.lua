@@ -15,7 +15,7 @@ _G.HCT_Handlers.AddonCommHandler = {
         if prefix == HCT.addonPrefix then
             local myName = UnitName("player")
             if sender == myName or Ambiguate(sender, "none") == myName then return end
-            local success, msgType, payload = AceSerializer:Deserialize(message)
+            local success, msgType, message = AceSerializer:Deserialize(message)
             if not success then
                 HCT:Print("Failed to deserialize message from " .. sender)
                 HCT:Print("prefix: " .. prefix)
@@ -23,16 +23,16 @@ _G.HCT_Handlers.AddonCommHandler = {
                 return
             end
 
-            if msgType == "EVENT" then
-                AddonCommProcessor:ProcessEvent(payload)
+            if msgType == "CHARACTER_EVENT" then
+                _G.Service.Character_Service:ProcessEvent(message)
             elseif msgType == "SYNC_REQUEST" then
-                AddonCommProcessor:ProcessSyncRequest(payload, sender)
+                _G.Service.Sync_Service:ProcessSyncRequest(message, sender)
             elseif msgType == "SYNC_UPDATE" then
-                AddonCommProcessor:ProcessSyncUpdate(payload, sender)
+                _G.Service.Sync_Service:ProcessSyncUpdate(message, sender)
             elseif msgType == "SYNC_FINAL" then
-                AddonCommProcessor:ProcessSyncFinal(payload, sender)
+                _G.Service.Sync_Service:ProcessSyncFinal(message, sender)
             elseif msgType == "TEAMCHAT" then
-                HCT_ChatModule:ProcessTeamChatMessage(payload)
+                HCT_ChatModule:ProcessTeamChatMessage(message)
             else
                 HCT:Print("Received unknown message type: " .. tostring(msgType) .. " from " .. sender)
             end

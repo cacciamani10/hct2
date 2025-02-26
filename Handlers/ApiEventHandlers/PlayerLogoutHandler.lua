@@ -14,6 +14,6 @@ _G.HCT_Handlers.PlayerLogoutHandler = {
             characterName = UnitName("player")
         }
 
-        HCT_Broadcaster:BroadcastEvent(event)
+        _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
     end
 }

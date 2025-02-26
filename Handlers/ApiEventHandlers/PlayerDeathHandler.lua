@@ -1,5 +1,3 @@
-local HCT_Broadcaster = _G.HCT_Broadcaster
-
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 _G.HCT_Handlers = _G.HCT_Handlers or {}
@@ -33,13 +31,13 @@ _G.HCT_Handlers.PlayerDeathHandler = {
                 HCT:Print("You have died... but we go agane!")
 
                 local event = {
-                    type = "DEATH",
+                    type = _G.EventType.DEATH,
                     uuid = _G.DAO.CharacterDao:GetCharacterUUID_BattleTag_Username(battleTag, username),
                     lastUpdated = timestamp,
                     character = _G.DAO.CharacterDao:GetCharacter()
                 }
                 
-                HCT_Broadcaster:BroadcastEvent(event)
+                _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
             end
         end)
     end

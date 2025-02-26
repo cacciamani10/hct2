@@ -21,7 +21,6 @@ local HCT_LDB = LibStub("LibDataBroker-1.1"):NewDataObject(addonName, {
     end,
 })
 local icon = LibStub("LibDBIcon-1.0")
-local HCT_Broadcaster = _G.HCT_Broadcaster
 HCT_Env.InitializeAddon(HCT);
 HCT.teamChatLog = HCT.teamChatLog or {}
 HCT.addonPrefix = addonName
@@ -65,9 +64,8 @@ end
 
 function HCT:OnEnable()
     HCT:RegisterEvents()
-    HCT:StartAllMonitors()
+    HCT:StartMonitors()
     HCT_ChatModule:RegisterChatCommands()
-    HCT_Broadcaster:SyncRequest()
 end
 
 function HCT:OnDisable()
@@ -75,7 +73,7 @@ function HCT:OnDisable()
     HCT_ChatModule:UnregisterChatCommands()
 end
 
-function HCT:StartAllMonitors()
+function HCT:StartMonitors()
     for _, monitor in pairs(_G.Monitors) do
         if monitor.StartMonitor then
             monitor:StartMonitor()

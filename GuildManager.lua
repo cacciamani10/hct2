@@ -48,10 +48,10 @@ function HCT_GuildManager:AutoRequestToJoinGuild()
         local requester = UnitName("player")
 
         local ev = {
-            type = "GUILD_JOIN_REQUEST",
+            type = _G.EventType.GUILD_JOIN_REQUEST,
             requester = requester,
         }
-        -- HCT_Broadcaster:BroadcastEvent(ev)
+        _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
     end
 end
 

@@ -40,7 +40,10 @@ _G.HCT_Handlers.PlayerEnteringWorldHandler = {
 
     HandleLogin = function(HCT, isLogin)
         if isLogin then
-            
+            local message = {
+                users = _G.DAO.UserDao:GetUsers()
+            }
+            _G.Service.Event_Service:BroadcastEvent("SYNC_REQUEST", message)
         end
     end,
 

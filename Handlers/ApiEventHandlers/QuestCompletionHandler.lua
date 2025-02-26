@@ -13,13 +13,13 @@ _G.HCT_Handlers.QuestCompletionHandler = {
 
         _G.ACHIEVEMENTS.Achievement_Bounties:CheckAchievement(807)
 
-        local eventData = {
-            type = "QUEST_TURNED_IN",
+        local event = {
+            type = _G.EventType.CHARACTER,
             characterName = playerName,
             questID = questID,
             totalCompleted = count
         }
         
-        HCT_Broadcaster:BroadcastEvent(eventData)
+        _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
     end
 }

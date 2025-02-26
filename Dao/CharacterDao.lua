@@ -62,14 +62,14 @@ function _G.DAO.CharacterDao:InitializeCharacter()
             -- TODO recaclcualte achievements
         end
 
-        local event = {
-            type = "CHARACTER",
+        local message = {
+            type = _G.EventType.CHARACTER,
             subtype = "NEW",
             uuid = uuid,
             lastUpdated = lastUpdated,
             character = character
         }
-        HCT_Broadcaster:BroadcastEvent(event)
+        _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", message)
     end
 end
 
@@ -134,14 +134,14 @@ function _G.DAO.CharacterDao:AddLevelingAchievement(achievementId)
     db.characters[uuid].achievements[achievementId] = { timestamp = lastUpdated }
     characterEntry.lastUpdated = lastUpdated
     local event = {
-        type = "CHARACTER",
+        type = _G.EventType.CHARACTER,
         subtype = "DEAD",
         uuid = uuid,
         lastUpdated = lastUpdated,
         character = db.characters[uuid]
     }
 
-    _G.HCT_Broadcaster:BroadcastEvent(event)
+    _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
 end
 
 function _G.DAO.CharacterDao:AddBounty(achievementId, count)

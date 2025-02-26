@@ -26,7 +26,6 @@ function HCT_ChatModule:SendTeamChatMessage(text)
     local fullMessage = teamChatTag .. characterNameColored .. ": " .. text
 
     local payload = {
-        type = "TEAMCHAT",
         character = characterName,
         class = classFileName,
         sender = battleTag,
@@ -59,10 +58,6 @@ function HCT_ChatModule:RegisterChatCommands()
             HCT_ChatModule:SendTeamChatMessage(input)
         end
     end)
-end
-
-function HCT_ChatModule:UnregisterChatCommands()
-    -- No built-in unregister exists; this is a placeholder if needed.
 end
 
 function HCT_ChatModule:ProcessTeamChatMessage(payload)

@@ -1,5 +1,3 @@
-local HCT_Broadcaster = _G.HCT_Broadcaster
-
 _G.HCT_Handlers = _G.HCT_Handlers or {}
 
 _G.HCT_Handlers.PlayerLevelUpHandler = {
@@ -12,12 +10,12 @@ _G.HCT_Handlers.PlayerLevelUpHandler = {
         local uuid = _G.DAO.CharacterDao:GetUUID()
         
         local event = {
-            type = "CHARACTER",
+            type = _G.EventType.CHARACTER,
             subtype = "LEVEL_UP",
             uuid = uuid,
             character = _G.DAO.CharacterDao:GetCharacter()
         }
 
-        HCT_Broadcaster:BroadcastEvent(event)
+        _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
     end
 }

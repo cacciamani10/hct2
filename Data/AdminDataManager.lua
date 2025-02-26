@@ -34,13 +34,13 @@ local function InsertCharacter(battleTag, name, level, class, race)
         achievements = {}
     }
     local event = {
-        type = "CHARACTER",
+        type = _G.EventType.CHARACTER,
         subtype = "NEW",
         uuid = uuid,
         lastUpdated = lastUpdated,
         character = db.characters[uuid]
     }
-    HCT_Broadcaster:BroadcastEvent(event)
+    _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
 end
 
 local function InsertAchievement(battleTag, name, achievementId, timestamp)
@@ -57,13 +57,14 @@ local function InsertAchievement(battleTag, name, achievementId, timestamp)
     end
     db.characters[entry.uuid].achievements = db.characters[entry.uuid].achievements or {}
     db.characters[entry.uuid].achievements[achievementId] = { timestamp = timestamp }
-    HCT_Broadcaster:BroadcastEvent({
-        type = "CHARACTER",
+    local event = {
+        type = _G.EventType.CHARACTER,
         subtype = "ACHIEVEMENT",
         uuid = entry.uuid,
         lastUpdated = timestamp,
         character = db.characters[entry.uuid]
-    })
+    }
+    _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
 end
 
 local function InsertDeath(battleTag, name, timestamp)
@@ -78,13 +79,14 @@ local function InsertDeath(battleTag, name, timestamp)
     db.users[battleTag].characters.dead[name] = db.users[battleTag].characters.dead[name] or {}
     db.characters[entry.uuid].deathTimestamp = timestamp
     table.insert(db.users[battleTag].characters.dead[name], { uuid = entry.uuid, lastUpdated = timestamp })
-    HCT_Broadcaster:BroadcastEvent({
-        type = "CHARACTER",
+    local event = {
+        type = _G.EventType.CHARACTER,
         subtype = "DEATH",
         uuid = entry.uuid,
         lastUpdated = timestamp,
         character = db.characters[entry.uuid]
-    })
+    }
+    _G.Service.Event_Service:BroadcastEvent("CHARACTER_UPDATE", event)
 end
 
 -- Achievement should be marked as null. Info will still be present but a flag will be set to ignore it.
