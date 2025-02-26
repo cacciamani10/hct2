@@ -12,8 +12,8 @@ local function checkQuestAchievements()
 end
 
 function _G.Service.Achievement_Service:RecalculateAchievements()
-    _G.Service.Achievement_Service.CheckCharacterLevelAchievement()
-    _G.Service.Achievement_Service:.CheckProfessionAchievements()
+    _G.Service.Achievement_Service:CheckCharacterLevelAchievement()
+    _G.Service.Achievement_Service:CheckProfessionAchievements()
     checkQuestAchievements()
 end
 
