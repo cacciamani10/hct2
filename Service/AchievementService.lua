@@ -1,6 +1,8 @@
 _G.Service = _G.Service or {}
 _G.Service.Achievement_Service = _G.Service.Achievement_Service or {}
 
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+
 local function checkQuestAchievements() 
     local completedQuests = GetQuestsCompleted()
     local count = 0
