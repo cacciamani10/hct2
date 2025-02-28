@@ -26,7 +26,7 @@ local function CheckRecievedRareLoot(text, HCT)
         -- Check if the item is rare or better by looking for its color codes.
         if lootName:find("|cff0070dd") or lootName:find("|cffa335ee") or lootName:find("|cffff8000") then
             HCT:Print("Rare or better item looted: " .. lootName)
-            _G.Dao.CharacterDao:AddBounty(803, loot)
+            _G.Dao.CharacterDao:AddBounty(803, lootQuantity)
         end
     end
 end
