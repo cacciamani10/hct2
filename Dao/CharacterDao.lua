@@ -6,6 +6,8 @@ if not _G.Dao.CharacterDao then
     _G.Dao.CharacterDao = {}
 end
 
+local function GetHCT() return _G.HCT_Env.GetAddon() end
+
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 function _G.Dao.CharacterDao:InitializeCharacter()
