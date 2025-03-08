@@ -19,6 +19,7 @@ Utils/GameUtils.lua
 
 #Enums
 EventType.lua
+CharacterStatus.lua
 
 # Data and Module Logic
 UI/AdminPage.lua

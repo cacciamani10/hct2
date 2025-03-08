@@ -1,159 +1,74 @@
-local AceSerializer = LibStub("AceSerializer-3.0")
-
-local function GetHCT() return _G.HCT_Env.GetAddon() end
-local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
-
 _G.Service = _G.Service or {}
 _G.Service.Sync_Service = _G.Service.Sync_Service or {}
 
--- I know this is gross, but chatgpt wrote this in 2 seconds
--- TODO refactor the hell out of this
+function _G.Service.Sync_Service:localCharacterMatchesSenderByUUID(senderUserData, status, username, uuid)
+    local found = false
+    for _, senderCharEntry in ipairs(senderUserData.characters[status][username] or {}) do
+        if senderCharEntry.uuid == uuid then
+            found = true
+            break
+        end
+    end
+    return found
+end
+
 function _G.Service.Sync_Service:ProcessSyncRequest(payload, sender)
     print("Processing Sync_request")
-    local HCT = GetHCT()
-    local db = GetDB()
 
-    if not payload or not payload.users then return end
+    if not payload or not payload.users then
+        return
+    end
 
     local updatedCharacters = {
         users = {},
         characters = {}
     }
-
     local requestedCharacters = {
-        users = {},
+        users = {}
     }
 
     for battleTag, senderUserData in pairs(payload.users) do
-        local localUserData = db.users[battleTag]
-
+        local localUserData = _G.Dao.UserDao:GetUser(battleTag)
         requestedCharacters.users[battleTag] = {
             characters = {
                 alive = {},
-                dead = {},
-            },
+                dead = {}
+            }
         }
-
         updatedCharacters.users[battleTag] = {
             characters = {
                 alive = {},
-                dead = {},
-            },
+                dead = {}
+            }
         }
 
         if not localUserData then
             requestedCharacters.users[battleTag] = senderUserData
         else
-            for username, charList in pairs(senderUserData.characters.alive or {}) do
-                for _, senderCharEntry in ipairs(charList) do
-                    local uuid = senderCharEntry.uuid
-                    local senderTimestamp = senderCharEntry.lastUpdated
-                    local localCharEntry = localUserData.characters.alive[username] and
-                    localUserData.characters.alive[username][1]
-                    local localTimestamp = db.characters[uuid] and db.characters[uuid].lastUpdated or 0
-
-                    if not localCharEntry or senderTimestamp > localTimestamp then
-                        requestedCharacters.users[battleTag].characters.alive[username] = requestedCharacters.users
-                        [battleTag].characters.alive[username] or {}
-                        table.insert(requestedCharacters.users[battleTag].characters.alive[username], { uuid = uuid })
-                    elseif senderTimestamp < localTimestamp then
-                        updatedCharacters.characters[uuid] = db.characters[uuid]
-                        table.insert(updatedCharacters.users[battleTag].characters.alive[username], { uuid = uuid, lastUpdated = localTimestamp })
-                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
-                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
-                    end
-                end
-            end
-
-            for username, localCharList in pairs(localUserData.characters.alive or {}) do
-                for _, localCharEntry in ipairs(localCharList) do
-                    local uuid = localCharEntry.uuid
-                    local lastUpdated = localCharEntry.lastUpdated
-
-                    -- If sender does not have this character, add it to updatedCharacters
-                    local found = false
-                    for _, senderCharEntry in ipairs(senderUserData.characters.alive[username] or {}) do
-                        if senderCharEntry.uuid == uuid then
-                            found = true
-                            break
-                        end
-                    end
-
-                    if not found then
-                        updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or
-                        { characters = { alive = {}, dead = {} } }
-                        updatedCharacters.characters[uuid] = db.characters[uuid]
-                        updatedCharacters.users[battleTag].characters.alive[username] = updatedCharacters.users
-                        [battleTag].characters.alive[username] or {}
-                        table.insert(updatedCharacters.users[battleTag].characters.alive[username],
-                            { uuid = uuid, lastUpdated = lastUpdated })
-                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
-                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
-                    end
-                end
-            end
-
-            for username, charList in pairs(senderUserData.characters.dead or {}) do
-                for _, senderCharEntry in ipairs(charList) do
-                    local uuid = senderCharEntry.uuid
-                    local senderTimestamp = senderCharEntry.lastUpdated
-                    local localCharEntry = localUserData.characters.dead[username] and
-                    localUserData.characters.dead[username][1]
-                    local localTimestamp = db.characters[uuid] and db.characters[uuid].lastUpdated or 0
-
-                    if not localCharEntry or senderTimestamp > localTimestamp then
-                        requestedCharacters.users[battleTag].characters.dead[username] = requestedCharacters.users
-                        [battleTag].characters.dead[username] or {}
-                        table.insert(requestedCharacters.users[battleTag].characters.dead[username], { uuid = uuid })
-                    elseif senderTimestamp < localTimestamp then
-                        updatedCharacters.characters[uuid] = db.characters[uuid]
-                        table.insert(updatedCharacters.users[battleTag].characters.dead[username], { uuid = uuid, lastUpdated = localTimestamp })
-                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
-                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
-                    end
-                end
-            end
-
-            for username, localCharList in pairs(localUserData.characters.dead or {}) do
-                for _, localCharEntry in ipairs(localCharList) do
-                    local uuid = localCharEntry.uuid
-                    local lastUpdated = localCharEntry.lastUpdated
-
-                    local found = false
-                    for _, senderCharEntry in ipairs(senderUserData.characters.dead[username] or {}) do
-                        if senderCharEntry.uuid == uuid then
-                            found = true
-                            break
-                        end
-                    end
-
-                    if not found then
-                        updatedCharacters.characters[uuid] = db.characters[uuid]
-                        updatedCharacters.users[battleTag].characters.dead[username] = updatedCharacters.users
-                        [battleTag].characters.dead[username] or {}
-                        table.insert(updatedCharacters.users[battleTag].characters.dead[username],
-                            { uuid = uuid, lastUpdated = lastUpdated })
-                        updatedCharacters.users[battleTag].team = db.users[battleTag].team 
-                        updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
-                    end
-                end
-            end
+            _G.Dao.UserDao:SyncUsersData(senderUserData, battleTag, requestedCharacters, updatedCharacters, _G.CharacterStatus.ALIVE)
+            _G.Dao.UserDao:SyncCharactersSenderIsMissing(senderUserData, localUserData, battleTag, updatedCharacters, _G.CharacterStatus.ALIVE)
+            _G.Dao.UserDao:SyncUsersData(senderUserData, battleTag, requestedCharacters, updatedCharacters, _G.CharacterStatus.DEAD)
+            _G.Dao.UserDao:SyncCharactersSenderIsMissing(senderUserData, localUserData, battleTag, updatedCharacters, _G.CharacterStatus.DEAD)
         end
     end
 
-    local message = {
-        updatedCharacters = updatedCharacters,
-        requestedCharacters = requestedCharacters
-    }
+    print("Processed Sync_request")
 
-    _G.Service.Event_Service:WhisperEvent("SYNC_UPDATE", AceSerializer:Serialize("SYNC_UPDATE", message), sender)
-    print("Processed Sync_request and sending sync udpate")
+    if next(updatedCharacters.characters) or next(updatedCharacters.users) then
+        local message = {
+            updatedCharacters = updatedCharacters,
+            requestedCharacters = requestedCharacters
+        }
+        print("sending SYNC_UPDATE")
+        _G.Service.Event_Service:WhisperEvent("SYNC_UPDATE", message, sender)
+    end    
 end
 
 function _G.Service.Sync_Service:ProcessSyncUpdate(payload, sender)
     print("Processing Sync_update")
-    local HCT = GetHCT()
-    local db = GetDB()
+    if not payload or (not payload.updatedCharacters and not payload.updatedCharacters) then
+        return
+    end
 
     local updatedCharacters = {
         users = {},
@@ -162,139 +77,76 @@ function _G.Service.Sync_Service:ProcessSyncUpdate(payload, sender)
 
     if payload.requestedCharacters and payload.requestedCharacters.users then
         for battleTag, _ in pairs(payload.requestedCharacters.users) do
-            if db.users[battleTag] then
-                -- Ensure user entry exists in updatedCharacters
-                updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or
-                { characters = { alive = {}, dead = {} } }
-                updatedCharacters.users[battleTag].lastUpdated = db.users[battleTag].lastUpdated
+            if _G.Dao.UserDao.PlayerExists(battleTag) then
+                updatedCharacters.users[battleTag] = updatedCharacters.users[battleTag] or {
+                    timestamp = _G.Dao.UserDao:GetTimestamp(battleTag),
+                    team = _G.Dao.UserDao:GetTeam(battleTag),
+                    characters = {
+                        alive = {},
+                        dead = {}
+                    }
+                }
 
-                for username, charList in pairs(db.users[battleTag].characters.alive or {}) do
-                    updatedCharacters.users[battleTag].characters.alive[username] = updatedCharacters.users[battleTag]
-                    .characters.alive[username] or {}
-
-                    for _, charEntry in ipairs(charList) do
-                        local uuid = charEntry.uuid
-                        local lastUpdated = charEntry.lastUpdated
-                        if db.characters[uuid] then
-                            updatedCharacters.characters[uuid] = db.characters[uuid]
-                            table.insert(updatedCharacters.users[battleTag].characters.alive[username],
-                                { uuid = uuid, lastUpdated = lastUpdated })
-                            updatedCharacters.users[battleTag].team = db.users[battleTag].team 
-                            updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
-                        end
-                    end
-                end
-
-                for username, charList in pairs(db.users[battleTag].characters.dead or {}) do
-                    updatedCharacters.users[battleTag].characters.dead[username] = updatedCharacters.users[battleTag]
-                    .characters.dead[username] or {}
-
-                    for _, charEntry in ipairs(charList) do
-                        local uuid = charEntry.uuid
-                        local lastUpdated = charEntry.lastUpdated
-                        if db.characters[uuid] then
-                            updatedCharacters.characters[uuid] = db.characters[uuid]
-                            table.insert(updatedCharacters.users[battleTag].characters.dead[username],
-                                { uuid = uuid, lastUpdated = lastUpdated })
-                                updatedCharacters.users[battleTag].team = db.users[battleTag].team 
-                                updatedCharacters.users[battleTag].timestamp = db.users[battleTag].timestamp 
-                        end
-                    end
-                end
+                _G.Dao.UserDao:RetrieveUserData(battleTag, updatedCharacters, _G.CharacterStatus.ALIVE)
+                _G.Dao.UserDao:RetrieveUserData(battleTag, updatedCharacters, _G.CharacterStatus.DEAD)
             end
         end
     end
-    self:UpdateLocalData(payload)
+
+    self:UpdateLocalUser(payload)
     print("Procesed Sync_update")
     if next(updatedCharacters.characters) or next(updatedCharacters.users) then
         local message = {
             updatedCharacters = updatedCharacters
         }
         print("sending Sync_final")
-        _G.Service.Event_Service:WhisperEvent("SYNC_UPDATE", AceSerializer:Serialize("SYNC_FINAL", message), sender)
+        _G.Service.Event_Service:WhisperEvent("SYNC_FINAL", message, sender)
     end
 end
 
-function _G.Service.Sync_Service:ProcessSyncFinal(payload, sender)
+function _G.Service.Sync_Service:ProcessSyncFinal(payload)
     print("processing Sync_final")
-    self:UpdateLocalData(payload)
+    self:UpdateLocalUser(payload)
     print("processed Sync_final")
 end
 
-function _G.Service.Sync_Service:UpdateLocalData(payload)
-    local db = GetDB()
-
-    if not payload then return end
-    -- TODO insert while looping through characters. correlate with existing alive characters 
-    -- (if someone deleted their saved variables...)
-    if payload.updatedCharacters and payload.updatedCharacters.characters then
-        for uuid, characterData in pairs(payload.updatedCharacters.characters) do
-            db.characters[uuid] = characterData
-        end
+function _G.Service.Sync_Service:UpdateLocalUser(payload)
+    if not (payload and payload.updatedCharacters and payload.updatedCharacters.users) then
+        return
     end
 
-    if payload.updatedCharacters and payload.updatedCharacters.users then
-        for battleTag, userData in pairs(payload.updatedCharacters.users) do
-            for username, charList in pairs(userData.characters.alive or {}) do
-                db.users[battleTag] = {
-                    characters = {
-                        alive = {},
-                        dead = {},
-                    },
-                }
-                if not db.users[battleTag].team then
-                    db.users[battleTag].team = userData.team
-                end
-                if not db.users[battleTag].timestamp then
-                    db.users[battleTag].timestamp = userData.timestamp
-                end
-                    
-                db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    local lastUpdated = charEntry.lastUpdated
-                    local found = false
-                    if db.users[battleTag].characters.alive[username] then
-                        for _, existingEntry in ipairs(db.users[battleTag].characters.alive[username]) do
-                            if existingEntry.uuid == uuid then
-                                existingEntry.lastUpdated = charEntry.lastUpdated
-                                found = true
-                                break
-                            end
-                        end
-                    end
+    for battleTag, userData in pairs(payload.updatedCharacters.users) do
+        _G.Dao.UserDao:CreateUserWithData(battleTag, userData.team, userData.timestamp)
 
-                    if not found then
-                        db.users[battleTag].characters.alive[username] = db.users[battleTag].characters.alive[username] or {}
-                        table.insert(db.users[battleTag].characters.alive[username],
-                            { uuid = uuid, lastUpdated = lastUpdated })
-                    end
+        self:UpdateLocalCharacter(userData, payload.updatedCharacters.characters, battleTag, _G.CharacterStatus.ALIVE)
+        self:UpdateLocalCharacter(userData, payload.updatedCharacters.characters, battleTag, _G.CharacterStatus.DEAD)
+    end
+end
+
+function _G.Service.Sync_Service:UpdateLocalCharacter(userData, characterData, battleTag, status)
+    for username, charList in pairs(userData.characters[status] or {}) do
+        for _, charEntry in ipairs(charList) do
+            local newUuid = charEntry.uuid
+            local uuidFound = false
+            local characterExists = _G.Dao.UserDao.CharacterExists(battleTag, status, username)
+            if characterExists then
+                uuidFound = _G.Dao.UserDao.UpdateCharacter(battleTag, username, newUuid, status, charEntry, characterData)
+                if (uuidFound) then
+                    _G.Dao.CharacterDao:UpsertCharacter(uuidFound, characterData[uuidFound])
                 end
             end
 
-            for username, charList in pairs(userData.characters.dead or {}) do
-                db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
-                for _, charEntry in ipairs(charList) do
-                    local uuid = charEntry.uuid
-                    local lastUpdated = charEntry.lastUpdated
-                    local found = false
-                    if db.users[battleTag].characters.dead[username] then
-                        for _, existingEntry in ipairs(db.users[battleTag].characters.dead[username]) do
-                            if existingEntry.uuid == uuid then
-                                existingEntry.lastUpdated = charEntry.lastUpdated
-                                found = true
-                                break
-                            end
-                        end
-                    end
-
-                    if not found then
-                        db.users[battleTag].characters.dead[username] = db.users[battleTag].characters.dead[username] or {}
-                        table.insert(db.users[battleTag].characters.dead[username],
-                            { uuid = uuid, lastUpdated = lastUpdated })
-                    end
+            if not uuidFound then
+                if characterExists and status == CharacterStatus.ALIVE then
+                    -- savevariables were likely deleted, which assigns a new uuid to existing characte
+                    _G.Dao.UserDao.UpdateCorrelatedCharacter(battleTag, username, newUuid, status, charEntry.lastUpdated)
+                else
+                    _G.Dao.UserDao:AddCharacter(battleTag, username, newUuid, status, charEntry.lastUpdated)
                 end
+                _G.Dao.CharacterDao:UpsertCharacter(newUuid, characterData[newUuid])
             end
         end
     end
 end
+
+return _G.Service.Sync_Service

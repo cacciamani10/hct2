@@ -1,7 +1,6 @@
 local AceSerializer = LibStub("AceSerializer-3.0")
 
 local function GetHCT() return _G.HCT_Env.GetAddon() end
-local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
 _G.Service = _G.Service or {}
 _G.Service.Event_Service = _G.Service.Event_Service or {}
@@ -28,3 +27,5 @@ function _G.Service.Event_Service:WhisperEvent(eventType, event, player)
 
         HCT:SendCommMessage(HCT.addonPrefix, serialized, "WHISPER", player)
 end
+
+return _G.Service.Event_Service.Event_Service

@@ -6,10 +6,8 @@ if not _G.Dao.CharacterDao then
     _G.Dao.CharacterDao = {}
 end
 
-
 local function GetDB() return _G.HCT_Env.GetAddon().db.profile end
 
--- this class needs some thought. Its harder to organize things cleanly when updating characters while peer to peer syncing asynchronously
 function _G.Dao.CharacterDao:InitializeCharacter()
     local db = GetDB()
     local playerFaction = UnitFactionGroup("player")
@@ -266,3 +264,10 @@ function _G.Dao.CharacterDao:GetUUID()
     local db = GetDB()
     return db.users[_G.Utils.GameUtils:GetBattleTag()].characters.alive[UnitName("player")][1]
 end
+
+function _G.Dao.CharacterDao:UpsertCharacter(uuid, newCharacterData)
+    local db = GetDB()
+    db.characters[uuid] = newCharacterData
+end
+
+return _G.Dao.CharacterDao
