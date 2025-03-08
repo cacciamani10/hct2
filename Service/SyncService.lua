@@ -116,6 +116,10 @@ function _G.Service.Sync_Service:UpdateLocalUser(payload)
     end
 
     for battleTag, userData in pairs(payload.updatedCharacters.users) do
+        if (battleTag == _G.Utils.GameUtils:GetBattleTag()) then
+            return
+        end
+        
         _G.Dao.UserDao:CreateUserWithData(battleTag, userData.team, userData.timestamp)
 
         self:UpdateLocalCharacter(userData, payload.updatedCharacters.characters, battleTag, _G.CharacterStatus.ALIVE)
